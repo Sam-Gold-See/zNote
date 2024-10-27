@@ -2381,6 +2381,223 @@ Commons是apache开源基金组织提供的工具包，里面有很多帮助我�
 | public static String readLines(Reader input)                        | 读取文件内容       |
 | public static void write(String str, OutputStream output)           | 写入文件内容       |
 
+## 多线程
+
+进程：进程是程序的基本执行实体
+
+线程：线程是操作系统能够进行运算调度的最小单位，它被包含在进程之中，是进程中的实际运作单位。
+
+简单理解，线程就是应用软件中互相独立、可以同时运行的功能
+
+线程的调度方式，分为抢占式和非抢占式。
+
+- 非抢占式：轮流执行
+- 抢占式（JVM）：体现随机性，优先级越大分配的越多
+
+### 并发和并行
+
+并发：在同一时刻，有多个指令在单个CPU上交替执行
+
+并行：在同一时刻，有多个指令在多个CPU上同时执行
+
+### 多线程的实现方式
+
+| 实现方式 | 优点 | 缺点 |
+| --- | --- | --- |
+| 继承Thread类 | 简单，可以直接使用Thread提供的方法 | 无法继承其他类，可拓展性较差 |
+| 实现Runnable接口 | 可以继承其他类，可拓展性强 | 复杂，不能直接使用Thread提供的方法 |
+| 利用Callable和Future接口 | 可以继承其他类，可拓展性强 | 复杂，不能直接使用Thread提供的方法 |
+
+#### 继承Thread类
+	
+将类声明为Thread类的子类，并重写run()方法，接下来可以分配并启动该子类的实例，创建对象之后调用start()方法。
+
+```
+public class MyThread extends Thread {
+    @Override
+    public void run() {		
+        // 线程要执行的代码
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyThread myThread = new MyThread();
+        myThread.start();
+    }
+}
+```
+
+#### 实现Runnable接口
+
+声明一个类实现Runnable接口，并重写run()方法，接下来可以分配并启动该类的实例，创建对象之后调用start()方法。
+
+```
+public class MyRunnable implements Runnable {
+    @Override
+    public void run() {
+        // 线程要执行的代码
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyRunnable myRunnable = new MyRunnable();
+        new Thread(myRunnable).start();
+    }
+}
+```
+
+#### 利用Callable和Future接口
+
+可以将线程的执行结果返回，并提供回调接口。
+
+```
+public class MyCallable implements Callable<T> {
+    @Override
+    public T call() throws Exception {
+        // 线程要执行的代码
+        return null;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        MyCallable mc = new MyCallable();
+		FutureTask<T> ft = new FutureTask<>(mc);
+		new Thread(ft).start();
+		T result = ft.get(); // 获取线程执行结果
+	}
+}
+```
+
+### Thread的成员方法
+
+| 方法名 | 说明 |
+| --- | --- |
+| String getName() | 获取线程的名称 |
+| void setName(String name) | 设置线程的名称 |
+| static Thread currentThread() | 获取当前线程 |
+| static viod sleep(long millis) | 让当前线程暂停执行一段时间 |
+| setPriority(int newPriority) | 设置线程的优先级 |
+| final int getPriority() | 获取线程的优先级 |
+| final void setDaemon(boolean on) | 设置线程是否为守护线程 |
+| public static void yield() | 出让线程/礼让线程 |
+| public static void join() | 插入线程/插队线程 |
+
+方法细节：
+
+1. `getName()`：，默认名称为“Thread-数字”
+2. `setName(String name)`：可以在子类中继承构造方法设置
+3. `currentThread()`：当JVM启动时，系统会自动创建主线程main，作用就是调用main方法，并执行里面的代码
+4. `sleep(long millis)`：哪条线程执行到这里，那么哪条线程就会在这里停留对应时间，单位为毫秒，当时间到了后线程会自动地醒来继续执行
+5. `setPriority(int newPriority)`、`final int getPriority()`：设置线程的优先级，优先级越高，获得CPU的使用权越大，默认优先级为5，范围为1~10，只是反应抢到CPU的概率，并不是绝对的，具体取决于系统的调度算法。
+6. `final void setDaemon(boolean on)`：设置线程是否为守护线程，如果设置为true，则该线程不重要，随着程序的结束而结束，默认值为false。
+7. `public static void yield()`：出让线程/礼让线程，让当前线程暂停执行一段时间，但不释放CPU资源，让其他线程有机会执行。
+8. `public static void join()`：插队线程，让当前线程暂停执行一段时间，直到其他线程执行完毕，才继续执行。
+
+### 线程的生命周期
+
+![线程的生命周期](img/Java_7.png)
+
+### 线程安全的问题
+
+#### 同步代码块：
+
+把操作共享数据的代码锁起来
+
+```
+synchronized(锁){
+    // 共享数据操作的代码
+}
+```
+
+特点1：锁默认打开，有一个线程进去了，锁自动关闭
+
+特点2：里面的代码全部执行完毕，线程出来，锁自动打开
+
+特点3：锁对象可以是任意对象，但必须要唯一
+
+#### 同步方法：
+
+把整个方法锁起来
+
+```
+public synchronized void method(){
+    // 共享数据操作的代码
+}
+```
+
+特点1：同步方法是锁住方法里面所有的代码
+
+特点2：锁对象不能自己指定，非静态方法（this），静态（当前类的字节码文件对象）
+
+StringBulider类和StringBuilder类的差别就是，前者是线程不安全的，后者是线程安全的。
+
+### Lock锁接口
+
+JDK5后提供了一个新的锁对象Lock，实现提供比使用synchronized方法和语句可以获得更广泛的锁定操作
+
+即提供了获得锁和释放锁的方法，可以显式地进行锁定和解锁操作，并且可以绑定多个条件。
+
+```
+void lock(); //获取锁
+void unlock(); //释放锁
+```
+
+Lock是接口，不能直接实例化，这里采用它的实现类ReentrantLock来实例化
+
+使用`ReentrantLock()`：空参构造
+
+使用`try-catch-finally`：确保锁一定被释放
+
+### 死锁
+
+两个或两个以上的进程在执行过程中，因争夺资源而造成的一种互相等待的现象，若无外力作用，它们都将无法推进下去。
+
+#### 死锁条件
+
+- 互斥条件：共享资源X和Y只能被一个线程占用
+- 请求和保持条件：线程T1已经取得共享资源X，在等待共享资源Y的时候，不释放共享资源X
+- 不可抢占条件：其他线程不能强行抢占线程T1占有的资源
+- 循环等待条件：线程T1等待线程T2占有的资源，线程T2等待线程T1占有的资源
+
+#### 处理方法
+
+导致死锁后，只能人工干预来处理，重启服务、kill掉线程
+
+避免死锁，可以：
+
+1. 一次性申请所有资源，就不存在锁要等待了
+2. 占用部分资源的线程进行进一步申请其他资源的时候，如果申请不到，先释放自己占有的资源
+3. 按序申请资源，线性申请资源
+4. 避免嵌套锁
+
+### 生产者和消费者（等待唤醒机制）
+
+生产者消费者模式是一个十分经典的多线程协作的模式
+
+生产者：生产数据，放入缓冲区
+
+消费者：从缓冲区取出数据，消费数据
+
+| 方法名称 | 说明 |
+| --- | --- |
+| void wait() | 让线程等待，直到被唤醒 |
+| void notify() | 唤醒一个正在等待的线程 |
+| void notifyAll() | 唤醒所有正在等待的线程 |
+
+使用以上方法都是和锁绑定
+
+可以模拟实现或者阻塞队列实现
+
+#### 阻塞队列
+
+![阻塞队列的继承结构](img/Java_8.png)
+
+- ArrayBlockingQueue：一个由数组结构组成的有界阻塞队列，FIFO，容量大小为数组大小
+- LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列，FIFO，容量大小无限（最大为int的最大值）
+
 ## API
 
 API(Application Programming Interface):应用程序编程接口
