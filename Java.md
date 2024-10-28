@@ -15,6 +15,8 @@
 |      cls       | 清屏。                            |
 |      exit      | 退出命令提示符窗口。              |
 |     strat      | 打开文件                          |
+|    ipconfig    | 查看本地IP地址                    |
+|    ping IP     | 检查网络是否连接                  |
 
 进入的目录带有中文、空格需要将目录使用双引号标记 cd "目录"
 
@@ -1829,14 +1831,14 @@ Stream<String> stream = Stream.of("a","b","c");
 
 - 概念：中间操作的意思是,执行完此方法之后,Stream流依然可以继续执行其他操作
 
-| 方法名 | 说明 |
-| --- | --- |
-| Stream<T> filter(Predicate predicate) | 用于对流中的数据进行过滤 |
-| Stream<T> limit(long maxSize) | 返回此流中的元素组成的流，截取前指定参数个数的数据 |
-| Stream<T> skip(long n) | 跳过指定参数个数的数据，返回由该流的剩余元素组成的流 |
-| static <T> Stream<T> concat(Stream a, Stream b) | 合并a和b两个流为一个流 |
-| Stream<T> distinct() | 返回由该流的不同元素（根据Object.equals(Object) ）组成的流 |
-| Stream<T> map(Function<T,R> mapper) | 转换流中的数据类型 |
+| 方法名                                          | 说明                                                       |
+| ----------------------------------------------- | ---------------------------------------------------------- |
+| Stream<T> filter(Predicate predicate)           | 用于对流中的数据进行过滤                                   |
+| Stream<T> limit(long maxSize)                   | 返回此流中的元素组成的流，截取前指定参数个数的数据         |
+| Stream<T> skip(long n)                          | 跳过指定参数个数的数据，返回由该流的剩余元素组成的流       |
+| static <T> Stream<T> concat(Stream a, Stream b) | 合并a和b两个流为一个流                                     |
+| Stream<T> distinct()                            | 返回由该流的不同元素（根据Object.equals(Object) ）组成的流 |
+| Stream<T> map(Function<T,R> mapper)             | 转换流中的数据类型                                         |
 
 中间方法，返回新的Stream流，原来的Stream流只能使用一次且不会影响原本数据
 
@@ -1844,12 +1846,12 @@ Stream<String> stream = Stream.of("a","b","c");
 
 - 概念：终结方法的意思是,执行完此方法之后,Stream流就被使用完毕,不能再使用其他方法
 
-| 方法名 | 说明 |
-| --- | --- |
-| void forEach(Consumer<? super T> action) | 遍历 |
-| long count() | 返回流中元素的个数 |
-| toArray() | 收集流中的数据，放到数组中 |
-| collect() | 收集流中的数据，放到集合中 |
+| 方法名                                   | 说明                       |
+| ---------------------------------------- | -------------------------- |
+| void forEach(Consumer<? super T> action) | 遍历                       |
+| long count()                             | 返回流中元素的个数         |
+| toArray()                                | 收集流中的数据，放到数组中 |
+| collect()                                | 收集流中的数据，放到集合中 |
 
 ## 方法引用
 
@@ -1908,10 +1910,10 @@ Exception体系：
 
 ### Throwable的成员方法
 
-| 方法名 | 说明 |
-| --- | --- |
-| public String getMessage() | 返回此throwable的详细消息字符串 |
-| public String toString() | 返回此可爬出的简短描述 |
+| 方法名                        | 说明                                                     |
+| ----------------------------- | -------------------------------------------------------- |
+| public String getMessage()    | 返回此throwable的详细消息字符串                          |
+| public String toString()      | 返回此可爬出的简短描述                                   |
 | public void printStackTrace() | 将异常的错误信息输出在控制台（仅打印信息，不会停止运行） |
 
 ### 抛出、捕获
@@ -1939,39 +1941,39 @@ File对象就表示一个路径，可以使文件的路径，也可以是文件�
 
 这个路径可以是存在的，也允许不符你在
 
-| 方法名 | 说明 |
-| --- | --- |
-| public File(String pathname) | 根据路径名构造File对象 |
+| 方法名                                   | 说明                                       |
+| ---------------------------------------- | ------------------------------------------ |
+| public File(String pathname)             | 根据路径名构造File对象                     |
 | public File(String parent, String child) | 根据父路径字符串和子路径字符串构造File对象 |
-| public File(File parent, String child) | 根据父File对象和子路径字符串构造File对象 |
+| public File(File parent, String child)   | 根据父File对象和子路径字符串构造File对象   |
 
 ### 判断、获取功能
 
-| 方法名 | 说明 |
-| --- | --- |
-| public boolean isDirectory() | 判断是否为目录 |
-| public boolean isFile() | 判断是否为文件 |
-| public boolean exists() | 判断文件或目录是否存在 |
-| public long length() | 获取文件大小（字节），不能获取文件夹大小 |
-| public String getAbsolutePath() | 获取绝对路径 |
-| public String getPath() | 获取路径 |
-| public String getName() | 获取文件名，带后缀 |
-| public long lastModified() | 获取最后修改时间（毫秒） |
+| 方法名                          | 说明                                     |
+| ------------------------------- | ---------------------------------------- |
+| public boolean isDirectory()    | 判断是否为目录                           |
+| public boolean isFile()         | 判断是否为文件                           |
+| public boolean exists()         | 判断文件或目录是否存在                   |
+| public long length()            | 获取文件大小（字节），不能获取文件夹大小 |
+| public String getAbsolutePath() | 获取绝对路径                             |
+| public String getPath()         | 获取路径                                 |
+| public String getName()         | 获取文件名，带后缀                       |
+| public long lastModified()      | 获取最后修改时间（毫秒）                 |
 
 ### 创建、删除功能
 
-| 方法名 | 说明 |
-| --- | --- |
-| public boolean createNewFile() | 创建文件 |
-| public boolean mkdir() | 创建目录 |
-| public boolean mkdirs() | 创建多级目录 |
-| public boolean delete() | 删除文件或目录 |
+| 方法名                         | 说明           |
+| ------------------------------ | -------------- |
+| public boolean createNewFile() | 创建文件       |
+| public boolean mkdir()         | 创建目录       |
+| public boolean mkdirs()        | 创建多级目录   |
+| public boolean delete()        | 删除文件或目录 |
 
 ### 遍历功能
 
-| 方法名 | 说明 |
-| --- | --- |
-| public String[] list() | 列出目录下的文件和目录 |
+| 方法名                    | 说明                                 |
+| ------------------------- | ------------------------------------ |
+| public String[] list()    | 列出目录下的文件和目录               |
 | public File[] listFiles() | 列出目录下的文件和目录，返回File数组 |
 
 ## IO流
@@ -2402,11 +2404,11 @@ Commons是apache开源基金组织提供的工具包，里面有很多帮助我�
 
 ### 多线程的实现方式
 
-| 实现方式 | 优点 | 缺点 |
-| --- | --- | --- |
-| 继承Thread类 | 简单，可以直接使用Thread提供的方法 | 无法继承其他类，可拓展性较差 |
-| 实现Runnable接口 | 可以继承其他类，可拓展性强 | 复杂，不能直接使用Thread提供的方法 |
-| 利用Callable和Future接口 | 可以继承其他类，可拓展性强 | 复杂，不能直接使用Thread提供的方法 |
+| 实现方式                 | 优点                               | 缺点                               |
+| ------------------------ | ---------------------------------- | ---------------------------------- |
+| 继承Thread类             | 简单，可以直接使用Thread提供的方法 | 无法继承其他类，可拓展性较差       |
+| 实现Runnable接口         | 可以继承其他类，可拓展性强         | 复杂，不能直接使用Thread提供的方法 |
+| 利用Callable和Future接口 | 可以继承其他类，可拓展性强         | 复杂，不能直接使用Thread提供的方法 |
 
 #### 继承Thread类
 	
@@ -2473,17 +2475,17 @@ public class Main {
 
 ### Thread的成员方法
 
-| 方法名 | 说明 |
-| --- | --- |
-| String getName() | 获取线程的名称 |
-| void setName(String name) | 设置线程的名称 |
-| static Thread currentThread() | 获取当前线程 |
-| static viod sleep(long millis) | 让当前线程暂停执行一段时间 |
-| setPriority(int newPriority) | 设置线程的优先级 |
-| final int getPriority() | 获取线程的优先级 |
-| final void setDaemon(boolean on) | 设置线程是否为守护线程 |
-| public static void yield() | 出让线程/礼让线程 |
-| public static void join() | 插入线程/插队线程 |
+| 方法名                           | 说明                       |
+| -------------------------------- | -------------------------- |
+| String getName()                 | 获取线程的名称             |
+| void setName(String name)        | 设置线程的名称             |
+| static Thread currentThread()    | 获取当前线程               |
+| static viod sleep(long millis)   | 让当前线程暂停执行一段时间 |
+| setPriority(int newPriority)     | 设置线程的优先级           |
+| final int getPriority()          | 获取线程的优先级           |
+| final void setDaemon(boolean on) | 设置线程是否为守护线程     |
+| public static void yield()       | 出让线程/礼让线程          |
+| public static void join()        | 插入线程/插队线程          |
 
 方法细节：
 
@@ -2581,10 +2583,10 @@ Lock是接口，不能直接实例化，这里采用它的实现类ReentrantLock
 
 消费者：从缓冲区取出数据，消费数据
 
-| 方法名称 | 说明 |
-| --- | --- |
-| void wait() | 让线程等待，直到被唤醒 |
-| void notify() | 唤醒一个正在等待的线程 |
+| 方法名称         | 说明                   |
+| ---------------- | ---------------------- |
+| void wait()      | 让线程等待，直到被唤醒 |
+| void notify()    | 唤醒一个正在等待的线程 |
 | void notifyAll() | 唤醒所有正在等待的线程 |
 
 使用以上方法都是和锁绑定
@@ -2598,10 +2600,10 @@ Lock是接口，不能直接实例化，这里采用它的实现类ReentrantLock
 - ArrayBlockingQueue：一个由数组结构组成的有界阻塞队列，FIFO，容量大小为数组大小
 - LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列，FIFO，容量大小无限（最大为int的最大值）
 
-| 方法名称 | 说明 |
-| --- | --- |
+| 方法名称      | 说明                                   |
+| ------------- | -------------------------------------- |
 | void put(E e) | 向队列中添加元素，如果队列已满，则阻塞 |
-| E take() | 从队列中取出元素，如果队列为空，则阻塞 |
+| E take()      | 从队列中取出元素，如果队列为空，则阻塞 |
 
 ### 多线程的6种状态
 
@@ -2640,10 +2642,10 @@ Executors：线程池的工具类，通过调用方法返回不同的线程池�
 
 1. 创建线程池对象
 
-| 方法名称 | 说明 |
-| --- | --- |
-| static ExecutorService newCachedThreadPool() | 创建一个可缓存线程池，线程池的大小不受限，线程数的创建和销毁由JVM自动管理 |
-| static ExecutorService newFixedThreadPool(int nThreads) | 创建固定线程数量的线程池 |
+| 方法名称                                                | 说明                                                                      |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- |
+| static ExecutorService newCachedThreadPool()            | 创建一个可缓存线程池，线程池的大小不受限，线程数的创建和销毁由JVM自动管理 |
+| static ExecutorService newFixedThreadPool(int nThreads) | 创建固定线程数量的线程池                                                  |
 
 2. 提交任务
 
@@ -2675,12 +2677,135 @@ Executors：线程池的工具类，通过调用方法返回不同的线程池�
 
 ##### 任务拒绝策略：
 
-| 任务拒绝策略 | 说明 |
-|--- | --- |
-| ThreadPoolExecutor.AbortPolicy | 直接抛出异常，默认策略 |
-| ThreadPoolExecutor.DiscardPolicy | （不推荐）直接丢弃任务，不抛出异常 |
+| 任务拒绝策略                           | 说明                                                           |
+| -------------------------------------- | -------------------------------------------------------------- |
+| ThreadPoolExecutor.AbortPolicy         | 直接抛出异常，默认策略                                         |
+| ThreadPoolExecutor.DiscardPolicy       | （不推荐）直接丢弃任务，不抛出异常                             |
 | ThreadPoolExecutor.DiscardOldestPolicy | 丢弃队列最前面的任务（等待最久的任务），然后把当前任务加入队列 |
-| ThreadPoolExecutor.CallerRunsPolicy | 由调用者所在的线程来执行任务(绕过线程池) |
+| ThreadPoolExecutor.CallerRunsPolicy    | 由调用者所在的线程来执行任务(绕过线程池)                       |
+
+##### 最大并行数
+
+```
+int maxParallelism = Runtime.getRuntime().availableProcessors();
+```
+
+可以求出最大并行数
+
+##### 线程池大小设置
+
+对于CPU密集型任务，最大并行数+1
+
+对于IO密集型任务，最大并行数 * 期望CPU利用率 * 总时间(CPU计算时间+等待时间)/CPU计算时间
+
+## 网络编程
+
+网络编程：在网络通信协议下，不同计算机上运行的程序，进行的数据传输和通信，是计算机跟计算机之间通过网络进行数据传输（Java.net包是心爱）
+
+### 常见软件架构
+
+#### CS架构
+
+`C/S Client/Server`：客户端和服务器架构，在用户本地需要下载安装客户端程序，在远程有一个服务器端程序
+
+优缺点：
+
+1. 画面可以做的非常精美，用户体验好
+
+2. 需要开发客户端，也需要开发服务端
+3. 用户需要下载和更新的时候太麻烦了
+
+#### BS架构
+
+`B/S Browser/Server`：浏览器和服务器架构，用户通过浏览器访问服务器端程序，服务器端程序提供服务
+
+优缺点：
+
+1. 不需要开发客户端，只需要页面+服务端
+2. 用户不需要下载，打开浏览器就能使用
+
+3. 如果应用过大，用户体验受到影响
+
+### 网络编程三要素
+
+1. IP：设备在网络中的地址，是唯一的标识
+2. 端口号：应用程序在设备中唯一的标识
+3. 协议：数据在网络中传输的规则，常见的协议有UDP、TCP、http、https、ftp等
+
+#### IP
+
+全称：Internet Protocol，即互联网协议地址，也称IP地址，是分配给上网设备的数字标签
+
+上网设备在网络中的地址，是唯一的
+
+##### IPv4
+
+全称：Internet Protocol version 4，即互联网协议第四版
+
+采用32位地址长度，分成4组，每组8位，每组用“.”分隔，点分十进制表示法，0-255
+
+IPv4地址分类：公网地址（万维网使用）和私有地址（局域网使用）
+
+192.168.开头就是私有地址，范围即为192.168.0.0-192.168.255.255，专门为组织机构内部使用，以此来节省IP
+
+127.0.0.1，也可以是`localhost`：是回送地址，也称本地回环地址、本地IP，永远只会寻找当前所在本机（不经过网络，在本地回传）
+
+##### IPv6
+
+全称：Internet Protocol version 6，即互联网协议第六版
+
+采用128位地址长度，分成8组，每组16位，每组用“:”分隔，冒号十六进制表示法，0-65535
+
+特殊情况：连续出现多个0，则使用0位压缩表示法
+
+##### InetAddress类
+
+java.net包中提供的类，用来表示IP地址，可以获取IP地址的各种信息
+
+| 方法名                                    | 说明                                               |
+| ----------------------------------------- | -------------------------------------------------- |
+| static InetAddress getByName(String host) | 根据主机名获取IP地址，可以使机器名称也可以是IP地址 |
+| String getHostName()                      | 获取此IP地址的主机名                               |
+| String getHostAddress()                   | 返回文本显示的IP地址字符串                         |
+
+#### 端口号
+
+应用程序在设备中唯一的标识
+
+端口号由两个字节表示的整数，取值范围：0~65535
+0~1023：系统预留端口，一般不用
+
+一个端口号只能被一个应用使用，如果多个应用使用同一个端口号，则会出现端口冲突
+
+#### 协议
+
+计算机网络中，连接和通信的规则被称为网络通信协议
+
+- OSI参考模型：世界互联协议标准，全球偷心规范，单模型过于理想化，未能在因特网上进行广泛推广
+
+- TCP/IP参考模型（TCP/IP协议）：事实上的国际标准
+
+![协议对应模型](img/Java_10.png)
+
+UDP协议
+- 用户数据报协议（User Datagram Protocol）
+- UDP是面向无连接通信协议，速度快，有大小限制（64k），数据不安全，易丢失数据
+- 不管是否已经连接成功都发送
+
+TCP协议
+- 传输控制协议TCP（Transmission Control Protocol）
+- TCP是面向连接的协议，速度慢，没有大小限制，数据安全
+- 会确保连接成功，并且数据传输的完整性
+
+##### UDP通信程序
+
+发送数据
+1. 创建发送端的DatagramSocket对象
+2. 数据打包（DatagramPacket）
+3. 发送数据
+4. 释放资源
+
+##### TCP通信程序
 
 ## API
 
@@ -2731,14 +2856,14 @@ sb.reverse();
 
 集合：是一种长度可变，且添加数据  的时候不需要考虑索引，默认将数据添加到末尾的存储模型，智能存储引用数据类型
 
-| 方法名 | 说明 |
-| -- | -- |
-| public boolean add(要添加的元素) | 将指定的元素追加到此集合的末尾         |
-| public boolean remove(要删除的元素) | 删除指定元素,返回值表示是否删除成功    |
-| public E  remove(int index) | 删除指定索引处的元素，返回被删除的元素 |
+| 方法名                                | 说明                                   |
+| ------------------------------------- | -------------------------------------- |
+| public boolean add(要添加的元素)      | 将指定的元素追加到此集合的末尾         |
+| public boolean remove(要删除的元素)   | 删除指定元素,返回值表示是否删除成功    |
+| public E  remove(int index)           | 删除指定索引处的元素，返回被删除的元素 |
 | public E   set(int index,E   element) | 修改指定索引处的元素，返回被修改的元素 |
-| public E get(int   index)| 返回指定索引处的元素|
-| public int   size()| 返回集合中的元素的个数|
+| public E get(int   index)             | 返回指定索引处的元素                   |
+| public int   size()                   | 返回集合中的元素的个数                 |
 
 ### JFrame类
 
