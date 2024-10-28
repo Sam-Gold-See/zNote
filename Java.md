@@ -2598,6 +2598,90 @@ Lock是接口，不能直接实例化，这里采用它的实现类ReentrantLock
 - ArrayBlockingQueue：一个由数组结构组成的有界阻塞队列，FIFO，容量大小为数组大小
 - LinkedBlockingQueue：一个由链表结构组成的有界阻塞队列，FIFO，容量大小无限（最大为int的最大值）
 
+| 方法名称 | 说明 |
+| --- | --- |
+| void put(E e) | 向队列中添加元素，如果队列已满，则阻塞 |
+| E take() | 从队列中取出元素，如果队列为空，则阻塞 |
+
+### 多线程的6种状态
+
+![线程的状态](img/Java_9.png)
+
+（真实无运行状态）
+
+- 新建状态（NEW）：创建线程对象
+- 就绪状态（RUNNABLE）：start方法
+- 阻塞状态（BLOCKED）：无法获得锁对象
+- 等待状态（WAITING）：wait方法
+- 计时等待（TIMED_WAITING）：sleep方法
+- 终止状态（TERMINATED）：全部代码运行完毕
+
+### 线程栈
+
+线程栈是用来存储线程运行过程中的局部变量、方法调用、返回地址等信息的内存空间。
+
+每个线程都是一个线程栈
+
+### 线程池
+
+#### 线程池主要核心原理
+
+1. 创建一个池子，池子中是空的
+
+2. 提交任务，池子会创建新的线程对象（无空闲线程，但可创建新线程），任务执行完毕，线程归还给池子，下次再次提交任务时，不需要创建新的线程，直接复用已有的线程
+
+3. 但是提交任务时，池子中没有空闲线程，也无法创建新的线程，任务就会排队等待，直到池子中有空闲线程，才会执行任务
+
+4. 线程池的大小，决定了池子中最多能创建多少个线程，如果池子中有线程空闲，则不会创建新的线程，而是直接复用已有的线程
+
+#### 线程池代码实现
+
+Executors：线程池的工具类，通过调用方法返回不同的线程池对象
+
+1. 创建线程池对象
+
+| 方法名称 | 说明 |
+| --- | --- |
+| static ExecutorService newCachedThreadPool() | 创建一个可缓存线程池，线程池的大小不受限，线程数的创建和销毁由JVM自动管理 |
+| static ExecutorService newFixedThreadPool(int nThreads) | 创建固定线程数量的线程池 |
+
+2. 提交任务
+
+`pool.submit(Runnable task)`
+
+3. 所有任务执行完毕，关闭线程池
+
+`pool.shutdown()`
+
+#### 自定义线程池
+
+`ThreadPoolExecutor(int corePoolSize, int maximumPoolSize, long keepAliveTime, TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory, RejectedExecutionHandler handler)`
+
+- 核心线程数量：不能小于0
+- 线程池中最大线程的数量：最大数量不能小于核心线程数量
+- 空闲时间（值）：不能小于0
+- 空闲时间（单位）：用TimeUnit类指定
+- 阻塞队列：不能为null
+- 创建线程的方式：不能为null
+- 要执行的任务过多时的粗略：不能为null
+
+##### 创建临时线程的条件：
+
+1. 线程池中没有空闲线程
+2. 阻塞队列已满
+3. 线程池中线程数量没有达到最大线程数量
+
+（可以说明，任务不一定是按照提交顺序完成）
+
+##### 任务拒绝策略：
+
+| 任务拒绝策略 | 说明 |
+|--- | --- |
+| ThreadPoolExecutor.AbortPolicy | 直接抛出异常，默认策略 |
+| ThreadPoolExecutor.DiscardPolicy | （不推荐）直接丢弃任务，不抛出异常 |
+| ThreadPoolExecutor.DiscardOldestPolicy | 丢弃队列最前面的任务（等待最久的任务），然后把当前任务加入队列 |
+| ThreadPoolExecutor.CallerRunsPolicy | 由调用者所在的线程来执行任务(绕过线程池) |
+
 ## API
 
 API(Application Programming Interface):应用程序编程接口
