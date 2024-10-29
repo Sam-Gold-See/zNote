@@ -2805,6 +2805,55 @@ TCP协议
 3. 发送数据
 4. 释放资源
 
+
+```
+//创建发送端的DatagramSocket对象
+//绑定端口，通过该端口向外发送，若空参构造，则随机分配可用端口；若指定端口，则绑定该端口
+DatagramSocket ds = new DatagramSocket();
+
+//数据打包DatagramPacket
+//data为要发送的数据，必须要转化为字节形式
+DatagramPacket dp = new DatagramPacket(data, data.length, ip, port);
+
+//发送数据
+ds.send(dp);
+
+//释放资源
+ds.close();
+```
+
+接收数据
+1. 创建接收端的DatagramSocket对象
+2. 接收打包好的数据
+3. 解析数据包
+4. 释放资源
+
+```
+//创建接收端的DatagramSocket对象
+//接收的时候一定要绑定端口，还要和发送端口一致
+DatagramSocket ds = new DatagramSocket(port);
+
+//接收打包好的数据
+byte[] data = new byte[1024];
+DatagramPacket dp = new DatagramPacket(data, data.length);
+ds.receive(dp);
+
+//解析数据包
+byte[] bytes = dp.getData();
+int len = dp.getLength();
+InetAddress address = dp.getAddress();
+int port = dp.getPort();
+
+System.out.println("接收到的数据：" + new String(bytes, 0, len));
+System.out.println("发送方的IP：" + address.getHostAddress());
+System.out.println("发送方的端口：" + port);
+
+//释放资源
+ds.close();
+```
+
+细节：receive()方法是阻塞的，直到接收到数据才会返回，如果没有数据，则一直阻塞
+
 ##### TCP通信程序
 
 ## API
