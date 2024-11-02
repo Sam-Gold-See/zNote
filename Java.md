@@ -2883,6 +2883,28 @@ TCP通信协议是一种可靠的网络协议，它在通信的两端各建立�
 
 ![TCP的四次挥手](img/Java_13.png)
 
+## 动态代理
+
+动态代理特点：无侵入式的给代码增加额外的功能
+
+把所有想要被代理的方法写在接口里面，对象和代理需要实现同一个接口
+
+`java.lang.reflect.Proxy`：提供了为对象产生代理对象的方法
+
+## 反射
+
+反射允许对成员变量、成员方法和构造方法的信息进行编程访问
+
+### 获取class对象
+
+1. Class.forName("全类名") 包名+类名
+
+2. 类名.class
+
+3. 对象.getClass()
+
+使用Class对象存储
+
 ## API
 
 API(Application Programming Interface):应用程序编程接口
