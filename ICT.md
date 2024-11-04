@@ -22,3 +22,12 @@
 
 **考点**
 
+![openEuler考点1](img/ICT_1.png)
+
+![openEuler考点2](img/ICT_2.png)
+
+![openGauss考点1](img/ICT_3.png)
+
+![openGauss考点2](img/ICT_4.png)
+
+![Kunpeng考点](img/ICT_5.png)
