@@ -441,3 +441,342 @@ JavaScript是一门脚本语言，用于实现网页的动态效果，让页面�
 | 比较运算符 |  >, < , >= , <= , != , == , ===   注意`==`会进行类型转换`===`不会进行类型转换 |
 | 逻辑运算符 | && , \|\| , ! |
 | 三元运算符 | 条件表达式 ? true_value: false_value |
+
+#### 函数
+
+- 第一种定义格式：
+
+```
+function 函数名(参数1,参数2..){
+    要执行的代码
+}
+```
+
+因为JavaScript是弱数据类型的语言，所以有如下几点需要注意：
+
+  - 形式参数不需要声明类型，并且JavaScript中不管什么类型都是let或者var去声明，加上也没有意义。
+  
+  - 返回值也不需要声明类型，直接return即可
+
+- 第二种定义格式：
+
+```
+var functionName = function (参数1,参数2..){   
+	//要执行的代码
+}
+```
+
+  - 在JavaScript中，函数的调用只需要名称正确即可，参数列表不管的。如上述案例，10传递给了变量a，20传递给了变量b,而30和40没有变量接受，但是不影响函数的正常调用。
+
+### JavScript对象
+
+#### 基本对象
+
+- Array
+- Boolean
+- Classe
+- Date
+- Error
+- Global
+- JSON
+- Math
+- Number
+- RegExp
+- String
+- 运算符
+- 语句
+
+##### Array
+
+Array对象是用来定义数组
+
+**构造方法**
+
+方法一：`var 变量名 = new Array(元素1,元素2,元素3..);`
+
+方法二：`var 变量名 = [元素1,元素2,元素3..];`
+
+JavaScript中数组相当于Java中的集合，数组的长度是可以变化的。而且JavaScript是弱数据类型的语言，所以数组中可以存储任意数据类型的值。接下来我们通过代码来演示上述特点。
+
+**属性和方法**
+
+属性：
+
+| 属性 | 描述 |
+| :----- | :--------------------------- |
+| length | 设置或返回数组中元素的数量。 |
+
+方法：
+
+| 方法方法  | 描述 |
+| :-------- | :---- |
+| forEach() | 遍历数组中的每个有值的元素，并调用一次传入的函数 |
+| push()    | 将新元素添加到数组的末尾，并返回新的长度 |
+| splice()  | 从数组中删除元素，参数1表示从哪个索引位置删除，参数2表示删除的元素个数 |
+
+使用方法都是使用`.`来后接方法名，并传入相应的参数。
+
+```
+arr.forEach(function(e){
+  console.log(e);
+})
+
+arr.forEach((e)=>console.log(e))
+```
+
+##### String
+
+String对象是用来定义字符串
+
+**构造方法**
+
+方法一：`var 变量名 = new String(字符串);`
+
+方法二：`var 变量名 = "字符串";`
+
+**属性和方法**
+
+属性：
+
+| 属性   | 描述           |
+| ------ | -------------- |
+| length | 字符串的长度。 |
+
+方法：
+
+| 方法        | 描述 |
+| ----------- | ----- |
+| charAt()    | 返回在指定位置的字符。 |
+| indexOf()   | 检索字符串。|
+| trim()      | 去除字符串两边的空格 |
+| substring() | 提取字符串中两个指定的索引号之间的字符。 |
+
+##### JSON
+
+###### 自定义对象
+
+**构造方法**
+
+```
+var 对象名 = {
+    属性名1: 属性值1, 
+    属性名2: 属性值2,
+    属性名3: 属性值3,
+    函数名称: function(形参列表){}
+};
+```
+
+通过`对象名.属性名`调用属性或者`对象名.函数名称(参数)`调用函数。
+
+###### JSON对象
+
+JSON对象：**J**ava**S**cript **O**bject **N**otation，JavaScript对象标记法。是通过JavaScript标记法书写的文本。
+
+**格式**：
+
+```
+{
+  "key":value,
+  "key":value,
+  "key":value
+}
+```
+
+**key必须使用引号并且是双引号标记，value可以是任意数据类型。**
+
+JSON这种数据格式的对象经常用来作为前后台交互的数据载体。
+
+在前后台交互的时候，我们需要传输数据，可以使用下图的XML格式，可以清晰地描述Java中需要传递给前端的Java对象。
+
+![XML格式传输数据](img/Web_9.png)
+
+但是XML格式存在如下问题：
+
+- 冗余：标签需要编写双份，占用带宽、浪费资源
+
+- 繁琐：解析繁琐
+
+JSON格式的对象可以解决这些问题
+
+![JSON格式传输数据](img/Web_10.png)
+
+但是上述在浏览器中还不能直接使用，**因为上述是一个JSON字符串，不是JSON对象**
+
+使用`JSON.parse()`方法，传入一个JSON字符串，可以将其转换为JSON对象。
+
+使用`JSON.stringify()`方法，传入一个JSON对象，可以将其转换为JSON字符串。
+
+#### BOM对象
+
+BOM的全称是Browser Object Model,翻译过来是浏览器对象模型
+
+也就是JavaScript将浏览器的各个组成部分封装成了对象。操作浏览器的部分功能，可以通过操作BOM对象的相关属性或者函数来完成。
+
+| 对象名称  | 描述           |
+| :-------- | :------------ |
+| Window    | 浏览器窗口对象 |
+| Navigator | 浏览器对象     |
+| Screen    | 屏幕对象       |
+| History   | 历史记录对象   |
+| Location  | 地址栏对象     |
+
+BOM对象与浏览器各组成对应关系：
+
+![BOM对象与浏览器各组成对应关系](img/Web_11.png)
+
+##### Window对象
+
+Window对象指的是浏览器窗口对象，是JavaScript的全部对象，对于Window对象，我们可以直接使用，并且对于其属性和方法，我们可以省略Window对象。
+
+window对象提供了获取其他BOM对象的属性：
+
+| 属性      | 描述                  |
+| --------- | --------------------- |
+| history   | 用于获取history对象   |
+| location  | 用于获取location对象  |
+| navigator | 用于获取navigator对象 |
+| screen    | 用于获取screen对象    |
+
+Window也提供了一些常用的函数，如下表格所示：
+
+| 函数 | 描述 |
+| --- | --- |
+| alert()       | 显示带有一段消息和一个确认按钮的警告框。           |
+| comfirm()     | 显示带有一段消息以及确认按钮和取消按钮的对话框。   |
+| setInterval() | 按照指定的周期（以毫秒计）来调用函数或计算表达式。 |
+| setTimeout()  | 在指定的毫秒数后调用函数或计算表达式。             |
+
+- alert()函数：弹出警告框，函数的内容就是警告框的内容
+
+- confirm()函数：弹出确认框，并且提供用户2个按钮，分别是确认和取消。该函数有个布尔类型的返回值
+
+- setInterval(function,毫秒值)：定时器，用于周期性的执行某个功能，并且是**循环执行**。该函数需要传递2个参数：第一个参数是要执行的函数，第二个参数是执行的周期，单位是毫秒。
+
+- setTimeout(function,毫秒值) ：定时器，只会在一段时间后**执行一次功能**。参数同`setInterval()`
+
+##### Location对象
+
+location是指浏览器的地址栏对象，常用属性为`href`属性，用于获取或者设置浏览器的地址信息
+
+#### DOM对象
+
+DOM：Document Object Model 文档对象模型。也就是 JavaScript 将 HTML 文档的各个组成部分封装为对象。
+
+封装的对象分为：
+
+- Document：整个文档对象
+- Element：元素对象
+- Attribute：属性对象
+- Text：文本对象
+- Comment：注释对象
+
+![JavaScript转换HTML文档](img/Web_12.png)
+
+DOM技术的特点：
+
+- 改变 HTML 元素的内容
+- 改变 HTML 元素的样式（CSS）
+- 对 HTML DOM 事件作出反应
+- 添加和删除 HTML 元素
+
+DOM技术核心：
+
+- 如何获取DOM中的元素对象（Element对象 ，也就是标签）
+- 如何操作Element对象的属性,也就是标签的属性。
+
+##### 获取DOM对象
+
+HTML中的Element对象可以通过Document对象获取，而Document对象是通过Window对象获取的。Document对象提供的用于获取Element元素对象的API如下表所示：
+
+| 函数 | 描述 |
+| --- | --- |
+| document.getElementById() | 根据id属性值获取，返回单个Element对象 |
+| document.getElementsByTagName() | 根据标签名称获取，返回Element对象数组 |
+| document.getElementsByName() | 根据name属性值获取，返回Element对象数组 |
+| document.getElementsByClassName() | 根据class属性值获取，返回Element对象数组 |
+
+- document.getElementById()：根据标签的id属性获取标签对象，id是唯一的，所以获取到是单个标签对象。
+
+- document.getElementsByTagName() :  根据标签的名字获取标签对象，同名的标签有很多，所以返回值是数组。
+
+- document.getElementsByName()：根据标签的name的属性值获取标签对象，name属性值可以重复，所以返回值是一个数组。
+
+- document.getElementsByClassName(): 根据标签的class属性值获取标签对象，class属性值也可以重复，返回值是数组。
+
+##### 操作DOM对象
+
+`innerHTML`属性：设置或获取元素的内容，可以设置HTML代码。
+
+`style`属性：设置或获取元素的样式，可以设置CSS样式。
+
+[JavaScript参考手册](https://www.w3school.com.cn/jsref/index.asp)
+
+### JavaScript事件
+
+HTML事件是发生在HTML元素上的 “事情”，例如：
+
+- 按钮被点击
+- 鼠标移到元素上
+- 输入框失去焦点
+
+可以给这些事件绑定函数，当事件触发时，可以自动的完成对应的功能。这就是事件监听。
+
+#### 事件绑定
+
+JavaScript对于事件的绑定提供了2种方式：
+
+- 方式1：通过html标签中的事件属性进行绑定，然后指向一个函数
+
+- 方式2：通过DOM中Element元素的事件属性进行绑定，然后操作对象属性绑定函数事件
+
+### 常见事件
+
+上面案例中使用到了 `onclick` 事件属性，那都有哪些事件属性供我们使用呢？下面就给大家列举一些比较常用的事件属性
+
+| 事件属性名  | 说明 |
+| ----------- | ------------------------ |
+| onclick     | 鼠标单击事件             |
+| onblur      | 元素失去焦点             |
+| onfocus     | 元素获得焦点             |
+| onload      | 某个页面或图像被完成加载 |
+| onsubmit    | 当表单提交时触发该事件   |
+| onmouseover | 鼠标被移到某元素之上     |
+| onmouseout  | 鼠标从某元素移开         |
+
+## Vue
+
+Vue.js是一套构建用户界面的 **渐进式框架**。与其他重量级框架不同的是，Vue 采用自底向上增量开发的设计。Vue 的核心库只关注视图层，并且非常容易学习，非常容易与其它库或已有项目整合。Vue.js 的目标是通过尽可能简单的 API 实现**响应的数据绑定**和**组合的视图组件**。
+
+框架即是一个半成品软件，是一套可重用的、通用的、软件基础代码模型。基于框架进行开发，更加快捷、更加高效。
+
+为了提高开发的效率，引入**MVVM(Model-View-ViewModel)的前端开发思想**，即让开发者更加关注数据，而非数据绑定到视图这种机械化的操作。
+
+MVVM:其实是Model-View-ViewModel的缩写，有3个单词，具体释义如下：
+
+- Model: 数据模型，特指前端中通过请求从后台获取的数据
+
+- View: 视图，用于展示数据的页面，可以理解成我们的html+css搭建的页面，但是没有数据
+
+- ViewModel: 数据绑定到视图，负责将数据（Model）通过JavaScript的DOM技术，将数据展示到视图（View）上
+
+![MVVM架构](img/Web_13.png)
+
+基于MVVM思想，其中的Model我们可以通过Ajax来发起请求从后台获取
+
+对于View部分，我们将来会学习一款ElementUI框架来替代HTML+CSS来更加方便的搭建View
+
+而侧重于ViewModel部分开发的vue前端框架，用来替代JavaScript的DOM操作，让数据展示到视图的代码开发变得更加的简单。
+
+### 基础介绍
+
+核心功能：
+
+- **声明式渲染**：Vue基于标准HTML拓展了一套模板语法，使得我们可以声明式地描述最终输出的HTML和JavaScript状态之间的关系
+
+- **响应性**：Vue会自动跟踪JavaScript状态并在其发生变化时响应式地更新DOM
+
+使用类HTML格式的文件来书写Vue组件，也称为**单文件组件**（`.vue`文件）顾名思义，Vue 的单文件组件会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
+
+#### 组合式API
+
+组合式 API 通常会与`<script setup>`搭配使用
