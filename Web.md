@@ -777,6 +777,301 @@ MVVM:其实是Model-View-ViewModel的缩写，有3个单词，具体释义如下
 
 使用类HTML格式的文件来书写Vue组件，也称为**单文件组件**（`.vue`文件）顾名思义，Vue 的单文件组件会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
 
-#### 组合式API
+### 创建一个Vue实例
 
-组合式 API 通常会与`<script setup>`搭配使用
+每个Vue应用都是通过`createApp`函数创建一个新的应用实例
+
+```
+import { createApp } from 'vue'
+const app = createApp({
+  /* 根组件选项 */
+})
+```
+
+**根组件**：传入的`createApp`对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件嵌套在根组件下。
+
+### 模板语法
+
+Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实例的数据绑定到呈现的 DOM 上。所有的 Vue 模板都是语法层面合法的 HTML，可以被符合规范的浏览器和 HTML 解析器解析。
+
+在底层机制中，Vue 会将模板编译成高度优化的 JavaScript 代码。结合响应式系统，当应用状态变更时，Vue 能够智能地推导出需要重新渲染的组件的最少数量，并应用最少的 DOM 操作。
+
+#### 文本插值
+
+最基础的数据绑定形式是文本插值，使用的是 `{{ }}` 语法，该语法会被替换为相应组件实例中 `msg` 属性的值，每次 `msg` 属性更改时也会同步更新
+
+```
+<span>Message: {{ message }}</span>
+```
+
+#### Attribute绑定
+
+`{{}}` 不能在 HTML attribute 中使用，想要响应式地绑定一个 attribute ，应该使用 `v-bind` 指令：
+
+```
+<div v-bind:id="dynamicId"></div>
+```
+
+`v-bind` 指令指示 Vue 将元素的 `id` attribute 与组件的 `dynamicId` 属性保持一致，如果 `dynamicId` 发生变化，则会同步更新 `id` attribute；如果绑定的值是 `null` 或者 `undefined` 那么该attribute会被移除。
+
+##### 简写
+
+将常用的 `v-bind` 指令缩写为 `: `：
+
+```
+<div :id="dynamicId"></div>
+```
+
+##### 同名简写
+
+如果 attribute 的名称与绑定的 JavaScript 值的名称相同，那么可以进一步简化语法，省略 attribute 值：
+
+```
+<!-- 与 :id="id" 等效 -->
+<div :id="id"></div>
+```
+
+##### 布尔型 Attribute
+
+**布尔型 attribute** 依据 true/false 值来决定 attribute 是否应该存在于该元素上。 `disabled` 就是最常见的例子
+
+`v-bind` 在这种场景下有所不同：
+
+```
+<button :disabled="isButtonDisabled">Button</button>
+```
+
+1. 如果 `isButtonDisabled` 为 `true` 或者一个空字符串，则 `<button>` 元素将会获得 `disabled` attribute。
+
+2. 如果 `isButtonDisabled` 为 `false`，则 `<button>` 元素将会失去 `disabled` attribute。
+
+##### 动态绑定多个值
+
+```
+const objectOfAttrs = {
+  id: 'container',
+  class: 'wrapper',
+  style: 'background-color:green'
+}
+
+<div v-bind="objectOfAttrs"></div>
+```
+
+#### JavaScript表达式
+
+在 Vue 模板内，JavaScript 表达式可以被使用在如下场景上：
+
+- 在文本插值中 (双大括号)
+
+- 在任何 Vue 指令 (以 v- 开头的特殊 attribute) attribute 的值中
+
+仅支持单一表达式，判断标准是否可以合法地写在 `return` 后面
+
+#### 指令 Directives
+
+指令是指带有 `v-` 前缀的特殊 attribute
+
+Vue 提供了很多内置指令， 指令 attribute 的期望值为一个 JavaScript 表达式（除了 `v-for` 、 `v-on` 、 `v-slot`这几个指令之外），一个指令的任务是在其表达式的值变化时响应式地更新DOM。
+
+![完整指令语法](img/Web_14.png)
+
+##### 参数 Arguments
+
+某些指令需要一个参数，在指令后通过一个冒号 `:` 来指定参数
+
+```
+<a :href="url">...</a>
+```
+
+此处的 `href` 就是一个参数，它告诉 `v-bind` 指令将表达式 `url` 的值绑定到元素的 `href` attribute 上。
+
+###### 动态参数
+
+在指令参数上也可以使用一个 JavaScript 表达式，需要包含在 `[ ]` 内：
+
+```
+<a :[key]="url">...</a>
+```
+
+此处的 `key` 会作为一个 JavaScript 表达式被动态执行，计算得到的值会被用作最汇总的参数。
+
+动态参数中表达式的值应当是一个字符串或者 `null` ，特殊值 `null` 意为显式移除该绑定。其他非字符串的值会触发警告。
+
+##### 修饰符 Modifiers
+
+修饰符是以点开头的特殊后缀，表明指令需要以一些特定的方式被绑定，后续 `v-on` 和 `v-model` 会详细说明
+
+### 响应式基础
+
+#### 声明响应式状态
+
+##### `ref()`
+
+```
+import { ref } from 'vue'
+
+const count = ref(0)
+```
+
+`ref()` 接收参数，并将其包裹在一个带有 `.value` 属性的 ref 对象中返回
+
+```
+const count = ref(0)
+
+console.log(count.value) // {{ value: 0 }}
+console.log(count) // 0
+
+count.value++
+
+console.log(count.value) // 1
+```
+
+##### `<script setup>`
+
+在 `setup()` 函数中手动暴露大量的状态和方法十分繁琐，可以通过单文件组件来避免，使用 `<script setup>` 来大幅度简化代码
+
+```
+<script setup>
+import { ref } from 'vue'
+
+const count = ref(0)
+
+function increment() {
+  count.value++
+}
+</script>
+
+<template>
+  <button @click="increment">{{ count }}</button>
+</template>
+```
+
+`<script setup>` 中的顶层的导入、声明的变量和函数刻在同一组件的模板中直接使用
+
+##### 响应式原理
+
+当在模板中使用了一个 `ref`，然后改变了这个 `ref` 的值时，Vue 会自动检测到这个变化，并且相应地更新 DOM。这是通过一个基于依赖追踪的响应式系统实现的。当一个组件首次渲染时，Vue 会追踪在渲染过程中使用的每一个 `ref`。然后，当一个 `ref` 被修改时，它会触发追踪它的组件的一次重新渲染。
+
+另一个 `ref` 的好处是，与普通变量不同，你可以将 `ref` 传递给函数，同时保留对最新值和响应式连接的访问。当将复杂的逻辑重构为可重用的代码时，这将非常有用。
+
+##### 深层响应性
+
+Ref 可以持有任何类型的值，包括深层嵌套的对象、数组或者 JavaScript 内置的数据结构，比如 `Map`。这意味着即使改变嵌套对象或数组时，变化也会被检测到.
+
+非原始值将通过 `reactive()` 转换为响应式代理
+
+也可以通过 `shallow ref` 来放弃深层响应性。对于浅层 `ref`，只有 `.value` 的访问会被追踪。浅层 `ref` 可以用于避免对大型数据的响应性开销来优化性能、或者有外部库管理其内部状态的情况。
+
+##### DOM 更新时机
+
+修改了响应式状态时，DOM 会被自动更新。但是需要注意的是，DOM 更新不是同步的。Vue 会在“next tick”更新周期中缓冲所有状态的修改，以确保不管你进行了多少次状态修改，每个组件都只会被更新一次。
+
+要等待 DOM 更新完成后再执行额外的代码，可以使用 `nextTick()` 全局 API：
+
+```
+import { nextTick } from 'vue'
+
+async function increment() {
+  count.value++
+  await nextTick()
+  // 现在 DOM 已经更新了
+}
+```
+
+### 计算属性
+
+使用**计算属性**来描述依赖响应式状态的复杂逻辑
+
+```
+<script setup>
+import { ref, computed } from 'vue'
+
+const authorName = ref('John Doe')
+const books = ref([
+  'Vue 2 - Advanced Guide',
+  'Vue 3 - Basic Guide',
+  'Vue 4 - The Mystery'
+])
+
+const publishedBooksMessage = computed(() => {
+  return books.value.length > 0 ? "yes" : "no"
+})
+</script>
+
+<template>
+  <p>Has published books: {{ publishedBooksMessage }}</p>
+</template>
+```
+
+计算属性的返回值是一个 `computed ref`，它会根据依赖的响应式状态自动更新。
+
+Vue 的计算属性会自动追踪响应式依赖。它会检测到 `publishedBooksMessage` 依赖于 `books`，所以当 `books` 改变时，任何依赖于 `publishedBooksMessage` 的绑定都会同时更新。
+
+若使用
+
+```
+function caculateBooksMessage() {
+  return books.value.length > 0 ? "yes" : "no"
+}
+```
+
+定义为一个方法而不是计算属性，则不会自动追踪依赖，需要手动调用 `caculateBooksMessage()` 来更新。
+
+### Class 与 Style 绑定
+
+数据绑定的一个常见需求场景是操纵元素的 CSS class 列表和内联样式。因为 class 和 style 都是 attribute，可以和其他 attribute 一样使用 v-bind 将它们和动态的字符串绑定。
+
+但是，在处理比较复杂的绑定时，通过拼接生成字符串是麻烦且易出错的。
+
+因此，Vue 专门为 class 和 style 的 v-bind 用法提供了特殊的功能增强。除了字符串外，表达式的值也可以是对象或数组。
+
+#### 绑定 Class
+
+使用 `:class` （ `v-bind:class` ）来传递一个对象来动态切换 class
+
+#### 绑定 Style
+
+使用 `:style` 来绑定 JavaScript 表达式对象，动态更新元素的样式，对应的是 `style` attribute。
+
+### 条件渲染
+
+#### `v-if`
+
+`v-if` 指令用于条件性地渲染一块内容。这块内容只会在指令的表达式返回真值时才被渲染。
+
+#### `v-else`
+
+`v-else` 指令表示 `v-if` 的“else 块”。
+
+#### `v-else-if`
+
+`v-else-if` 指令表示 `v-if` 的一个分支，可以连续多次重复使用，一个使用 `v-else-if` 的元素必须紧跟在一个 `v-if` 或一个 `v-else-if` 元素后面。
+
+#### `v-show`
+
+`v-show` 指令根据表达式的真假值，切换元素的 `display` CSS 属性。不同于 `v-if`，`v-show` 不渲染元素，只是简单地切换元素的 `display` 值。
+
+### 列表渲染
+
+#### `v-for`
+
+我们可以使用 `v-for` 指令基于一个数组来渲染一个列表。`v-for` 指令的值需要使用 `item in items` 、 `item of items` 形式的特殊语法，其中 items 是源数据的数组，而 item 是迭代项的别名：
+
+`v-for` 也支持使用可选的第二个参数表示当前项的位置索引
+
+#### `v-for` 与 对象
+
+可以使用 `v-for` 来遍历一个对象的所有属性。遍历的顺序会基于对该对象调用 `Object.values()` 的返回值来决定。
+
+提供第二个参数表示属性名（`key`），第三个参数表示位置索引（`index`）
+
+#### `v-for` 与 范围值
+
+可以使用 `v-for` 来渲染一个数字范围，会基于 `1 ... n`的取值范围来渲染。
+
+```
+<span v-for="n in 10">{{ n }}</span>
+```
+
+**初值为1**
+
