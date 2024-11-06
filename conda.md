@@ -9,8 +9,8 @@
 
 ## 虚拟环境操作
 
-- `conda create -n <environment-name> python=<edition>` 使用 conda 创建名为 **environment-name** ， Python版本为 **edition** 虚拟环境
-- `conda info -e` 查看目前 conda 已有的虚拟环境，其中带 * 号的表示为当前活动环境
+- `conda create -n <environment-name> python=<edition>` 使用 conda 创建名为 **environment-name** ， Python 版本为 **edition** 虚拟环境
+- `conda info -e` 查看目前 conda 已有的虚拟环境，其中带 \* 号的表示为当前活动环境
 - `conda activate <environment-name>` 激活名为 **environment-name** 的虚拟环境
 - `conda deactivate` 退出当前虚拟环境，回到 **base environment**
 - `conda remove -n <environment-name> --all` 可以将指定虚拟环境及其中所安装的包都删除
