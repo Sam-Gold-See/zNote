@@ -1,6 +1,6 @@
-# C&CPP学习笔记
+# C&CPP 学习笔记
 
-## VS_Code快捷键
+## VS_Code 快捷键
 
 - Ctrl + B 开关侧边栏
 - Ctrl + D 选定当前字符串，多选后可同时更改
@@ -33,9 +33,10 @@ string new_s= old_s.substr(pos,n);
 ```
 string new_s=old_s.replace(pos,len,use_s);
 ```
+
 从旧字符串的 **pos** 位置开始，后续 **n** 个依次替换为 **use_s**
 
-### lambda函数
+### lambda 函数
 
 ```
 [capture](parameter_list) -> return_type {
@@ -89,7 +90,7 @@ for(auto it=umap.begin();it!=umap.end();it++){
 }
 ```
 
-### 哈希表的erase()方法
+### 哈希表的 erase()方法
 
 1. 如果删除的元素不存在，erase()方法不会进行操作
 
