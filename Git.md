@@ -1,4 +1,5 @@
 # Git
+
 [Git Learning Branch](https://learngitbranching.js.org/)
 
 ## Git Commit
@@ -35,18 +36,18 @@ Git 还保存了**提交的历史记录**，大多数提交记录的上面都有
 
 ## 相对引用
 
-使用 `<option>^` 向上移动1个提交记录，或者使用 `~<num>` 移动多个提交记录；或者使用 **HEAD** 作为参照物，反复使用 `HEAD^` 重复向上移动
+使用 `<option>^` 向上移动 1 个提交记录，或者使用 `~<num>` 移动多个提交记录；或者使用 **HEAD** 作为参照物，反复使用 `HEAD^` 重复向上移动
 
 ## `~` 操作符
 
 使用 `~` 操作符，后跟一个数字（也可以不跟，此时等价于 `^` ），指定向上移动多少次
 
-使用 `-f` 选项让分支指向另一个提交， `git branch -f <branch-name> HEAD~n` 使得 `<branch-name>` 分支强制指向 **HEAD** 的第n级 parent 提交
+使用 `-f` 选项让分支指向另一个提交， `git branch -f <branch-name> HEAD~n` 使得 `<branch-name>` 分支强制指向 **HEAD** 的第 n 级 parent 提交
 
 ## 撤销变更
 
 主要用两种方法来撤销变更，一是 `git reset` ，还有就是 `git revert`
 
-在本地情况下，使用 `git reset HEAD~n` 将分支记录回退n个提交记录来实现撤销，本地代码库将无法找到回退之后的提交记录
+在本地情况下，使用 `git reset HEAD~n` 将分支记录回退 n 个提交记录来实现撤销，本地代码库将无法找到回退之后的提交记录
 
-在远程环境下，前者就失效了，需要使用 `git revert HEAD~n` ，此时并非删除n个提交记录，而是生成一个新提交记录，该提交记录等价于n个提交记录之前的提交记录
+在远程环境下，前者就失效了，需要使用 `git revert HEAD~n` ，此时并非删除 n 个提交记录，而是生成一个新提交记录，该提交记录等价于 n 个提交记录之前的提交记录
