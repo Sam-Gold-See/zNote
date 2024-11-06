@@ -1,4 +1,4 @@
-# Linux命令
+# Linux 命令
 
 ## 常用命令
 
@@ -24,7 +24,7 @@
 
 `cat` Concatenate：查看文件内容
 
-`cat /proc/version` CentOS查看系统版本
+`cat /proc/version` CentOS 查看系统版本
 
 - 重定向输出
 
@@ -49,17 +49,17 @@
 
 `{a,min,xy}`：多组字符串，全匹配
 
-## CentOS7配置网络
+## CentOS7 配置网络
 
-先检查VMware网络，在VM界面左上角编辑处点击`虚拟网络编辑器`，点击`更改设置`提供管理员权限,查看NAT模式的VMnet8的`NAT设置`，记录子网IP、子网掩码、网关IP三者数据保存退出
+先检查 VMware 网络，在 VM 界面左上角编辑处点击`虚拟网络编辑器`，点击`更改设置`提供管理员权限,查看 NAT 模式的 VMnet8 的`NAT设置`，记录子网 IP、子网掩码、网关 IP 三者数据保存退出
 
-然后登录CentOS的root账号
+然后登录 CentOS 的 root 账号
 
 输入如下指令进行配置网络
 
 `vi /etc/sysconfig/network-scripts/ificg-ens33`
 
-使用`i`指令进入INSERT编辑模式
+使用`i`指令进入 INSERT 编辑模式
 
 对于`BOOTPROTO`属性的值更改为`static`
 
@@ -75,13 +75,13 @@ DNS1=8.8.8.8
 DNS2=8.8.4.4
 ```
 
-后按`esc`键退出INSERT模式，键入`:wq`指令保存（`w`）并且退出（`q`）
+后按`esc`键退出 INSERT 模式，键入`:wq`指令保存（`w`）并且退出（`q`）
 
-再输入如下指令配置网关IP
+再输入如下指令配置网关 IP
 
 `vi /etc/resolv.conf`
 
-对于该空文档同样进入INSERT模式
+对于该空文档同样进入 INSERT 模式
 
 输入如下内容
 
@@ -94,4 +94,4 @@ nameserver XXX.XXX.XXX.XXX #输入内容为网关IP
 
 若如上步骤无出错则配置成功，接下来进行验证
 
-使用`ping www.baidu.com`指令，若没有报错则代表配置成功，使用`Ctrl + C`按键退出ping指令
+使用`ping www.baidu.com`指令，若没有报错则代表配置成功，使用`Ctrl + C`按键退出 ping 指令
