@@ -285,6 +285,91 @@
 
 - `<textarea>`: 文本域
 
+#### HTTP 请求
+
+##### 请求组成：
+
+1. 请求行：请求方式、请求地址、协议版本
+
+2. 请求头：头名:头值
+
+3. 请求体（可选）：携带数据
+
+##### 请求方式与数据格式
+
+**get 请求示例**
+
+```
+GET /test2?name=张&age=20 HTTP/1.1
+//请求行
+
+Host: localhost
+//请求头
+```
+
+**post 请求示例**
+
+（url 编码）
+
+```
+POST /test2 HTTP/1.1
+//请求行
+
+Host: localhost
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 21
+//请求头
+
+name=张
+//请求体
+```
+
+- application/x-www-form-urlencoded：参数用键值对存储，用 `=` 分隔；参数之间用 `&` 分割
+
+**json 请求示例**
+
+（utf-8 编码）
+
+```
+POST /test3 HTTP/1.1
+//请求行
+
+Host: localhost
+Content-Type: application/json
+Content-Length: 25
+//请求头
+
+{"name":"zhang","age":18}
+//请求体
+```
+
+- application/json：参数以 JSON 格式存储，参数之间用 `,` 分割；参数的键值对用 `:` 分割
+
+##### session 原理
+
+Http 无状态，有会画：
+
+- 无状态是指，请求之间相互独立，第一次请求的数据，第二次请求不能重用
+
+- 有会话是指，客户端和服务端都有相应的技术，可以暂存数据，让数据在请求间共享
+
+服务端使用了 session 技术来暂存数据
+
+- 存
+
+```
+GET /s1?name=zhang HTTP/1.1
+Host: localhost
+```
+
+- 取
+
+```
+GET /s2 HTTP/1.1
+Host: localhost
+Cookie: JSESSIONID=560FA845D02AE09B176E1BC5D9816A5D
+```
+
 ### CSS
 
 **CSS**:Cascading Style Sheet，层叠样式表，用于控制页面的样式（表现）。
@@ -742,6 +827,37 @@ JavaScript 对于事件的绑定提供了 2 种方式：
 | onsubmit    | 当表单提交时触发该事件   |
 | onmouseover | 鼠标被移到某元素之上     |
 | onmouseout  | 鼠标从某元素移开         |
+
+## TypeScript
+
+动态类型意味着
+
+- 运行代码时才知道发生什么 (running the code to see what happens)
+
+静态类型意味着
+
+- 在代码运行前，就对它的行为做出预测 (make predications about what code is expected before it runs)
+
+typescript 属于编译时实施类型检查（静态类型）的技术
+
+### 类型
+
+| 类型         | 例                                    | 备注                         |
+| ------------ | ------------------------------------- | ---------------------------- |
+| 字符串类型   | string                                |                              |
+| 数字类型     | number                                |                              |
+| 布尔类型     | boolean                               |                              |
+| 数组类型     | number[],string[], boolean[] 依此类推 |                              |
+| 任意类型     | any                                   | 相当于又回到了没有类型的时代 |
+| 复杂类型     | type 与 interface                     |                              |
+| 函数类型     | () => void                            | 对函数的参数和返回值进行说明 |
+| 字面量类型   | "a"\|"b"\|"c"                         | 限制变量或参数的取值         |
+| nullish 类型 | null 与 undefined                     |                              |
+| 泛型         | `<T>`，`<T extends 父类型>`           |                              |
+
+### 标注位置
+
+
 
 ## Vue
 
