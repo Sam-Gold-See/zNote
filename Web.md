@@ -857,7 +857,145 @@ typescript 属于编译时实施类型检查（静态类型）的技术
 
 ### 标注位置
 
+##### 标注变量
 
+```
+let message: string = 'hello,world'
+```
+
+- 一般可以省略，因为可以根据后面的字面量推断出前面变量类型
+
+##### 标注参数
+
+```
+function greet(name: string): void {
+  //...
+}
+```
+
+##### 标注返回值
+
+```
+function add(a: number, b: number) : number {
+    return a + b
+}
+```
+
+- 一般也可以省略，因为可以根据返回值做类型推断
+
+##### 复杂类型
+
+**type**
+
+```
+type Cat = {
+  name: string,
+  age: number
+}
+
+const c1: Cat = { name: '小白', age: 1 }
+const c2: Cat = { name: '小花' }					  // 错误: 缺少 age 属性
+const c3: Cat = { name: '小黑', age: 1, sex: '公' } // 错误: 多出 sex 属性
+```
+
+**interface**
+
+```
+interface Cat {
+  name: string,
+  age: number
+}
+
+const c1: Cat = { name: '小白', age: 1 }
+const c2: Cat = { name: '小花' }					  // 错误: 缺少 age 属性
+const c3: Cat = { name: '小黑', age: 1, sex: '公' } // 错误: 多出 sex 属性
+```
+
+**可选属性**
+
+```
+interface Cat {
+  name: string,
+  age?: number
+}
+
+const c1: Cat = { name: '小白', age: 1 }
+const c2: Cat = { name: '小花' }					  // 正确: age 属性可选
+```
+
+可选属性需要注意处理 `undefined` 值，否则会报错。
+
+##### 方法类型
+
+```
+interface Api {
+  foo(): void,
+  bar(str: string): string
+}
+
+function test(api: Api) {
+  api.foo()
+  console.log(api.bar('hello'))
+}
+
+test({
+  foo() { console.log('ok') },
+  bar(str: string) { return str.toUpperCase() }
+})
+```
+
+##### 字面量类型
+
+```
+function printText(s: string, alignment: "left" | "right" | "center") {
+  console.log(s, alignment)
+}
+
+printText('hello', 'left')
+printText('hello', 'aaa') // 错误: 取值只能是 left | right | center
+```
+
+##### nullish 类型
+
+```
+function test(x?: string | null) {
+  console.log(x?.toUpperCase())
+}
+
+test('aaa')
+test(null)
+test()
+```
+
+- x?: string | null 表示可能是 undefined 或者是 string 或者是 null
+
+##### 泛型
+
+```
+interface Ref<T> {
+  value: T
+}
+
+const r1: Ref<string> = { value: 'hello' }
+const r2: Ref<number> = { value: 123 }
+const r3: Ref<boolean> = { value: true }
+```
+
+- 泛型的要点就是 `<类型参数>`，把【类型】也当作一个变化的要素，像参数一样传递过来，这样就可以派生出结构相似的新类型
+
+函数定义也支持泛型
+
+```
+function ref<T>(n: T): Ref<T> {
+  return { value: n }
+}
+
+const v1 = ref("hello"); 	// Ref<string>
+const v2 = ref(123.3333);	// Ref<number>
+
+v1.value.toLocaleLowerCase()
+v2.value.toFixed(2)
+```
 
 ## Vue
 
@@ -893,6 +1031,84 @@ MVVM:其实是 Model-View-ViewModel 的缩写，有 3 个单词，具体释义�
 
 使用类 HTML 格式的文件来书写 Vue 组件，也称为**单文件组件**（`.vue`文件）顾名思义，Vue 的单文件组件会将一个组件的逻辑 (JavaScript)，模板 (HTML) 和样式 (CSS) 封装在同一个文件里。
 
+### 环境准备
+
+使用 `vite` 作为前端项目的打包、构建工具
+
+```
+npm init vite@latest
+
+cd <my-project>
+npm install
+npm run dev
+```
+
+#### 修改端口
+
+```
+// vite.config.ts
+
+export default defineConfig({
+  //...
+
+  server: {
+    port: 3000,
+    host: "0.0.0.0",
+  }
+})
+```
+
+#### 配置代理
+
+为了避免前后端服务器联调时，相关请求产生跨域问题，需要配置代理
+
+```
+// vite.config.ts
+
+export default defineConfig({
+  //...
+
+  server: {
+    //...
+
+    proxy: {
+      '/api':{
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+      }
+    }
+  }
+})
+```
+
+#### 项目结构
+
+```
+index.html
+package.json
+tsconfig.json
+vite.config.ts
+├─public
+└─src
+    ├─assets
+    ├─components
+    ├─model
+    ├─router
+    ├─store
+    └─views
+```
+
+- index.html 为主页面
+- package.json npm 配置文件
+- tsconfig.json typescript 配置文件
+- vite.config.ts vite 配置文件
+- public 静态资源
+- src/components 可重用组件
+- src/model 模型定义
+- src/router 路由
+- src/store 共享存储
+- src/views 视图组件
+
 ### 创建一个 Vue 实例
 
 每个 Vue 应用都是通过`createApp`函数创建一个新的应用实例
@@ -904,7 +1120,146 @@ const app = createApp({
 })
 ```
 
-**根组件**：传入的`createApp`对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件嵌套在根组件下。
+**根组件**`src/App.vue`：传入的`createApp`对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件嵌套在根组件下。
+
+#### Vue 组件
+
+Vue 组件文件是以`.vue`结尾，每个组件由三个部分组成
+
+```
+<script setup lang="ts"></script>
+
+<template></template>
+
+<style scoped></style>
+```
+
+- script 代码部分，控制模板的数据来源和行为
+
+- template 模板部分，由它生成 html 代码
+
+#### main.ts
+
+```
+import { createApp } from 'vue'
+import App from './App.vue'
+
+createApp(App).mount('#app')
+```
+
+- createApp 就是创建一个 Vue 应用实例，它接受的参数 App 即根组件
+
+- mount 就是把根组件生成的 html 代码片段挂载到 index.html 中的 id 为 `app` 的元素上
+
+#### ref 和 reactive
+
+- ref 能将任意类型的数据变为【响应式】的
+
+- reactive 只能将对象类型变为【响应式】，对基本类型无效（例如 string，number，boolean）
+
+```
+<script setup lang="ts">
+import { ref, reactive } from 'vue'
+const u1 = ref({ name: '张三' })
+const u2 = reactive({ name: '张三' })
+
+function test() {
+  console.log(u1.value)
+  console.log(u2)
+}
+
+test()
+</script>
+
+<template>
+  <h2>{{u1.name}}</h2>
+  <h2>{{u2.name}}</h2>
+</template>
+```
+
+- 在 template 模板中使用 ref 包装的数据，直接写【变量名】就可以了
+
+- 但在代码中要使用 ref 包装的数据，必须用【变量名.value】才能访问到
+
+- reactive 包装的数据，在模板中和代码中都是一致的
+
+#### 属性绑定
+
+```
+<script setup lang="ts">
+import { ref } from 'vue'
+const path = ref('/src/assets/vue.svg')
+
+</script>
+
+<template>
+  <img :src="path" alt="">
+</template>
+```
+
+- 【:属性名】用来将标签属性与【响应式】变量绑定（`v-bind`简写）
+
+#### 事件绑定
+
+```
+<script setup lang="ts">
+import { ref } from 'vue'
+const count = ref(0)
+function dec() {
+  count.value--
+}
+function inc() {
+  count.value++
+}
+</script>
+
+<template>
+  <input type="button" value="-" @click="dec">
+  <h2>{{count}}</h2>
+  <input type="button" value="+" @click="inc">
+</template>
+```
+
+- 【@事件名】用来将标签属性与函数绑定，事件发生后执行函数内代码（`v-on`简写）
+
+#### 表单绑定
+
+- 用 v-model 实现双向绑定，即
+
+  - javascript 数据可以同步到表单标签
+
+  - 反过来用户在表单标签输入的新值也会同步到 javascript 这边
+
+- 双向绑定只适用于表单这种带【输入】功能的标签，其它标签的数据绑定，单向就足够了
+
+- 复选框这种标签，双向绑定的 javascript 数据类型一般用数组
+
+#### 计算属性
+
+```
+computed(()=>{
+
+})
+```
+
+- 计算属性具备缓存功能，即传入参数的值发生了变化，才会重新计算
+
+- 如果用函数实现相同功能，则没有缓存功能，不会再当参数改变时重新计算
+
+#### xhr 请求
+
+```
+const xhr = new XMLHttpRequest() // 创建 XMLHttpRequest 对象
+
+// 当响应返回时，会触发 onload 事件
+xhr.onload = function() {
+  console.log(xhr.response) // 响应数据
+}
+
+xhr.open('Get', url) // 打开请求
+xhr.responseType = 'json' // 设置响应类型
+xhr.send() // 发送请求
+```
 
 ### 模板语法
 
