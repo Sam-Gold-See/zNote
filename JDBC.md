@@ -164,3 +164,276 @@ ResultSet resultSet = preparedStatement.executeQuery(); // 执行查询语句
 >
 > 1. SQL 语句有错误，检查 SQL 语句！建议 SQL 语句在 SQL 工具中测试后再复制到 Java 程序中！
 > 2. 连接数据库的 URL 中，数据库名称编写错误，也会报该异常！
+
+```
+	@Test
+	public void querySingleColumn() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("SELECT `name` FROM emp");
+
+		ResultSet draftSet = draftStatement.executeQuery();
+
+		while (draftSet.next()) {
+			String name = draftSet.getString("name");
+			System.out.println(name);
+		}
+
+		draftSet.close();
+		draftStatement.close();
+		draftConnection.close();
+	}
+
+	@Test
+	public void querySingleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("SELECT id,`name`,salary,age FROM emp WHERE id = ?");
+
+		draftStatement.setInt(1, 6); //填入 占位符? 处的内容，索引从1开始
+
+		ResultSet draftSet = draftStatement.executeQuery();
+
+		while (draftSet.next()) {
+			int id = draftSet.getInt("id");
+			String name = draftSet.getString("name");
+			double salary = draftSet.getDouble("salary");
+			int age = draftSet.getInt("age");
+			System.out.println(id + " " + name + " " + salary + " " + age);
+		}
+
+		draftSet.close();
+		draftStatement.close();
+		draftConnection.close();
+	}
+
+	@Test
+	public void queryMultipleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("SELECT id,`name`,salary,age FROM emp");
+
+		ResultSet draftSet = draftStatement.executeQuery();
+
+		while (draftSet.next()) {
+			int id = draftSet.getInt("id");
+			String name = draftSet.getString("name");
+			double salary = draftSet.getDouble("salary");
+			int age = draftSet.getInt("age");
+			System.out.println(id + " " + name + " " + salary + " " + age);
+		}
+
+		draftSet.close();
+		draftStatement.close();
+		draftConnection.close();
+	}
+
+	@Test
+	public void insertSingleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("INSERT INTO emp VALUES (?,?,?,?)");
+
+		draftStatement.setInt(1,6);
+		draftStatement.setString(2, "rose");
+		draftStatement.setDouble(3,666.66);
+		draftStatement.setInt(4,20);
+
+		int result = draftStatement.executeUpdate();
+
+		if(result > 0)
+			System.out.println("success");
+		else
+			System.out.println("failure");
+
+		draftStatement.close();
+		draftConnection.close();
+	}
+
+	@Test
+	public void updateSingleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("UPDATE emp SET salary = ? WHERE id = ?");
+
+		draftStatement.setDouble(1, 888.88);
+		draftStatement.setInt(2, 6);
+
+		int result = draftStatement.executeUpdate();
+
+		if (result > 0)
+			System.out.println("success");
+		else
+			System.out.println("failure");
+
+		draftStatement.close();
+		draftConnection.close();
+	}
+
+	@Test
+	public void deleteSingleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("DELETE FROM emp WHERE id = ?");
+
+		draftStatement.setInt(1, 6);
+
+		int result = draftStatement.executeUpdate();
+
+		if (result > 0)
+			System.out.println("success");
+		else
+			System.out.println("failure");
+
+		draftStatement.close();
+		draftConnection.close();
+	}
+```
+
+## 进阶篇
+
+### JDBC 拓展
+
+#### 实体类和 ORM
+
+- 在使用 JDBC 操作数据库时，数据都是零散的，在数据库中是一行完整的数据，到了 Java 中变成了一个一个的变量，不利于维护和管理。而我们 Java 是面向对象的，一个表对应的是一个类，一行数据就对应的是 Java 中的一个对象，一个列对应的是对象的属性，所以把数据存储在一个载体里，这个载体就是实体类。
+
+- ORM（Object Relational Mapping）思想，**对象到关系数据库的映射**，作用是在编程中，把面向对象的概念跟数据库中表的概念对应起来，以面向对象的角度操作数据库中的数据，即一张表对应一个类，一行数据对应一个对象，一个列对应一个属性。
+
+- 当下 JDBC 中这种过程我们称其为手动 ORM。后续也有相关 ORM 框架，比如 MyBatis、JPA 等。
+
+```
+  public class Employee{
+    private int id;
+    private String name;
+    private double salary;
+    private int age;
+
+    // constructor
+
+    // getter and setter
+
+    // toString()
+  }
+
+
+	@Test
+	public void querySingleRow() throws SQLException {
+		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
+
+		PreparedStatement draftStatement = draftConnection.prepareStatement("SELECT id,`name`,salary,age FROM emp WHERE id = ?");
+
+		draftStatement.setInt(1, 6); //填入 占位符? 处的内容，索引从1开始
+
+		ResultSet draftSet = draftStatement.executeQuery();
+
+		Employee employee = null;
+
+		while (draftSet.next()) {
+			int id = draftSet.getInt("id");
+			String name = draftSet.getString("name");
+			double salary = draftSet.getDouble("salary");
+			int age = draftSet.getInt("age");
+			employee = new Employee(id, name, salary, age);
+		}
+
+		System.out.println(employee);
+		draftSet.close();
+		draftStatement.close();
+		draftConnection.close();
+	}
+```
+
+#### 主键回显
+
+在数据中，执行新增操作时，主键列为自动增长，可以在表中直观的看到，但是在 Java 程序中，执行完新增后，只能得到受影响行数，无法得知当前新增数据的主键值。在 Java 程序中获取数据库中插入新数据后的主键值，并赋值给 Java 对象，此操作为主键回显。
+
+在构建 PreparedStatement 对象时，传入需要主键回显参数 `Statement.RETURN_GENERATED_KEYS`
+
+然后执行完新增操作后，对 PreparedStatement 对象调用 `getGeneratedKeys()` 方法（生成 ResultSet 对象），获取数据库中插入新数据的主键值，并赋值给 Java 对象。
+
+```
+PreparedStatement draftStatement = draftConnection.prepareStatement("INSERT INTO emp(name,salary,age) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+
+// execute insert
+
+ResultSet draftSet = draftStatement.getGeneratedKeys();
+if(draftSet.next()){
+  int id = draftSet.getInt(1); // 主键回显
+  employee.setId(id);
+}
+```
+
+#### 批量操作
+
+首先在连接数据库的 URL 后面追加`?rewriteBatchedStatements=true`参数，表示启用批量操作。
+
+新增的 SQL 语句必须使用 `VALUES`，而且语句最后不要追加 `;`
+
+先调用 `addBatch()` 方法，将多个 SQL 语句添加到批处理中，然后调用 `executeBatch()` 方法，执行批处理。
+
+### 连接池
+
+> 连接池就是数据库连接对象的缓冲区，通过配置，由连接池负责创建连接、管理连接、释放连接等操作。
+>
+> 预先创建数据库连接放入连接池，用户在请求时，通过池直接获取连接，使用完毕后，将连接放回池中，避免了频繁的创建和销毁，同时解决了创建的效率。
+>
+> 当池中无连接可用，且未达到上限时，连接池会新建连接。
+>
+> 池中连接达到上限，用户请求会等待，可以设置超时时间。
+
+JDBC 的数据库连接池使用 javax.sql.DataSource 接口进行规范，所有的第三方连接池都实现此接口，自行添加具体实现。也就是说，所有连接池获取连接的和回收连接方法都一样，不同的只有性能和扩展功能!
+
+主流连接池以及功能对比：
+
+![主流连接池以及功能对比](img/JDBC_2.png)
+
+#### Druid 连接池配置、使用
+
+- 使用步骤：
+
+  - 引入 jar 包。
+  - 编码。
+
+- 代码实现编码操作：
+
+  - 硬编码方式（不推荐、了解为主）
+
+  - 软编码方式：
+
+    - 在项目目录下创建 `resources` 目录，标识该目录为资源目录。
+
+    - 创建 `db.properties` 配置文件，将连接信息定义在该文件中
+
+    ```
+    # druid连接池需要的配置参数，key固定命名
+    driverClassName=com.mysql.cj.jdbc.Driver
+    url=jdbc:mysql:///atguigu
+    username=root
+    password=atguigu
+    initialSize=10
+    maxActive=20
+    ```
+
+    - 编写 Java 代码，读取配置文件，创建 DruidDataSource 对象，设置相关参数。
+
+    ```
+    //1.创建Properties集合，用于存储外部配置文件的key和value值。
+    Properties properties = new Properties();
+
+    //2.读取外部配置文件，获取输入流，加载到Properties集合里。
+    InputStream inputStream = DruidTest.class.getClassLoader().getResourceAsStream("db.properties");
+    properties.load(inputStream);
+
+    //3.基于Properties集合构建DruidDataSource连接池
+    DataSource dataSource = DruidDataSourceFactory.createDataSource(properties);
+
+    //4.通过连接池获取连接对象
+    Connection connection = dataSource.getConnection();
+    System.out.println(connection);
+
+    //5.开发CRUD
+
+    //6.回收连接
+    connection.close();
+    ```
