@@ -2942,250 +2942,100 @@ TCP 通信协议是一种可靠的网络协议，它在通信的两端各建立�
 
 ## 反射
 
-反射允许对成员变量、成员方法和构造方法的信息进行编程访问
+反射允许对封装类成员变量、成员方法和构造方法的信息进行编程访问
+
+1. 获取 class 对象，类名为 Class
+
+2. 获取成员变量、成员方法、构造方法（获取）
+
+3. 调用方法（解剖）
 
 ### 获取 class 对象
 
 1. Class.forName("全类名") 包名+类名
 
-2. 类名.class
+源代码阶段使用（将 java 文件编译成 class 文件），最为常用
+
+2. 类名.clss
+
+加载阶段使用（将 class 文件加载到内存中），更多用于当做参数传递
 
 3. 对象.getClass()
 
-使用 Class 对象存储
+运行阶段使用（获取对象的类信息），当已经有了对象才可以使用
 
-## API
+### 获取成员变量、成员方法、构造方法
 
-API(Application Programming Interface):应用程序编程接口
+#### 获取构造方法
 
-java 中的 API，指的就是 JDK 中提供的各种功能的 Java 类，这些类将底层的实现封装了起来，我们不需要关心这些类是如何实现的，只需要学习这些类如何使用即可，我们可以通过帮助文档来学习这些 API 如何使用。
+Constructor 类，可以获取类的构造方法
 
-### String 类
+| 方法名                                                           | 说明                                     |
+| ---------------------------------------------------------------- | ---------------------------------------- |
+| Constructor<?>[] getConstructors()                               | 获取类的所有公共构造方法                 |
+| Constructor<?>[] getDeclaredConstructors()                       | 获取类的所有构造方法（包括私有构造方法） |
+| Constructor<T> getConstructor(Class<?>...parameterTypes)         | 返回单个公共构造方法对象                 |
+| Constructor<T> getDeclaredConstructor(Class<?>...parameterTypes) | 返回单个构造方法对象（包括私有构造方法） |
 
-String 代表字符串，java 程序中的所有字符串文字都被实现为此类的实例。
-所有的双引号字符串都是 String 类的对象。
-String 类在 java.lang 包下，所以无需导包即可使用。
+传入的参数是类的 class 对象，如传入`String.class`
 
-- 特点：
+#### 调用构造方法
 
-  - 字符串不可变，值在创建后不可以更改
-  - 值可以被共享
-  - 效果上相当于字符数组（char[]），但底层原理是字节数组（byte[]）
+getModifiers() 方法可以获取构造方法的修饰符，返回 int 类型，具体含义参考 Modifier 类
 
-- 通过构造方法创建字符串
-  通过 new 创建的字符串对象，每一次 new 都会申请一个内存空间，虽然内容相同，但是地址值不同
+getParameterTypes() 方法可以获取构造方法的参数类型，返回 Parameter 类数组
 
-- 直接赋值方式创建字符串
-  以“”方式给出的字符串，只要字符序列相同(顺序和大小写)，无论在程序代码中出现几次，JVM 都只会建立一个 String 对象，并在字符串池中维护
+对于 Constructor 类，可以通过 `newInstance()` 方法将获得的构造放方法创建对象，传入参数为构造方法的参数，也可以使用 `setAccessible(true)` 方法临时取消权限校验进行构造
 
-- 字符串的比较
-  - `==` 号
-    - 对于基本数据类型，比较的是具体值
-    - 对于引用数据类型（String 类属于此类），比较的是对象地址值
-  - `equal` 方法
-    `boolean flag = s1.queal(s2);`可以比较字符串的内容是否相同（区分大小写）
+#### 获取字段（成员变量）
 
-charAt(int index): 根据索引获取相应的字符
-length(): 返回字符串的长度
-substring(int beginIndex,(int endIndex))：截取从 beginIndex 到 endIndex（默认末尾）,左闭右开
-replace(String goalStr, String needStr)：
+| 方法名                              | 说明                               |
+| ----------------------------------- | ---------------------------------- |
+| Field[] getFields()                 | 获取类的所有公共字段               |
+| Field[] getDeclaredFields()         | 获取类的所有字段（包括私有字段）   |
+| Field getField(String name)         | 根据字段名获取字段                 |
+| Field getDeclaredField(String name) | 根据字段名获取字段（包括私有字段） |
 
-### StringBulider 类
+#### 调用字段
 
-StringBulider 是一个可以变化的容器，运用于拼接字符串和反转字符串
+getModifiers() 方法可以获取字段的修饰符，返回 int 类型，具体含义参考 Modifier 类
 
-```
-StringBuilder sb = new StringBuilder();
-sb.append(char, char[] ...);
-sb.reverse();
-```
+getType() 方法可以获取字段的类型，返回 Class 类对象
 
-### Arraylist 类
+getName() 方法可以获取字段的名称，返回字符串
 
-集合：是一种长度可变，且添加数据 的时候不需要考虑索引，默认将数据添加到末尾的存储模型，智能存储引用数据类型
+对于 Field 类，可以通过 `get()` 方法获取字段的值，可以通过 `set()` 方法设置字段的值，传入的参数都是该对象（set 方法多传入修改后的值），也可以使用 `setAccessible(true)` 方法临时取消权限校验进行操作
 
-| 方法名                              | 说明                                   |
-| ----------------------------------- | -------------------------------------- |
-| public boolean add(要添加的元素)    | 将指定的元素追加到此集合的末尾         |
-| public boolean remove(要删除的元素) | 删除指定元素,返回值表示是否删除成功    |
-| public E remove(int index)          | 删除指定索引处的元素，返回被删除的元素 |
-| public E set(int index,E element)   | 修改指定索引处的元素，返回被修改的元素 |
-| public E get(int index)             | 返回指定索引处的元素                   |
-| public int size()                   | 返回集合中的元素的个数                 |
+#### 获取成员方法
 
-### JFrame 类
+| 方法名                                                           | 说明                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------ |
+| Method[] getMethods()                                            | 获取类的所有公共方法（包括父类）                 |
+| Method[] getDeclaredMethods()                                    | 获取类的所有方法（包括私有方法，不包括父类）     |
+| Method getMethod(String name, Class<?>...parameterTypes)         | 根据方法名和参数类型获取方法对象                 |
+| Method getDeclaredMethod(String name, Class<?>...parameterTypes) | 根据方法名和参数类型获取方法对象（包括私有方法） |
 
-`import javax.swing.JFrame;`导入 JFrame 包
+#### 调用成员方法
 
-```
-//召唤主界面
-JFrame jFrame = new JFrame();
+getModifiers() 方法可以获取方法的修饰符，返回 int 类型，具体含义参考 Modifier 类
 
-//设置主界面的大小
-jFrame.setSize(514,595);
+getName() 方法可以获取方法的名称，返回字符串
 
-//将主界面设置到屏幕的正中央
-jFrame.setLocationRelativeTo(null);
+getParameters() 方法可以获取方法的参数列表，返回 Parameter 类数组
 
-//将主界面置顶
-jFrame.setAlwaysOnTop(true);
+getExceptionTypes() 方法可以获取方法的异常列表，返回 Class 类数组
 
-//关闭主界面的时候让代码一起停止
-jFrame.setDefaultCloseOperation(3);
+invoke(Object obj, Object...args) 方法可以调用方法，传入的参数为调用方法的对象以及该方法需要使用的参数，返回值是方法的返回值，也可以使用 `setAccessible(true)` 方法临时取消权限校验进行操作
 
-//给主界面设置一个标题
-jFrame.setTitle("拼图游戏单机版 v1.0");
+getReturnType() 方法可以获取方法的返回类型，返回 Class 类对象
 
-//让主界面显示出来，必须写在最后
-jFrame.setVisible(true);
+### 反射的作用
 
-//把管理容器加入界面
-jFrame.add((JLabel)temp);
+1. 获取一个类里面所有的信息，获取到了之后，在执行其他的业务逻辑
 
-//获取jFrame对象中的隐藏控制组件容器
-this.getContentPane();
+2. 结合配置文件，动态地创建对象并且调用方法
 
-//取消默认居中的布局方式
-jFrame.setLayout(null);
-```
-
-坐标以左上角为原点，水平线为 x 轴，竖直线为 y 轴
-
-### JMenuBar 类
-
-JMenuBar 是整体，一个界面中一般只有一个 JMenuBar。
-
-而 JMenu 是菜单中的选项，可以有多个。
-
-JMenuItem 是选项下面的条目，也可以有多个。
-
-```
-//创建一个菜单对象
-JMenuBar jMenuBar = new JMenuBar();
-//设置菜单的宽高
-jMenuBar.setSize(514, 20);
-//创建一个选项
-JMenu jMenu1 = new JMenu("功能");
-//创建一个条目
-jMenuItem1 = new JMenuItem("重新游戏");
-//把条目添加到选项当中
-jMenu1.add(jMenuItem1);
-//把选项添加到菜单当中
-jMenuBar.add(jMenu1);
-//把菜单添加到最外层的窗体当中
-this.setJMenuBar(jMenuBar);
-```
-
-### ImageIcon 类
-
-描述图片的类，可以关联计算中任意位置的图片，但是一般会把图片拷贝到当前项目中。
-
-```
-ImageIcon(String filename);创建对象，输入文件路径
-```
-
-### JLabel 类
-
-用来管理图片、文字的类，可以用来设置位置、宽高
-
-```
-//创建对象，传入ImageIcon类
-JLabel((ImageIcon)temp);
-
-//指定图片位置、大小
-JLabel.setBounds(int x, int y, int width, int height);
-```
-
-先加载的图片在上面，后加载的在下面
-
-### JButton 类
-
-```
-//初始化按钮
-JButton(String fileName);
-
-//设置位置、大小
-JButton.setBounds(int x, int y, int width, int height);
-
-//添加动作事件监听（鼠标左键单击，空格），参数为事件被触发后要执行的代码
-JButton.addActionListener();
-//多结合匿名内部类
-JButton.addActionListener(new ActionListener(){
-	@Override
-	public void actionPeformed(ActionEvent e){
-		;
-	}
-});
-
-//添加鼠标事件监听（滑入、按下、松开、划出）
-JButton.addMouseListener();
-
-//添加键盘事件监听（按下键、释放键、键入键）
-JButton.addKeyListener();
-```
-
-### Math 类
-
-私有化构造方式，所有的方法都是静态的
-
-```
-//获得参数绝对值
-public static int abs(int a);
-//向上取整
-public static double ceil(double a);
-//向下取整
-public static double floor(double a);
-//四舍五入
-public static int round(float a);
-//取最大值
-public static int max(int a,int b);
-//取最小值
-public static int min(int a,int b);
-//返回a的b次幂
-public static double pow(double a, double b);
-//返回一个范围为 [0.0,1.0) 的随机数
-public static double random();
-//开平方根
-public static double sqrt(double a);
-//开立方根
-public static double cbrt(double a);
-```
-
-### System 类
-
-```
-//结束程序（0为正常停止，非0为异常停止）
-public static void exit(int status);
-//返回时间原点（1970.01.01.08:00:00）至今的毫秒数
-public static long currentTimeMillis();
-//数组拷贝
-public static void arraycopy(数据源数组, 起始索引, 目的地数组, 起始索引, 拷贝个数);
-
-//System：类名
-//out：静态变量
-//System.out：获取打印的对象
-//println()：方法
-//参数：表示打印的内容
-```
-
-### Runtime 类
-
-```
-//获取当前系统的运行虚拟环境对象
-public static Runtime getRuntime();
-//停止虚拟机
-public void exit();
-//获得CPU的线程数
-public int availableProcessors();
-//JVM能从系统中获取总内存大小（单位byte）
-public long maxMemory();
-//JVM已经从系统中获取的内存大小（单位byte）
-punlic long totalMemory();
-//JVM剩余内存大小（单位Byte）
-public long freeMemory();
-//运行cmd命令
-public process exec(String command);
-```
+## 类与对象
 
 ### Object 类
 
@@ -3239,209 +3089,6 @@ public static boolean isNull(Object obj)
 public static boolean nonNull(Object obj)
 ```
 
-### BigInteger 类
-
-处于`math`包下，需要进行导入
-
-```
-//获取随机大整数，范围：[0 ~ 2的num次方-1]
-public BigInteger(int num, Random rnd)
-//获取指定的大整数
-public BigInteger(String val)
-//获取指定进制的大整数
-public BigInteger(String val, int radix)
-
-//静态方法获取BigInteger的对象，内部有优化
-public static BigInteger valueOf(long val)
-```
-
-若 BigInteger 表示的数字没有超过 long 的范围，可以使用静态方法获取
-若超出 long 的范围，可以使用构造方法获取
-对象一旦创建，BigInteger 内部记录的值不能发生改变
-只要进行计算都会产生一个新的 BigInteger 对象
-
-```
-//加法
-public BigInteger add(BigInteger val)
-//减法
-public BigInteger subtract(BigInteger val)
-//乘法
-public BigInteger multiply(BigInteger val)
-//除法
-public BigInteger divide(BigInteger val)
-//除法，获取商和余数
-public BigInteger[] divideAndRemainder(BigInteger val)
-//比较是否相同
-public  boolean equals(Object x)
-//次幂、次方
-public  BigInteger pow(int exponent)
-//返回较大值/较小值
-public  BigInteger max/min(BigInteger val)
-//转为int类型整数，超出范围数据有误
-public  int intValue(BigInteger val)
-```
-
-### BigDecimal 类
-
-使用 float 或者 double 类型的数据在进行数学运算的时候，很有可能会产生精度丢失问题。
-
-计算机底层在进行运算的时候，使用的都是二进制数据； 在程序中写了一个十进制数据 ，在进行运算的时候，计算机会将这个十进制数据转换成二进制数据，然后再进行运算，计算完毕以后计算机会把运算的结果再转换成十进制数据再展示；
-
-如果数据是一个浮点类型的数据，有的时候计算机并不会将这个数据完全转换成一个二进制数据，而是将这个将其转换成一个无限的趋近于这个十进数的二进制数据
-
-所以为了解决精度问题，引入了`BigDecimal`类，存在于`java.math`包下，使用时候需要进行引入
-
-构造方法：
-
-```
-public BigDecimal(int val)
-public BigDecimal(long val)
-public BigDecimal(String val)
-```
-
-成员方法：
-
-```
-// 加法运算
-public BigDecimal add(BigDecimal value)
-// 减法运算
-public BigDecimal subtract(BigDecimal value)
-// 乘法运算
-public BigDecimal multiply(BigDecimal value)
-// 触发运算
-public BigDecimal divide(BigDecimal value)
-```
-
-### Date 类
-
-`java.text.Date`
-
-`public Date()`：从运行程序的此时此刻到时间原点经历的毫秒值,转换成 Date 对象，分配 Date 对象并初始化此对象，以表示分配它的时间（精确到毫秒）。
-
-`public Date(long date)`：将指定参数的毫秒值 date,转换成 Date 对象，分配 Date 对象并初始化此对象，以表示自从标准基准时间（称为“历元（epoch）”，即 1970 年 1 月 1 日 00:00:00 GMT）以来的指定毫秒数。
-
-`public long getTime()` 把日期对象转换成对应的时间毫秒值。
-
-`public void setTime(long time)` 把方法参数给定的毫秒值设置给日期对象
-
-### SimpleDateFormat 类
-
-`java.text.SimpleDateFormat`
-
-该类实现了日期和文本之间的转换,也就是可以在 Date 对象与 String 对象之间进行来回转换
-
-`public SimpleDateFormat(String pattern)`：用给定的模式和默认语言环境的日期格式符号构造 SimpleDateFormat。参数 pattern 是一个字符串，代表日期时间的自定义格式。
-
-- `public String format(Date date)`：将 Date 对象格式化为字符串。
-
-- `public Date parse(String source)`：将字符串解析为 Date 对象。
-
-| 标识字母（区分大小写） | 含义 |
-| ---------------------- | ---- |
-| y                      | 年   |
-| M                      | 月   |
-| d                      | 日   |
-| H                      | 时   |
-| m                      | 分   |
-| s                      | 秒   |
-
-### Calendar 类
-
-`java.util.Calendar`类表示一个“日历类”，可以进行日期运算。它是一个抽象类，不能创建对象，我们可以使用它的子类：`java.util.GregorianCalendar`类
-
-直接创建`GregorianCalendar`类
-通过`Calendar`中的静态方法`getInstance()`来获取`GregorianCalendar`对象
-
-月份范围为 0~11
-星期，日-六分别为 1-7
-
-```
-\\获取日期对象
-public final Date getTime()
-\\给日历设置日期对象
-public final setTime(Date date)
-\\拿到时间毫秒值
-public long getTimeInMillis()
-\\给日历设置时间亳秒值
-public void setTimeInMillis(long millis)
-\\职日历中的某个字段信息
-public int get(int field)
-\\修改日历的某个字段信息
-public void set(int field,int value)
-\\为某个字段增加/减少指定的值
-public void add(int field,int amount)
-```
-
-### ZoneId 类
-
-`java.time.ZoneId`
-
-```
-\\获取Java中支持的所有时区
-static Set<string> getAvailableZoneIds()
-\\获取系统默认时区
-static ZoneId systemDefault()
-\\获取一个指定时区
-static Zoneld of(string zoneld)
-```
-
-### Instant 类
-
-时间戳
-
-```
-//获取当前时间的Instant对象(标准时间)
-static Instant now()
-//根据(秒/毫秒/纳秒)获取Instant对象
-static Instant ofXxxx(long epochMilli)
-//指定时区
-ZonedDateTime atZone(ZoneIdzone)
-//判断系列的方法
-boolean isxxx(Instant otherInstant)
-//减少时间系列的方法
-Instant minusXxx(long millisToSubtract)
-//增加时间系列的方法
-Instant plusXxx(long millisToSubtract)
-```
-
-### ZoneDateTime 类
-
-```
-\\获取当前时间的ZonedDateTime对象
-static ZonedDateTime now()
-\\获取指定时间的ZonedDateTime对象
-static ZonedDateTime ofXxxx(...)
-\\修改时间系列的方法
-ZonedDateTime withXxx(时间)
-\\减少时间系列的方法
-ZonedDateTime minusXxx(时间)
-\\增加时间系列的方法
-ZonedDateTime plusXxx(时间)
-```
-
-### DateTimeFormatter 类
-
-```
-\\获取格式对象
-static DateTimeFormatter ofPattern(格式)
-\\按照指定方式格式化
-String format(时间对象)
-```
-
-### LocalDate 类
-
-### LocatTime 类
-
-### LocalDateTime 类
-
-### Duration 类
-
-### Period 类
-
-### ChronoUnit 类
-
-### Arrays 类
-
 ### 包装类
 
 Java 提供了两个类型系统，基本类型与引用类型，使用基本类型在于效率，然而很多情况，会创建对象使用，因为对象可以做更多的功能，如果想要我们的基本类型像对象一样操作，就可以使用基本类型对应的包装类
@@ -3472,51 +3119,152 @@ JDK5 自动装箱与自动拆箱
 
 - `public static byte parseByte(String s)`：将字符串参数转换为对应的 byte 基本类型。
 - `public static short parseShort(String s)`：将字符串参数转换为对应的 short 基本类型。
-- **`public static int parseInt(String s)`：将字符串参数转换为对应的 int 基本类型。**
-- **`public static long parseLong(String s)`：将字符串参数转换为对应的 long 基本类型。**
+- `public static int parseInt(String s)`：将字符串参数转换为对应的 int 基本类型。
+- `public static long parseLong(String s)`：将字符串参数转换为对应的 long 基本类型。
 - `public static float parseFloat(String s)`：将字符串参数转换为对应的 float 基本类型。
 - `public static double parseDouble(String s)`：将字符串参数转换为对应的 double 基本类型。
 - `public static boolean parseBoolean(String s)`：将字符串参数转换为对应的 boolean 基本类型。
 
 细节：获取 Integer 对象的时候不要自己 new，而是采取直接赋值或者静态方法 valueOf 的方式
 
-### Arrays 类
+## 日志
+
+### 日志技术概述
+
+可以把程序在运行过程中的详细信息都打印在控制台上
+
+利用 log 日志还可以把这些详细信息保存到文件和数据库中。
+
+#### 优势
+
+- 可以将系统执行的信息选择性的记录到指定位置（控制台、文件、数据库中）
+
+- 可以随时以开关的形式控制是否记录日志，无需修改源代码
+
+### 日志技术体系
+
+#### 体系结构
+
+日志规范接口：`Commons Logging`（JCL）、`Simple Logging Facade for Java`（slf4j）
+
+**日志规范**：一些接口，提供给日志的实现框架设计的标准
+
+日志实现框架：`Log4j`、`JUL`(java.util.logging)、`Logback`等
+
+**日志框架**：已经做好的日志记录实现代码
+
+### Logback 概述
+
+Logback 是基于 slf4j 的日志规范实现的框架，性能比之前使用的 log4j 要好
+
+#### 技术模块
+
+- Logback-core:该模块为其他两个模块提供基础代码，必须有
+
+- Logback-classic:完整实现了 slf4j API 的模块
+
+- Logback-access:模块与 Tomcat 和 Jetty 等 Servlet 容器集成，以提供 HTTP 访问日志功能
+
+### Logback 快速上手
+
+- 导入包在 lib 文件夹中，并且将 lib 文件夹作为库
+
+- 配置文件 **logback.xml** 并放到 src 文件夹下
+
+- `public static final Logger LOGGER = LoggerFactory.getLogger("类对象");`
+
+- 用`LOGGER.info("日志信息");`等等方法输出在控制台/文件/数据库中
+
+> xml 文件配置，其中文件路径需要自行修改
 
 ```
-//把数组拼接成一个字符串
-public static String toString(数组)
-//二分查找法查找元素
-public staticint binarySearch(数组，查找的元素)
-//拷贝数组
-public static int[] copyOf(原数组,新数组长度)
-//拷贝数组(指定范围)
-public static int[]copyOfRange(原数组,起始索引,结束索引)
-//填充数组
-public static void fill(数组,元素)
-//按照默认方式进行数组排序
-public static void sort(数组)
-//按照指定的规则排序
-public static void sort(数组，排序规则)
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- CONSOLE ：表示当前的日志信息是可以输出到控制台的 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <!--输出流对象 默认 System.out 改为 System.err  其中err：控制台输出日志为红色，而out为黑色-->
+        <target>System.out</target>
+        <encoder>
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level]  %c [%thread] : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- File：表示当前的日志信息是可以输出到文件的 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <charset>utf-8</charset>
+        </encoder>
+        <!--日志输出路径(logback_message.log是文档名，下方还有一处文件名（不用写.log）)-->
+        <file>C:\Hcx\Code\Java\log\test.log</file>
+        <!--指定日志文件拆分和压缩规则（防止文件过大）-->
+        <rollingPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--通过指定压缩文件名称，来确定分割文件方式-->
+            <fileNamePattern>C:\Hcx\Code\Java\log\test-%d{yyyy-MMdd}.log%i.gz</fileNamePattern>
+            <maxFileSize>1MB</maxFileSize> <!--文件拆分大小-->
+        </rollingPolicy>
+    </appender>
+
+    <!--
+    level:用来设置打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和 OFF (关掉)， 默认debug（可忽略大小写）
+    <root>可以包含零个或多个<appender-ref>元素，标识这个输出位置将会被本日志级别控制。
+    -->
+    <root level="INFO"> <!--打印规则：只打印不低于当前级别的日志-->
+        <appender-ref ref="CONSOLE"/> <!--如果这个地方不配置关联打印的位置，改位置将不会记录日志-->
+        <appender-ref ref="FILE" />
+    </root>
+</configuration>
+
 ```
 
-`compare(T o1, T o2)`
+### Logback 配置详解
 
-形式参数：
-`o1`表示无序序列中的每一个元素，`o2`表示有序序列中的元素
+Logback 日志系统的特性都是通过核心板配置文件 logback.xml 来配置的。
 
-返回值：
-负数：表示当前插入的元素小，放在前面
-正数、0：表示当前插入的元素大，放在后面
+#### Logback 日志输出位置、格式设置
 
-### Collections 类
+- 通过 logback.xml 文件中的`<appender>`标签可以设置输出位置和日志信息的详细格式。
 
-```
-public static <T> boolean addAll(Collection<T> c, T... elements)
-//批量添加元素
-public static void shuffle(List<?> list)
-//打乱List集合元素的顺序
-public static<T> void sort(List<T> list)
-//对List集合元素进行排序
-public static<T> void sort(List<T> list, Comparator<T> c)
-//对List集合元素进行指定规则的排序
-```
+- 通常可以设置 2 个日志输出位置：**一个是控制台**、**一个是系统文件**
+
+  - 控制台输出日志信息：`<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">`
+
+  - 文件输出日志信息：`<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">`
+
+- 日志信息的详细格式设置：
+
+  - 日志输出方式（控制台中）：`<target>`标签，传入`System.out`或`System.err`
+
+  - 日志输出格式：`<encoder>`、`<pattern>`标签，设置日志输出格式，其中`<pattern>`标签设置日志信息的输出格式
+  
+  - 日志文字编码：`<charset>`标签设置日志信息的编码格式（文件输出）
+  
+  - 日志输出文件路径：`<file>`标签设置日志文件输出路径（文件输出）
+  
+  - 日志文件拆分和压缩：`<rollingPolicy>`标签设置日志文件拆分和压缩规则（文件输出）
+  
+  - `<root>`标签设置日志输出位置和日志级别，在`<root level="">`处填入级别表示只打印不低于当前级别的日志信息，中间加入`<appender-ref>`标签关联日志输出位置
+
+#### Logback 日志级别设置
+
+- Logback 日志系统共分为 5 个级别：
+
+  - TRACE：细粒度信息，仅在调试阶段使用
+
+  - DEBUG：调试信息，一般用于开发阶段
+
+  - INFO：运行信息，记录程序的运行状态
+
+  - WARN：警告信息，记录程序的运行中出现的异常
+
+  - ERROR：错误信息，记录程序的运行中出现的严重错误
+
+- 额外设置：
+
+  - ALL：打印所有级别的日志信息
+
+  - OFF：关闭所有日志信息
+
+- 在 logback.xml 文件的`<root>`标签中设置日志级别，如：`<root level="INFO">`
