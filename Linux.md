@@ -689,6 +689,92 @@ Yum 称为软件包仓库，其作用为：为客户端自动解决依赖关系�
 
 8. `--help` 查看外部命令的帮助信息
 
+### 用户和组概述
+
+#### 账号控制
+
+- 基于账号的访问控制：
+
+  - 系统用户：登录操作系统，方便做权限的不同设置
+
+  - 组：方便管理众多的用户，方便对用户进行分类
+
+- 唯一标识：UID，GID（管理员 root 的 UID 为 0）
+  llllll
+- 组的分类：基本组、附加组（从属组）
+
+  - 基本组：Linux 自己创建的组，与用户同名，系统自动将用户加入
+
+  - 附加组（从属组）：管理员自建创造，管理员将用户加入
+
+Linux 一个用户必须至少属于一个组
+
+##### 用户账号创建
+
+用户基本信息存放在 `/etc/passwd` 文件，每个用户记录一行，以 `:` 分割为 7 字段
+
+`用户名:密码占位符:用户UID:基本组GID:描述信息:家目录（宿主目录）:解释器`
+
+- 添加用户
+
+  - `useradd [选项]... 用户名`
+
+    - 常用命令选项：
+
+      - `-u`：用户 id
+
+      - `-d`：家目录路径
+
+      - `-s`：登录解释器
+
+      - `-G`：附加组
+
+##### 用户密码设置
+
+- 管理员给普通用户设置密码：
+
+  - `passwd 用户名`
+
+- 普通用户自己给自己更改密码：
+
+  - `su -用户名`：切换用户，管理员切换用户不用密码，普通用户切换需要密码
+
+#### 用户删改查
+
+- `usermod [选项]... 用户名`
+
+  - 常用命令选项：
+
+    - `-u`：用户 id
+
+    - `-d`：家目录路径
+
+    - `-s`：登录 Shell
+
+    - `-G`：附加组（重置附加组）
+
+- `userdel [-r] 用户名`（`-r`：删除用户家目录）
+
+#### 用户初始配置文件
+
+`/etc/skel/`目录是用来存放新用户配置文件的目录，当我们添加新用户的时候，这个目录下的所有文件会自动被复制到新添加的用户的家目录下。通过修改、添加、删除/etc/skel 目录下的文件，我们可为新创建的用户提供统一的、标准的、初始化用户环境。
+
+#### 组管理
+
+管理组成员
+
+组成员信息存放在 `/etc/gshadow` 文件
+
+- `groupadd [-g 组ID] 组名`
+
+  - `组名字:密码占位符:组GID:组成员列表（组成员可以使0-N）`
+
+- `gpasswd -a 用户名 组名`：添加用户到某个组
+
+- `gpasswd -d 用户名 组名`：删除用户从某个组
+
+- `-groupdel 组名`：删除组（不能删除基本组）
+
 ## 问题记录
 
 ### CentOS7 配置网络
@@ -1288,4 +1374,123 @@ rpm -qa | wc -l
 
 ```
 ls --help
+```
+
+#### 用户的基本组与附加组
+
+在 `/etc/passwd` 文件中，用户记录的 GID 所对应的组是这个用户的基本组，也称为私有组；除此以外，若 `/etc/group` 文件中某个其他组的成员也包括这个用户，那么这个组是这个用户的附加组，也称为公共组。
+
+#### 用户的 UID 标识
+
+在 Linux 系统中，管理员用户 root 的 UID 是 0，而新建普通用户的 UID 默认情况下会从 1000 开始。
+
+#### 用户与组相关配置文件
+
+Linux 用户的家目录、登录 Shell 等信息保存在 `/etc/passwd` 文件内，而加密的密码字符串、密码有效期等信息保存在 `/etc/shadow` 文件内。通过 `/etc/group` 文件可以查看系统中有哪些组账号，以及各个组包括那些成员用户。
+
+#### useradd 命令常用选项
+
+使用 `useradd` 命令添加用户账号时，常用的选项有：
+
+- `-u`：指定 UID 标记号
+- `-d`：指定宿主目录，缺省为 `/home/用户名`
+- `-e`：指定帐号失效时间
+- `-g`：指定所属的基本组（组名或 GID）
+- `-G`：指定所属的附加组（组名或 GID）
+- `-M`：不为用户建立并初始化宿主目录
+- `-s`：指定用户的登录 Shell
+
+#### useradd 命令的应用
+
+当执行 `useradd 登录名` 新建一个用户账号，并为其设置密码以后，系统都做了哪些工作，以使得此用户能够登入并正常使用？
+
+1.  修改 `/etc/group`、`/etc/gshadow`，添加与用户名同名的私有组记录。
+2.  修改 `/etc/passwd` 文件，添加登录名、UID、GID、登录 Shell 等账号记录。
+3.  修改 `/etc/shadow` 文件，添加加密的密码字串、密码有效期等相关记录。
+4.  为用户在 `/home` 目录下创建宿主文件夹，名称与登录名相同。
+5.  拷贝模板目录 `/etc/skel/` 下的文件到新用户的家目录下。
+
+#### 用户账号的初始配置文件
+
+用户账号的初始配置文件有：
+
+- `~/.bash_profile`：文件中的命令将在该用户每次登录时被执行。
+- `~/.bashrc`：文件中的命令会在每次加载 `/bin/bash` 程序时（当然也包括登录系统）被执行。
+- `~/.bash_logout` 文件中的命令将在用户每次退出登录时被执行。
+  上述文件适用于当前用户，而与之类似的 `/etc/profile`、`/etc/bashrc` 文件适用于所有本地用户。
+
+#### 为某个用户设置永久别名
+
+为 root 用户设置一个永久别名为 `myls='ls -lhd'`。
+
+1.  `[root@svr5 /]# vim /root/.bashrc`
+2.  `# .bashrc`
+3.  `# User specific aliases and functions`
+4.  `alias rm='rm -i'`
+5.  `alias cp='cp -i'`
+6.  `alias mv='mv -i'`
+7.  `alias myls='ls -lhd'` //添加此行
+8.  `.. ..`
+    当开启新的命令行终端时，检查别名即已生效。
+9.  `[root@svr5 /]# alias`
+10. `alias cp='cp -i'`
+11. `alias l.='ls -d .* --color=auto'`
+12. `alias ll='ls -l --color=auto'`
+13. `alias ls='ls --color=auto'`
+14. `alias mv='mv -i'`
+15. `alias myls='ls -lhd'`
+16. `alias rm='rm -i'`
+17. `alias which='alias | /usr/bin/which --tty-only --read-alias --show-dot --show-tilde'`
+18. `[root@svr5 /]#`
+
+#### 创建及修改 iamkiller 用户属性
+
+新建一个名为 iamkiller 的本地用户账号，要求如下：
+
+1.  宿主文件夹位于 `/opt/.private/iamkiller`。
+2.  使用 `/sbin/nologin` 作为登录 Shell。
+3.  将 UID 号指定为 1234。
+4.  修改登录 shell 为 `/bin/bash`，清空登录密码。
+5.  `[root@svr5 ~]# mkdir /opt/.private`
+6.  `[root@svr5 ~]# useradd -d /opt/.private/iamkiller -s /sbin/nologin -u 1234 iamkiller`
+7.  `[root@svr5 /]# usermod -s /bin/bash iamkiller`
+8.  `[root@svr5 /]# passwd –d iamkiller`
+
+#### 组的基本管理
+
+创建一个名为 student 的组账号，将 GID 设为 5918，其他相关要求如下：
+
+1.  添加 3 个成员用户 nsd001、nsd002、nsd003。
+2.  将其中用户 nsd001 的 UID 设置为 0。
+3.  添加组账号：
+
+```
+[root@svr5 ~]# groupadd -g 5918 student
+```
+
+2.  添加用户账号：
+
+```
+[root@svr5 ~]# useradd -G student nsd001
+[root@svr5 ~]# useradd -G student nsd002
+[root@svr5 ~]# useradd -G student nsd003
+```
+
+3.  强制将用户的 nsd001 设置为 0：
+
+```
+[root@svr5 ~]# vim /etc/passwd
+```
+
+```
+.. ..
+nsd001:x:0:1235::/home/nsd001:/bin/bash             //改 UID 为 0
+nsd002:x:1236:1236::/home/nsd002:/bin/bash
+nsd003:x:1237:1237::/home/nsd003:/bin/bash
+```
+
+或者
+
+```
+[root@svr5 ~]# usermod -u 0 -o nsd001
 ```
