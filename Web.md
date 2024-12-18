@@ -1803,4 +1803,144 @@ Ajax: 全称 Asynchronous JavaScript And XML，异步的 JavaScript 和 XML
 
 ![异步请求发送过程](img/Web_18.png)
 
-### Axios
+## Tomcat
+
+Web 服务器通常由硬件和软件共同构成
+
+- 硬件：电脑，提供服务供其他客户电脑访问
+
+- 软件：电脑上安装的服务器软件，安装后能提供服务给网络中的其他计算机，将本地文件映射成一个虚拟的 url 地址供网络中的其他人访问
+
+![Tomcat架构图](img/Web_19.png)
+
+### Tomcat 目录
+
+- bin：该目录下存放的是二进制可执行文件，如果是安装版，那么这个目录下会有两个 exe 文件：tomcat10.exe、tomcat10w.exe，前者是在控制台下启动 Tomcat，后者是弹出 GUI 窗口启动 Tomcat
+
+- conf：这是一个非常非常重要的目录，这个目录下有四个最为重要的文件：
+
+  - **server.xml：配置整个服务器信息。例如修改端口号。默认 HTTP 请求的端口号是：8080**
+
+  - tomcat-users.xml：存储 tomcat 用户的文件，这里保存的是 tomcat 的用户名及密码，以及用户的角色信息。可以按着该文件中的注释信息添加 tomcat 用户，然后就可以在 Tomcat 主页中进入 Tomcat Manager 页面了；
+
+  - - web.xml：部署描述符文件，这个文件中注册了很多 MIME 类型，即文档类型。这些 MIME 类型是客户端与服务器之间说明文档类型的，如用户请求一个 html 网页，那么服务器还会告诉客户端浏览器响应的文档是 text/html 类型的，这就是一个 MIME 类型。客户端浏览器通过这个 MIME 类型就知道如何处理它了。当然是在浏览器中显示这个 html 文件了。但如果服务器响应的是一个 exe 文件，那么浏览器就不可能显示它，而是应该弹出下载窗口才对。MIME 就是用来说明文档的内容是什么类型的！
+
+- context.xml：对所有应用的统一配置，通常我们不会去配置它。
+
+- lib：Tomcat 的类库，里面是一大堆 jar 文件。如果需要添加 Tomcat 依赖的 jar 文件，可以把它放到这个目录中，当然也可以把应用依赖的 jar 文件放到这个目录中，这个目录中的 jar 所有项目都可以共享之，但这样你的应用放到其他 Tomcat 下时就不能再共享这个目录下的 jar 包了，所以建议只把 Tomcat 需要的 jar 包放到这个目录下；
+
+- logs：这个目录中都是日志文件，记录了 Tomcat 启动和关闭的信息，如果启动 Tomcat 时有错误，那么异常也会记录在日志文件中。
+
+- temp：存放 Tomcat 的临时文件，这个目录下的东西可以在停止 Tomcat 后删除！
+
+- **webapps：存放 web 项目的目录，其中每个文件夹都是一个项目**；如果这个目录下已经存在了目录，那么都是 tomcat 自带的项目。其中 ROOT 是一个特殊的项目，在地址栏中访问：http://127.0.0.1:8080，没有给出项目目录时，对应的就是ROOT项目.http://localhost:8080/examples，进入示例项目。其中examples"就是项目名，即文件夹的名字。
+
+- work：运行时生成的文件，最终运行的文件都在这里。通过 webapps 中的项目生成的！可以把这个目录下的内容删除，再次运行时会生再次生成 work 目录。当客户端用户访问一个 JSP 文件时，Tomcat 会通过 JSP 生成 Java 文件，然后再编译 Java 文件生成 class 文件，生成的 java 和 class 文件都会存放到这个目录下。
+
+- LICENSE：许可证。
+
+- NOTICE：说明文件。
+
+### WEB 项目的标准结构
+
+在 Tomcat 的 webapps 目录下创建一个文件夹，这个文件夹就是你的 WEB 项目的名字
+
+app 本应用根目录：
+
+- static 非必要目录,约定俗成的名字,一般在此处放静态资源 (css js img)
+
+- WEB-INF 必要目录,必须叫 WEB-INF,受保护的资源目录,浏览器通过 url 不可以直接访问的目录
+
+  - classes 必要目录,src 下源代码,配置文件,编译后会在该目录下,web 项目中如果没有源码,则该目录不会出现
+
+  - lib 必要目录,项目依赖的 jar 编译后会出现在该目录下,web 项目要是没有依赖任何 jar,则该目录不会出现
+
+  - web.xml 必要文件,web 项目的基本配置文件. 较新的版本中可以没有该文件,但是学习过程中还是需要该文件
+
+- index.html 非必要文件,index.html/index.htm/index.jsp 为默认的欢迎页
+
+> url 的组成部分和项目中资源的对应关系：
+
+![url的组成部分和项目中资源的对应关系](img/Web_20.png)
+
+### WEB 项目部署的方式
+
+> 方式 1 直接将编译好的项目放在 webapps 目录下 (已经演示)
+
+> 方式 2 将编译好的项目打成 war 包放在 webapps 目录下,tomcat 启动后会自动解压 war 包(其实和第一种一样)
+
+> 方式 3 可以将项目放在非 webapps 的其他目录下,在 tomcat 中通过配置文件指向 app 的实际磁盘路径
+
+- 在磁盘的自定义目录上准备一个 app
+
+![磁盘的自定义目录准备app](img/Web_21.png)
+
+- 在 tomcat 的 conf 下创建 Catalina/localhost 目录,并在该目录下准备一个 app.xml 文件
+
+```
+<!--
+	path: 项目的访问路径,也是项目的上下文路径,就是在浏览器中,输入的项目名称
+    docBase: 项目在磁盘中的实际路径
+ -->
+<Context path="/app" docBase="D:\mywebapps\app" />
+```
+
+- 启动 tomcat 访问测试即可
+
+### IDEA 中开发、部署、运行 WEB 项目
+
+#### IDEA 关联 Tomcat
+
+在 IDEA 设置中的“构建、执行、部署”中的“应用程序服务器”添加`Tomcat Server`
+
+链接配置到对应的 Tomcat 主目录
+
+#### IDEA 创建 WEB 项目
+
+先创建一个空项目，然后在一个空项目下同时存在多个 modules，不用后续来回切换
+
+然后给 modules 添加 Tomcat 依赖（设置中项目结构，选择对应模块添加 Tomcat 库依赖）
+
+单击 modules 然后选择模块设置，选择“facet”，添加 Web Facet，点击“添加应用程序服务器特定的描述符”，选择 Tomcat 服务器（version 5.0），然后就应用确定
+
+#### IDEA Web 项目目录结构
+
+```
+App-1
+  ├─resources
+  ├─src
+  └─web
+      ├─META-INF
+      ├─static
+      │  ├─css
+      │  ├─img
+      │  └─js
+      └─WEB-INF
+          └─lib
+```
+
+![WEB 项目目录结构](img/Web_22.png)
+
+- resources 目录用于存储项目的配置文件，如 properties 文件、xml 文件等，**需要标记为资源根目录（resources root）**。
+
+- src 目录用于存储 Web 项目后端代码，如 Java 类
+
+- web 目录用于存储 Web 项目前端代码
+
+  - static 目录用于存储静态资源
+
+    - css 目录用于存储样式表文件
+
+    - img 目录用于存储图片文件
+
+    - js 目录用于存储 JavaScript 文件
+
+  - WEB-INF 目录用于存储 Web 项目的配置文件
+
+    - lib 目录用于存储依赖的 jar 包（src 文件夹所需要的 jar 包必须放在该目录下），**需要添加为模块库**
+
+    - web.xml 用于配置 Web 项目的基本信息。
+
+  - html 文件用于存储 Web 项目的页面文件
+
+最后可以通过项目结构来查看目前项目有什么环境依赖
