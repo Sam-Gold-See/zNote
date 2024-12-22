@@ -64,7 +64,7 @@ JDBC 简单执行过程：
 
 ##### 注册驱动
 
-```
+```java
 Class.forname("");
 ```
 
@@ -74,7 +74,7 @@ Class.forname("");
 
 ##### Connection 连接
 
-```
+```java
 Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/atguigu", "root", "123456");
 ```
 
@@ -108,7 +108,7 @@ Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306
 
 ##### PreparedStatement
 
-```
+```java
 PreparedStatement preparedStatement = connection.prepareStatement(SQL); // 创建 PreparedStatement 对象
 
 preparedStatement.executeUpdate(); // 执行增删改语句
@@ -130,7 +130,7 @@ preparedStatement.executeQuery(); // 执行查询语句
 
 ##### ResultSet
 
-```
+```java
 ResultSet resultSet = preparedStatement.executeQuery(); // 执行查询语句
 ```
 
@@ -165,7 +165,7 @@ ResultSet resultSet = preparedStatement.executeQuery(); // 执行查询语句
 > 1. SQL 语句有错误，检查 SQL 语句！建议 SQL 语句在 SQL 工具中测试后再复制到 Java 程序中！
 > 2. 连接数据库的 URL 中，数据库名称编写错误，也会报该异常！
 
-```
+```java
 	@Test
 	public void querySingleColumn() throws SQLException {
 		Connection draftConnection = DriverManager.getConnection("jdbc:mysql://localhost:3306/draft", "root", "123456");
@@ -302,7 +302,7 @@ ResultSet resultSet = preparedStatement.executeQuery(); // 执行查询语句
 
 - 当下 JDBC 中这种过程我们称其为手动 ORM。后续也有相关 ORM 框架，比如 MyBatis、JPA 等。
 
-```
+```java
   public class Employee{
     private int id;
     private String name;
@@ -352,7 +352,7 @@ ResultSet resultSet = preparedStatement.executeQuery(); // 执行查询语句
 
 然后执行完新增操作后，对 PreparedStatement 对象调用 `getGeneratedKeys()` 方法（生成 ResultSet 对象），获取数据库中插入新数据的主键值，并赋值给 Java 对象。
 
-```
+```java
 PreparedStatement draftStatement = draftConnection.prepareStatement("INSERT INTO emp(name,salary,age) VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
 
 // execute insert
@@ -405,7 +405,7 @@ JDBC 的数据库连接池使用 javax.sql.DataSource 接口进行规范，所�
 
     - 创建 `db.properties` 配置文件，将连接信息定义在该文件中
 
-    ```
+    ```properties
     # druid连接池需要的配置参数，key固定命名
     driverClassName=com.mysql.cj.jdbc.Driver
     url=jdbc:mysql:///atguigu
@@ -417,7 +417,7 @@ JDBC 的数据库连接池使用 javax.sql.DataSource 接口进行规范，所�
 
     - 编写 Java 代码，读取配置文件，创建 DruidDataSource 对象，设置相关参数。
 
-    ```
+    ```java
     //1.创建Properties集合，用于存储外部配置文件的key和value值。
     Properties properties = new Properties();
 
