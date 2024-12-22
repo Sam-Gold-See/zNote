@@ -46,7 +46,7 @@
 
 #### 关系运算符
 
-```
+```python
 "Hello">"world" # 逐个比较对应位置的字符，得出结论后立刻停止
 >>>False
 [1,2,3]<[1,2,4] # 比较列表的大小，逐个比较对应位置的元素
@@ -187,7 +187,7 @@
 
 #### 字典创建与删除
 
-```
+```python
 a_dict={'A':'1','B':2}
 x=dict()
 x={}
@@ -197,7 +197,7 @@ dict.fromkeys(['3','5','7'],666) # value = 666
 
 #### 字典元素访问
 
-```
+```python
 a_dict = {'age': 39, 'score': 97, 'name': 'Dong'}
 print(a_dict['age'])
 >>>39
@@ -223,7 +223,7 @@ for value in a_dict.values()    #遍历值
 
 以**Key**进行赋值时`a_dict[Key] = value`，若 Key 存在，则更新值，若不存在，则新增键值对
 
-```
+```python
 b_dict = {'gende': '28'}
 a_dict.update(b_dict)       # 将b_dict中的所有键值对更新到a_dict，规则如上
 ```
@@ -239,7 +239,7 @@ a_dict.update(b_dict)       # 将b_dict中的所有键值对更新到a_dict，�
 
 #### 集合创建与删除
 
-```
+```python
 a={}
 a_set = set(range(8,14))
 a_set set([0, 1, 2, 3, 4, 0, 2, 5]) #a_set={0, 1, 2, 3, 4, 5}
@@ -262,7 +262,7 @@ a_set set([0, 1, 2, 3, 4, 0, 2, 5]) #a_set={0, 1, 2, 3, 4, 5}
 
 ### 序列解包
 
-```
+```python
 x, y, z = 1, 2, 3
 tuple = (False, 3.5, 'exp')
 (x, y, z) = tuple
@@ -278,7 +278,7 @@ for key, value in dict.items():
 
 1. 关系运算符
 
-```
+```python
 1<2<3 # 1<2 and 2<3
 1<2>3 # 1<2 and 2>3
 ```
@@ -291,7 +291,7 @@ for key, value in dict.items():
 
 1. **单分支选择结构**
 
-```
+```python
 if condition :
     expression
 ```
@@ -300,7 +300,7 @@ if condition :
 
 2. **双分支选择结构**
 
-```
+```python
 if condition :
     expression1
 else :
@@ -311,7 +311,7 @@ value1 if condition else value2
 
 3. **多分支选择结构**
 
-```
+```python
 if condition1:
     expression1
 elif condition2:
@@ -323,7 +323,7 @@ elif conditionN:
 
 4. **选择结构的嵌套**
 
-```
+```python
 if condition1:
     expression1
     if condition2:
@@ -341,14 +341,14 @@ else:
 
 1. **for 循环和 while 循环**
 
-```
+```python
 while condition:
     循环体
 [else:
     expression]
 ```
 
-```
+```python
 for 循环变量 in 可迭代对象:
     循环体
 [else:
@@ -363,7 +363,7 @@ for 循环变量 in 可迭代对象:
 
 #### 基本语法
 
-```
+```python
 def name([参数列表]):
     body
 ```
@@ -429,14 +429,8 @@ def name([参数列表]):
 
 ### lambda 表达式
 
-```
+```python
 f = lambda 传入参数 : expression
-```
-
-## 面向对象程序设计
-
-```
-
 ```
 
 ## 字符串
@@ -596,7 +590,7 @@ Python 默认使用**UTF-8**进行编码
 
 使用**with**操作文件，保证文件**被正确关闭**
 
-```
+```python
 with open(file, mode="") as f:
     pass
 ```
@@ -621,13 +615,13 @@ with open(file, mode="") as f:
 
 使用该方式导入以后，使用时必须以“**模块名.对象名**”或者“**别名.对象名**”进行访问
 
-```
+```python
 import math
 print(math.sin(0.5))
 >>>0.479425538604203
 ```
 
-```
+```python
 import random as ran
 print(ran.random())
 >>>0.701114202997810
@@ -635,13 +629,13 @@ print(ran.random())
 
 #### from 包名/模块名 import 模块名/对象名 [ + as 别名]
 
-```
+```python
 from math import sin
 print(sin(3))
 >>>0.1411200080598672
 ```
 
-```
+```python
 from math import cos as f
 print(f(3))
 >>>-0.9899924966004454
@@ -656,7 +650,7 @@ Numpy 数组是一个多维数组对象，称为`ndarray`，其由两部分构�
 
 #### Numpy 简介
 
-```
+```python
 import numpy as np # 常用导入Numpy库方法
 ar=np.array([1,2,3,4],[5,6,7,8],[9,10,11,12])
 print(ar) # 数组
@@ -672,7 +666,7 @@ print(ar.dtype) # 数值的数据类型
 
 使用`array()`函数来创建数组，括号内可以填入列表、元组、数组、生成器
 
-```
+```python
 import numpy as np
 ar = np.random.rand(10).reshape(2,5)
 print(ar)
@@ -683,7 +677,7 @@ print(ar)
 `arange()`函数类似于`range()`，在给定间隔内返回均匀间隔的数值
 **左开右闭**
 
-```
+```python
 import numpy as np
 print(np.arange(10)) # 返回0~9 整型
 print(np.arange(10.0)) # 返回0.0~9.0 浮点型
@@ -695,14 +689,14 @@ print(np.arange(2,14，2)) # 返回2~13，步长为2 整型
 
 用来返回在间隔`[开始, 停止, num=N]`上计算 N 个均匀间隔的样本
 
-```
+```python
 import numpy as np
 print(np.linspace(10, 15, num=20))
 ```
 
 ##### 其他形式创建数组
 
-```
+```python
 import numpy as np
 print(np.zeros(10)) # 创建一维数组且用0填充
 print(np.zeros((3,5))) #创建尺寸为(3,5)的数组，用0填充
@@ -716,7 +710,7 @@ print(np.arange(16).reshape(4,4)) # 使用arange()赋值，reshape()决定
 
 T 方法可以用来转置，一维不变
 
-```
+```python
 import numpy as np
 ar=np.zeros((2,5))
 print(ar)
@@ -727,7 +721,7 @@ print(ar.T)
 
 ##### 数组的复制
 
-```
+```python
 import numpy as np
 ar1=np.arrange(10)
 ar2=ar1 # 仅起一个额外名字，对ar1进行操作仍会影响ar2
@@ -739,7 +733,7 @@ ar3=ar1.copy() # 全部复制到新变量，对ar1进行操作不会影响ar3
 堆叠数组需要保证数组的列是相同的
 使用`hstack()`和`vstack()`函数
 
-```
+```python
 import numpy as np
 a=np.arange(5)
 b=np.arange(5,9)
@@ -758,7 +752,7 @@ print(np.vstack((a,b))) # 竖向连接
 
 数组的拆分使用`hsplit()`和`vsplit()`函数
 
-```
+```python
 import numpy as np
 ar=np.arange(16).reshape(4,4)
 print(np.hsplit(ar,2)[0])
@@ -767,7 +761,7 @@ print(np.vsplit(ar,4))
 
 ##### 数组的简单运算
 
-```
+```python
 import numpy as np
 ar = np.arange(6).reshape(2,3)
 print(ar+10)
@@ -790,7 +784,7 @@ print(np.sort(np.array([1,4,3,2,5,6]))) # 排序
 
 对于一维数组：
 
-```
+```python
 import numpy as np
 ar=np.arange(20)
 print(ar)
@@ -801,7 +795,7 @@ print(ar[::2])
 
 对于二维数组：
 
-```
+```python
 import numpy as np
 ar = np.arange(16).reshape(4,4)
 print(ar)
@@ -814,7 +808,7 @@ print(ar[:2,2:]) # 打印从第一行到第二行，第三列到第四列
 
 对于三维及三维以上的数组：
 
-```
+```python
 import numpy as np
 ar = np.arange(12).reshape(3,2,2)
 print(ar)
@@ -828,7 +822,7 @@ print(ar[2][1][0]) # 打印第三维度第二行第一个元素
 
 ##### 均匀分布
 
-```
+```python
 import numpy as np
 data1=np.random.rand(300)
 data2=np.random.rand(300)
@@ -836,7 +830,7 @@ data2=np.random.rand(300)
 
 ##### 正态分布
 
-```
+```python
 import numpy as np
 data3=np.random.randn(500)
 data4=np.random.randn(500)
@@ -850,7 +844,7 @@ data4=np.random.randn(500)
 
 ##### 存储数组数据（.npy 文件）
 
-```
+```python
 import os
 import numpy as np
 os.chdir("URL")
@@ -860,7 +854,7 @@ np.save('name.npy',ar)
 
 ##### 读取数组数据（.npy 文件）
 
-```
+```python
 import numpy as np
 import os
 os.chdir("URL")
@@ -870,7 +864,7 @@ print(ar_load)
 
 ##### 存储文本文件
 
-```
+```python
 import numpy as np
 import os
 os.chdir("URL")
@@ -880,7 +874,7 @@ np.savetext("name.txt",ar,delimiter=',') # delimiter为分隔符
 
 默认为科学记数法，若想储存为浮点型
 
-```
+```python
 import numpy as np
 import os
 os.chdir("URL")
@@ -890,7 +884,7 @@ np.savetext("name.txt",ar,delimiter=',' fmt='%2f') # delimiter为分隔符，对
 
 ##### 读取文本文件
 
-```
+```python
 import numpy as np
 import os
 os.chdir("URL")
@@ -907,7 +901,7 @@ ar_loadtxt=np.loadtxt("name".txt, delimiter=",")
 
 1. **Title 设置**
 
-```
+```python
 import matplotlib.pyplot as plt
 plt.title("title")
 plt.show()
@@ -917,7 +911,7 @@ plt.show()
 
 在 matplotlib 中，整个图像为一个**Figure 对象**，在一个 Figure 对象中，包含着一个或者多个**Axes 对象**，每个**Axes**对象都是一个拥有自己坐标系统的**绘图区域**
 
-```
+```python
 plt.figure(figsize=(6,3))
 plt.plot(6,3)
 plt.plot(3,3*2)
@@ -926,7 +920,7 @@ plt.show()
 
 3. **坐标轴及标签**
 
-```
+```python
 plt.xlim(0,6)
 plt.ylim(0,3)
 plt.xlabel('X')
@@ -936,7 +930,7 @@ plt.show()
 
 4. **设置 label 和 legend**
 
-```
+```python
 plt.plot(2,3,label="name_1")
 plt.plot(2,3*2,label="name_2")
 plt.legend(loc="upper left") # "upper right", "center"
@@ -947,7 +941,7 @@ plt.show()
 
 1. **柱状图**
 
-```
+```python
 x = np.arange(10)
 y=np.random.randint(0,20,10)
 plt.bar(x,y)
@@ -955,7 +949,7 @@ plt.bar(x,y)
 
 2. **散点图**
 
-```
+```python
 x = np.random.rand(10)
 y = np.random.rand(10)
 plt.scatter(x,y)
@@ -964,7 +958,7 @@ plt.show()
 
 3. **饼图**
 
-```
+```python
 x = np.random.randint(1, 10 ,3)
 plt.pie(x)
 plt.show()
@@ -972,7 +966,7 @@ plt.show()
 
 4. **热图**
 
-```
+```python
 x = [[1,2],[3,4],[5,6]]
 plt.imshow(x)
 plt.colorbar()
@@ -981,7 +975,7 @@ plt.show()
 
 5. **折线图**
 
-```
+```python
 x = np.arange(10)
 y = np.random.randint(0,10,10)
 plt.plot(x,y)
@@ -1045,7 +1039,7 @@ Pytorch 的运算单元叫做**张量**，可以将张量理解为一个多维�
 
 对于创建尺寸为`(5,3)`的二阶张量，若希望每个元素是随机赋予的`[0,1]`区间中的一个实数：
 
-```
+```python
 import torch
 x = torch.rand(5,3)
 print(x)
@@ -1053,7 +1047,7 @@ print(x)
 
 创建一个尺寸为`(5,3)`的二阶张量，对于每一个元素都是实数 1：
 
-```
+```python
 import torch
 x = torch.ones(5,3)
 print(x)
@@ -1061,7 +1055,7 @@ print(x)
 
 创建一个尺寸为`(2,5,3)`的三阶张量，对于每一个元素都是实数 0：
 
-```
+```python
 import torch
 x = torch.zeros(2,5,3)
 print(x)
@@ -1126,7 +1120,7 @@ $$
 张量可以在 GPU 上进行运算，大大提高了计算速度，而 Numpy 不行
 在可以进行 GPU 计算时，将张量放到 GPU 上即可加速运算
 
-```
+```python
 import torch
 if torch.cuda.is_available():
     x=x.cuda()
@@ -1172,7 +1166,7 @@ if torch.cuda.is_available():
 
 1. 创建一个叫做 x 的自动微分变量，包裹了一个尺寸为`(2,2)`的张量，取值全为 1
 
-```
+```python
 import torch
 x = torch.ones(2, 2, requires_grad=True)
 print(x)
@@ -1180,7 +1174,7 @@ print(x)
 
 `requires_grad`该属性为 True，是为了保证它可以在反向传播算法的过程中获得梯度信息，执行该语句的输出结果是：
 
-```
+```python
 >>>tensor([[1., 1.],
            [1., 1.]], requires_grad=True)
 ```
@@ -1191,7 +1185,7 @@ print(x)
 
 - 加法运算：
 
-```
+```python
 y = x + 2
 print(y)
 >>>tensor([[3., 3.],
@@ -1205,7 +1199,7 @@ print(y.grad_fn)
 
 - 按元素乘法运算（非矩阵运算 mm，是两个张量在对应位置上进行数值相乘）：
 
-```
+```python
 z = y * y
 print(z)
 >>>tensor([[9., 9.],
@@ -1219,7 +1213,7 @@ print(z.grad_fn)
 
 - 求平均运算：
 
-```
+```python
 t = torch.mean(z)
 print(z)
 >>>tensor(9., grad_fn=<MeanBackward0>)
@@ -1302,7 +1296,7 @@ Pytorch 提供了非常方便的数值计算方案通过`.backward()`进行自�
 
 使用`linspace(low, up, num)`来构造 0~100 之间的均匀数字作为时间变量 x，在使用`randn(num)`生成 num 个满足标准正态分布的随机数（均值为 0，方差为 1），以此在作为历史房价数据 $y_{i}$
 
-```
+```python
 import torch
 x = torch.linspace(0, 100, 100).type(torch.FloatTensor)
 rand = torch.randn(100)*10
@@ -1315,7 +1309,7 @@ y = x + rand
 
 > **测试集**：是指用于检验这个训练好的模型的所有数据（在训练过程中，模型不会接触到测试集的数据）
 
-```
+```python
 x_train = x[:-10]
 x_test = x[-10:]
 y_train = y[:-10]
@@ -1324,7 +1318,7 @@ y_test = y[-10:]
 
 对训练数据点可视化操作：
 
-```
+```python
 import matplotlib.pyplot as plt
 plt.figure(figsize=(10,8)) # 设定绘制窗口大小为10*8 inch
 # 绘制数据，由于x和y都是自动微分变量，因此需要使用data来获取tensor，并转化为Numpy
@@ -1384,7 +1378,7 @@ $\alpha$ 作为一个参数，为学习率，可以调节更新的快慢，相�
 
 - 在 Pytorch 中，如果某个函数后面加上了“`_`”，就表明这个函数的计算结果更新当前的变量，进行原地计算
 
-```
+```python
 a = torch.rand(1, requires_grad=True)
 b = torch.rand(1, requires_grad=True)
 learning_rate = 0.0001
@@ -1407,7 +1401,7 @@ for i in range(1000): # 计算迭代次数为1000
 
 最后将原始的训练数据散点联合拟合的直线绘制出来：
 
-```
+```python
 plt.figure(figsize=(10, 7)) # 定义绘图窗口为 10*7 inch
 xplot = plt.plot(x_train.data.numpy(), y_train.data.numpy(), 'o') # 绘制x和y的散点图
 yplot = plt.plot(x_train.data.numpy(), x_train.data.numpy()*a.data.numpy()+b.data.numpy()) # 绘制拟合直线图
@@ -1424,7 +1418,7 @@ plt.show()
 
 - `np.r_(numpy_1, numpy_2)`：按行连接数组的函数，返回一个连接后的 numpy 数组
 
-```
+```python
 predictions = (a.expand_as(x_test) * x_test + b.expand_as(x_test)).data.numpy()
 import numpy as np
 plt.figure(figsize=(10,7))
