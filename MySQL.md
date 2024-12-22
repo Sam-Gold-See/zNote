@@ -391,7 +391,7 @@ SQL 语言在功能上主要分为如下 3 大类：
 
 #### SQL 注释
 
-```SQL
+```sql
 单行注释：#注释文字(MySQL特有的方式)
 单行注释：-- 注释文字(--后面必须包含一个空格。)
 多行注释：/* 注释文字 */
@@ -441,7 +441,7 @@ mysql> SOURCE 文件名;
 
 - 别名建议简短，见名知意
 
-```SQL
+```sql
 SELECT 列名1 AS 列名1别名, 列名2 列名2别名
 FROM 表名;
 ```
@@ -452,7 +452,7 @@ FROM 表名;
 
 在 SELECT 语句中使用关键字`DISTINCT`去除重复行
 
-```SQL
+```sql
 SELECT DISTINCT 列名 FROM 表名;
 ```
 
@@ -479,7 +479,7 @@ SELECT 查询还可以对常数进行查询。在 SELECT 查询结果中增加�
 
 SQL 中的 SELECT 语法的确提供了这个功能，一般来说我们只从一个表中查询数据，通常不需要增加一个固定的常数列，如果想整合不同的数据源，用常数列作为这个表的标记，就需要查询常数。
 
-```SQL
+```sql
 SELECT id, `name`, 1 AS `rank`, 'CN' AS country FROM student;
 ```
 
@@ -676,7 +676,7 @@ REGEXP 运算符在进行匹配时，常用的有以下几种通配符：
 
   - 格式：`LIMIT [位置偏移量,] 行数`，第一条记录的位置偏移量是 0，第二条记录的位置偏移量是 1，以此类推。
 
-```SQL
+```sql
 --前十条记录
 SELECT * FROM 表名 LIMIT 10;
 SELECT * FROM 表名 LIMIT 0, 10;
@@ -728,7 +728,7 @@ SELECT * FROM 表名 LIMIT 0, 10;
 
 使用`JOIN... ON`
 
-```SQL
+```sql
 SELECT 列名1, 列名2
 FROM table1
   JOIN table2 ON table1 和 table2 的连接条件
@@ -753,7 +753,7 @@ FROM table1
 
 语法：
 
-```SQL
+```sql
 SELECT 字段列表
 FROM table1 LEFT JOIN table2
 ON 关联条件
@@ -764,7 +764,7 @@ WHERE 条件
 
 语法：
 
-```SQL
+```sql
 SELECT 字段列表
 FROM table1 RIGHT JOIN table2
 ON 关联条件
@@ -783,7 +783,7 @@ WHERE 条件
 
 **合并查询结果** 利用 UNION 关键字，可以给出多条 SELECT 语句，并将它们的结果组合成单个结果集。合并时，两个表对应的列数和数据类型必须相同，并且相互对应。各个 SELECT 语句之间使用 UNION 或 UNION ALL 关键字分割
 
-```SQL
+```sql
 SELECT 字段列表 FROM table1
 UNION [ALL]
 SELECT 字段列表 FROM table2;
@@ -807,28 +807,28 @@ UNION ALL 操作符返回两个查询的结果集的并集。对于两个结果�
 ⋂
 ⋃
 
-```SQL
+```sql
 #中图：内连接 A ⋂ B
 SELECT 字段列表
 FROM 表1 JOIN 表2
 ON 表1.关联字段 = 表2.关联字段
 ```
 
-```SQL
+```sql
 #左上图：左外连接 A ⋃ (A ⋂ B)
 SELECT 字段列表
 FROM 表1 LEFT JOIN 表2
 ON 表1.关联字段 = 表2.关联字段
 ```
 
-```SQL
+```sql
 #右上图：右外连接 (A ⋂ B) ⋃ B
 SELECT 字段列表
 FROM 表1 RIGHT JOIN 表2
 ON 表1.关联字段 = 表2.关联字段
 ```
 
-```SQL
+```sql
 #左中图：A - A ⋂ B
 SELECT 字段列表
 FROM 表1 LEFT JOIN 表2
@@ -836,7 +836,7 @@ ON 表1.关联字段 = 表2.关联字段
 WHERE 表1.关联字段 IS NULL
 ```
 
-```SQL
+```sql
 #右中图：B - A ⋂ B
 SELECT 字段列表
 FROM 表1 RIGHT JOIN 表2
@@ -844,7 +844,7 @@ ON 表1.关联字段 = 表2.关联字段
 WHERE 表2.关联字段 IS NULL
 ```
 
-```SQL
+```sql
 #左下图：A ⋃ B
 SELECT 字段列表
 FROM 表1 LEFT JOIN 表2
@@ -859,7 +859,7 @@ ON 表1.关联字段 = 表2.关联字段
 WHERE 表1.关联字段 IS NULL
 ```
 
-```SQL
+```sql
 #右下图：A ⋃ B - A ⋂ B
 SELECT 字段列表
 FROM 表1 LEFT JOIN 表2
@@ -880,7 +880,7 @@ WHERE 表1.关联字段 IS NULL
 
 SQL99 在 SQL92 的基础上提供了一些特殊语法，比如 **NATURAL JOIN** 用来表示自然连接。我们可以把自然连接理解为 SQL92 中的等值连接。它会帮你自动查询两张连接表中 **所有相同的字段** ，然后进行 **等值连接** 。
 
-```SQL
+```sql
 SELECT 字段列表
 FROM 表1 NATURAL JOIN 表2
 ```
@@ -889,7 +889,7 @@ FROM 表1 NATURAL JOIN 表2
 
 当我们进行连接的时候，SQL99 还支持使用 **USING** 指定数据表里的 同名字段 进行等值连接。但是只能配合 JOIN 一起使用。
 
-```SQL
+```sql
 SELECT 字段列表
 FROM 表1 JOIN 表2
 USING 字段名
@@ -1047,7 +1047,7 @@ MySQL 中内置了一些可以查询 MySQL 信息的函数，这些函数主要�
 
 - 聚合函数语法：
 
-```SQL
+```sql
 SELECT [column,] group function(column), ...
 FROM table
 [WHERE condition]
@@ -1061,7 +1061,7 @@ FROM table
 
 可以对**数值型数据**使用 AVG 和 SUM 函数。
 
-```SQL
+```sql
 SELECT AVG(column), SUM(column)
 FROM table
 ```
@@ -1070,7 +1070,7 @@ FROM table
 
 可以对**任意数据类型**使用 MAX 和 MIN 函数。
 
-```SQL
+```sql
 SELECT MAX(column), MIN(column)
 FROM table
 ```
@@ -1079,7 +1079,7 @@ FROM table
 
 - `COUNT(*)` 返回表中记录总数，适用于**任意数据类型**
 
-```SQL
+```sql
 SELECT COUNT(*)
 FROM table
 WHERE condition;
@@ -1087,7 +1087,7 @@ WHERE condition;
 
 - `COUNT(expr)` 返回**expr 不为空**的记录总数
 
-```SQL
+```sql
 SELECT COUNT(column)
 FROM table
 WHERE column IS NOT NULL;
@@ -1099,7 +1099,7 @@ WHERE column IS NOT NULL;
 
 可以使用 GROUP BY 子句将表中的数据分成若干组
 
-```SQL
+```sql
 SELECT column, group function(column)
 FROM table
 [HWERE condition]
@@ -1111,7 +1111,7 @@ FROM table
 
 在 SELECT 列表中，所有未包含在组函数中的列都应该包含在 GROUP BY 子句中。
 
-```SQL
+```sql
 SELECT column1, group function(column2)
 FROM table
 GROUP BY column1;
@@ -1119,7 +1119,7 @@ GROUP BY column1;
 
 #### 使用多个分列
 
-```SQL
+```sql
 SELECT column1, column2, group function(column3)
 FROM table
 GROUP BY column1, column2;
@@ -1129,7 +1129,7 @@ GROUP BY column1, column2;
 
 使用 `WITH ROLLUP` 关键字后，在所有查询出来的分组记录之后增加一条记录，该记录计算查询出的所有记录的总和，即统计记录数量
 
-```SQL
+```sql
 SELECT column1, group function(column2)
 FROM table
 [WHERE condition]
@@ -1152,7 +1152,7 @@ GROUP BY column1 WITH ROLLUP;
 
 4. HAVING 不能单独使用，必须要跟 GROUP BY 一起使用。
 
-```SQL
+```sql
 SELECT column1, group function(column2)
 FROM table
 [WHERE condition]
@@ -1178,7 +1178,7 @@ FROM table
 
 #### 查询的结构
 
-```SQL
+```sql
 #方式1：
 
 SELECT ...,....,...
@@ -1217,13 +1217,13 @@ LIMIT ...,...
 
 1. **关键字的顺序不能颠倒**
 
-```SQL
+```sql
 SELECT ... FROM ... WHERE ... GROUP BY ... HAVING ... ORDER BY ... LIMIT...
 ```
 
 2. **SELECT 语句的执行顺序**
 
-```SQL
+```sql
 FROM -> WHERE -> GROUP BY -> HAVING -> SELECT 的字段 -> DISTINCT -> ORDER BY -> LIMIT
 ```
 
@@ -1243,7 +1243,7 @@ SQL 中子查询的使用大大增强了 SELECT 查询的能力，因为很多�
 
 - 基本语法结构：
 
-```SQL
+```sql
 SELECT 字段列表
 FROM 表名
 WHERE 条件
@@ -1380,7 +1380,7 @@ WHERE 条件
 
 #### 创建数据库
 
-```SQL
+```sql
 # 创建数据库
 CREATE DATABASE 数据库名;
 
@@ -1427,7 +1427,7 @@ CREATE DATABASE IF NOT EXISTS 数据库名;
 
 - **语法格式**：
 
-```SQL
+```sql
 CREATE TABLE [IF NOT EXISTS] 表名 (
   字段名 数据类型 [完整性约束条件] [默认值],
   字段名 数据类型 [完整性约束条件] [默认值],
@@ -1503,13 +1503,13 @@ CREATE TABLE [IF NOT EXISTS] 表名 (
 
 - 方式一：使用 RENAME
 
-```SQL
+```sql
 RENAME TABLE 旧表名 TO 新表名;
 ```
 
 - 方式二：
 
-```SQL
+```sql
 ALTER TABLE 旧表名 RENAME [TO] 新表名;
 ```
 
@@ -1543,7 +1543,7 @@ TURNCATE 语句**不能回滚**，而使用 DELETE 语句则可以回滚。
 
 - 字符和日期型数据应包含在单引号中。
 
-```SQL
+```sql
 # 为表的所有字段按默认顺序插入数据
 INSERT INTO 表名 VALUES (值1, 值2,...);
 # 为表的指定字段插入数据
@@ -1571,7 +1571,7 @@ VALUES
 
 INSERT 还可以将 SELECT 语句查询的结果插入到表中，此时不需要把每一条记录的值一个一个输入，只需要使用一条 INSERT 语句和一条 SELECT 语句组成的组合语句即可快速地从一个或多个表中向一个表中插入多行。
 
-```SQL
+```sql
 INSERT INTO 表名
 (tar_column1[,tar_column2,...])
 SELECT
@@ -1588,7 +1588,7 @@ FROM 源表名
 
 ### 更新数据
 
-```SQL
+```sql
 UPDATE 表名
 SET 字段名1=新值1, 字段名2=新值2,...
 [WHERE 条件];
@@ -1600,7 +1600,7 @@ SET 字段名1=新值1, 字段名2=新值2,...
 
 - 使用**WHERE**子句指定需要更新的数据
 
-```SQL
+```sql
 UPDATE 表名
 SET 字段名1=值1
 WHERE 字段名2=值2;
@@ -1616,7 +1616,7 @@ WHERE 字段名2=值2;
 
 在 MySQL 8.0 版本中，CREATE TABLE 和 ALTER TABLE 语句都支持计算列
 
-```SQL
+```sql
 CREATE TABLE 表名 (
   id INT,
   a INT,
@@ -2064,7 +2064,7 @@ MySQL 空间类型扩展支持地理特征的生成、存储和分析。MySQL �
 
 - 查看某个表已有的约束
 
-```SQL
+```sql
 #information_schema数据库名（系统库）
 #table_constraints表名称（专门存储各个表的约束）
 SELECT * FROM information_schema.table_constraints
@@ -2089,7 +2089,7 @@ WHERE table_name = '表名称';
 
 **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 表名 (
   字段名  数据类型  NOT NULL,
@@ -2124,7 +2124,7 @@ MODIFY 字段名  数据类型;
 
 **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 表名 (
   字段名  数据类型  UNIQUE,
@@ -2178,7 +2178,7 @@ DROP INDEX 索引名;
 
 **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 表名 (
   字段名  数据类型  PRIMARY KEY, #列级模式
@@ -2231,7 +2231,7 @@ DROP PRIMARY KEY;
 - 删除外键约束后，必须手动删除对应的索引
   **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 主表名称 (
   字段1  数据类型  PRIMARY KEY,
@@ -2265,7 +2265,7 @@ ADD [CONSTRAINT 约束名] FOREIGN KEY (从表的字段) REFERENCES 主表名(�
 
 **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 表名 (
   字段名  数据类型  CHECK(约束条件),
@@ -2283,7 +2283,7 @@ MODIFY 字段名  数据类型  CHECK(约束条件);
 
 **语法**：
 
-```SQL
+```sql
 #建表时添加
 CREATE TABLE 表名 (
   字段名  数据类型  DEFAULT 默认值，
@@ -2337,7 +2337,7 @@ MODIFY 字段名  数据类型；
 
 - **在 CREATE VIEW 语句中嵌入子查询**
 
-```SQL
+```sql
 CREATE [OR REPLACE]
 [ALGORITHM = {UNDEFINED | MERGE | TEMPTABLE}]
 VIEW 视图名称 [(字段列表)]
@@ -2347,7 +2347,7 @@ AS 查询语句
 
 - 精简版
 
-```SQL
+```sql
 CREATE VIEW 视图名称
 AS 查询语句
 ```
@@ -2356,25 +2356,25 @@ AS 查询语句
 
 - 查看数据库的表对象、视图对象
 
-```SQL
+```sql
 SHOW TABLES;
 ```
 
 - 查看视图的结构
 
-```SQL
+```sql
 DESC / DESCRIBE 视图名称;
 ```
 
 - 查看视图的属性信息：
 
-```SQL
+```sql
 SHOW TABLE STATUS LIKE '视图名称'\G
 ```
 
 - 查看视图的详细定义信息：
 
-```SQL
+```sql
 SHOW CREATE VIEW 视图名称;
 ```
 
@@ -2420,7 +2420,7 @@ SHOW CREATE VIEW 视图名称;
 
 语法：
 
-```SQL
+```sql
 CREATE PROCEDURE 存储过程名称(IN|OUT|INOUT 参数名 数据类型,...)
 [characteristic]
 BEGIN
@@ -2448,7 +2448,7 @@ END
 
 存储过程有多重调用方法，存储过程必须使用 CALL 语句调用，并且存储过程和数据库相关，如果要执行其他数据库中的存储过程，则需要制定数据库名称
 
-```SQL
+```sql
 CALL 存储过程名称(参数列表)
 ```
 
@@ -2456,13 +2456,13 @@ CALL 存储过程名称(参数列表)
 
 1. 调用 IN 模式的参数：
 
-```SQL
+```sql
 CALL 存储过程名(参数值1,参数值2,...)
 ```
 
 2. 调用 OUT 模式的参数：
 
-```SQL
+```sql
 SET @变量名;
 CALL 存储过程名(@变量名);
 SELECT @变量名;
@@ -2470,7 +2470,7 @@ SELECT @变量名;
 
 3. 调用 INOUT 模式的参数：
 
-```SQL
+```sql
 SET @变量名=参数值;
 CALL 存储过程名(@变量名);
 SELECT @变量名;
@@ -2535,7 +2535,7 @@ SELECT @变量名;
 
 根据条件执行不同的操作，语法格式：
 
-```SQL
+```sql
 IF 表达式1 THEN 操作1
 [ELSEIF 表达式2 THEN 操作2]……
 [ELSE 操作N]
@@ -2590,7 +2590,7 @@ END IF
 
 ### 创建触发器语法
 
-```SQL
+```sql
 CREATE TRIGGER 触发器名称
 {BEFORE|AFTER} {INSERT|UPDATE|DELETE} ON 表名
 FOR EACH ROW
