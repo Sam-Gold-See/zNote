@@ -22,7 +22,7 @@
 
 ### stirng 类型中以旧字符串初始化
 
-```
+```cpp
 string new_s= old_s.substr(pos,n);
 ```
 
@@ -30,7 +30,7 @@ string new_s= old_s.substr(pos,n);
 
 ### string 类型中字符替换
 
-```
+```cpp
 string new_s=old_s.replace(pos,len,use_s);
 ```
 
@@ -38,7 +38,7 @@ string new_s=old_s.replace(pos,len,use_s);
 
 ### lambda 函数
 
-```
+```cpp
 [capture](parameter_list) -> return_type {
     ...
 }
@@ -56,7 +56,7 @@ auto fun=[capture](parameter_list) -> return_type{
 
 ### to_string
 
-```
+```cpp
 int num=1000;
 string str=to_string(num); //str="1000"
 ```
@@ -65,7 +65,7 @@ string str=to_string(num); //str="1000"
 
 ### 迭代器与逆向迭代器
 
-```
+```cpp
 c.begin()=c.rend()+1
 c.rbegin()=c.end()-1
 ```
@@ -74,7 +74,7 @@ c.rbegin()=c.end()-1
 
 ### 遍历哈希表
 
-```
+```cpp
 unordered_map<int,int> umap;
 
 for(auto a:umap){
@@ -100,13 +100,13 @@ for(auto it=umap.begin();it!=umap.end();it++){
 
 ### accumulate 累加求和
 
-```
+```cpp
 int sum = accumulate(vec.begin(), vec.end(), first) //first为初始值
 ```
 
 ### 异或计算
 
-```
+```cpp
 同0异1
 
 1 ^ 0 = 1
