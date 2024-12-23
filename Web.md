@@ -98,14 +98,12 @@
 
 #### HTML 页面的基础结构标签
 
-```
+```html
 <html>
-	<head>
-    	<title> </title>
-    </head>
-    <body>
-
-    </body>
+  <head>
+    <title> </title>
+  </head>
+  <body></body>
 </html>
 ```
 
@@ -138,13 +136,13 @@
 
 1. 标题标签: `<h1>` - `<h6>`
 
-```
-	<h1>111111111111</h1>
-	<h2>111111111111</h2>
-	<h3>111111111111</h3>
-	<h4>111111111111</h4>
-	<h5>111111111111</h5>
-	<h6>111111111111</h6>
+```html
+<h1>111111111111</h1>
+<h2>111111111111</h2>
+<h3>111111111111</h3>
+<h4>111111111111</h4>
+<h5>111111111111</h5>
+<h6>111111111111</h6>
 ```
 
 2. 效果 : h1 为一级标题，字体也是最大的 ； h6 为六级标题，字体是最小的。
@@ -407,9 +405,9 @@ Cookie: JSESSIONID=560FA845D02AE09B176E1BC5D9816A5D
 - 选择器的名字必须是标签的名字
 - 作用：选择器中的样式会作用于所有同名的标签上
 
-```
+```css
 元素名称 {
-    css样式名:css样式值；
+  css样式名: css样式值；;
 }
 ```
 
@@ -418,9 +416,9 @@ Cookie: JSESSIONID=560FA845D02AE09B176E1BC5D9816A5D
 - 选择器的名字前面需要加上#
 - 作用：选择器中的样式会作用于指定 id 的标签上，而且有且只有一个标签（由于 id 是唯一的）
 
-```
+```css
 #id属性值 {
-    css样式名:css样式值；
+  css样式名: css样式值；;
 }
 ```
 
@@ -429,9 +427,9 @@ Cookie: JSESSIONID=560FA845D02AE09B176E1BC5D9816A5D
 - 选择器的名字前面需要加上 .
 - 作用：选择器中的样式会作用于所有 class 的属性值和该名字一样的标签上，可以是多个
 
-```
+```css
 .class属性值 {
-    css样式名:css样式值；
+  css样式名: css样式值；;
 }
 ```
 
@@ -531,7 +529,7 @@ JavaScript 是一门脚本语言，用于实现网页的动态效果，让页面
 
 - 第一种定义格式：
 
-```
+```js
 function 函数名(参数1,参数2..){
     要执行的代码
 }
@@ -545,7 +543,7 @@ function 函数名(参数1,参数2..){
 
 - 第二种定义格式：
 
-```
+```js
 var functionName = function (参数1,参数2..){
 	//要执行的代码
 }
@@ -601,12 +599,12 @@ JavaScript 中数组相当于 Java 中的集合，数组的长度是可以变化
 
 使用方法都是使用`.`来后接方法名，并传入相应的参数。
 
-```
-arr.forEach(function(e){
+```js
+arr.forEach(function (e) {
   console.log(e);
-})
+});
 
-arr.forEach((e)=>console.log(e))
+arr.forEach((e) => console.log(e));
 ```
 
 ##### String
@@ -642,12 +640,12 @@ String 对象是用来定义字符串
 
 **构造方法**
 
-```
+```js
 var 对象名 = {
-    属性名1: 属性值1,
-    属性名2: 属性值2,
-    属性名3: 属性值3,
-    函数名称: function(形参列表){}
+  属性名1: 属性值1,
+  属性名2: 属性值2,
+  属性名3: 属性值3,
+  函数名称: function (形参列表) {},
 };
 ```
 
@@ -659,7 +657,7 @@ JSON 对象：**J**ava**S**cript **O**bject **N**otation，JavaScript 对象标�
 
 **格式**：
 
-```
+```js
 {
   "key":value,
   "key":value,
@@ -859,15 +857,15 @@ typescript 属于编译时实施类型检查（静态类型）的技术
 
 ##### 标注变量
 
-```
-let message: string = 'hello,world'
+```js
+let message: string = "hello,world";
 ```
 
 - 一般可以省略，因为可以根据后面的字面量推断出前面变量类型
 
 ##### 标注参数
 
-```
+```js
 function greet(name: string): void {
   //...
 }
@@ -875,9 +873,9 @@ function greet(name: string): void {
 
 ##### 标注返回值
 
-```
-function add(a: number, b: number) : number {
-    return a + b
+```js
+function add(a: number, b: number): number {
+  return a + b;
 }
 ```
 
@@ -887,117 +885,121 @@ function add(a: number, b: number) : number {
 
 **type**
 
-```
+```js
 type Cat = {
   name: string,
-  age: number
-}
+  age: number,
+};
 
-const c1: Cat = { name: '小白', age: 1 }
-const c2: Cat = { name: '小花' }					  // 错误: 缺少 age 属性
-const c3: Cat = { name: '小黑', age: 1, sex: '公' } // 错误: 多出 sex 属性
+const c1: Cat = { name: "小白", age: 1 };
+const c2: Cat = { name: "小花" }; // 错误: 缺少 age 属性
+const c3: Cat = { name: "小黑", age: 1, sex: "公" }; // 错误: 多出 sex 属性
 ```
 
 **interface**
 
-```
+```js
 interface Cat {
-  name: string,
-  age: number
+  name: string;
+  age: number;
 }
 
-const c1: Cat = { name: '小白', age: 1 }
-const c2: Cat = { name: '小花' }					  // 错误: 缺少 age 属性
-const c3: Cat = { name: '小黑', age: 1, sex: '公' } // 错误: 多出 sex 属性
+const c1: Cat = { name: "小白", age: 1 };
+const c2: Cat = { name: "小花" }; // 错误: 缺少 age 属性
+const c3: Cat = { name: "小黑", age: 1, sex: "公" }; // 错误: 多出 sex 属性
 ```
 
 **可选属性**
 
-```
+```js
 interface Cat {
-  name: string,
-  age?: number
+  name: string;
+  age?: number;
 }
 
-const c1: Cat = { name: '小白', age: 1 }
-const c2: Cat = { name: '小花' }					  // 正确: age 属性可选
+const c1: Cat = { name: "小白", age: 1 };
+const c2: Cat = { name: "小花" }; // 正确: age 属性可选
 ```
 
 可选属性需要注意处理 `undefined` 值，否则会报错。
 
 ##### 方法类型
 
-```
+```js
 interface Api {
-  foo(): void,
-  bar(str: string): string
+  foo(): void;
+  bar(str: string): string;
 }
 
 function test(api: Api) {
-  api.foo()
-  console.log(api.bar('hello'))
+  api.foo();
+  console.log(api.bar("hello"));
 }
 
 test({
-  foo() { console.log('ok') },
-  bar(str: string) { return str.toUpperCase() }
-})
+  foo() {
+    console.log("ok");
+  },
+  bar(str: string) {
+    return str.toUpperCase();
+  },
+});
 ```
 
 ##### 字面量类型
 
-```
+```js
 function printText(s: string, alignment: "left" | "right" | "center") {
-  console.log(s, alignment)
+  console.log(s, alignment);
 }
 
-printText('hello', 'left')
-printText('hello', 'aaa') // 错误: 取值只能是 left | right | center
+printText("hello", "left");
+printText("hello", "aaa"); // 错误: 取值只能是 left | right | center
 ```
 
 ##### nullish 类型
 
-```
+```js
 function test(x?: string | null) {
-  console.log(x?.toUpperCase())
+  console.log(x?.toUpperCase());
 }
 
-test('aaa')
-test(null)
-test()
+test("aaa");
+test(null);
+test();
 ```
 
 - x?: string | null 表示可能是 undefined 或者是 string 或者是 null
 
 ##### 泛型
 
-```
+```js
 interface Ref<T> {
-  value: T
+  value: T;
 }
 
-const r1: Ref<string> = { value: 'hello' }
-const r2: Ref<number> = { value: 123 }
-const r3: Ref<boolean> = { value: true }
+const r1: Ref<string> = { value: "hello" };
+const r2: Ref<number> = { value: 123 };
+const r3: Ref<boolean> = { value: true };
 ```
 
 - 泛型的要点就是 `<类型参数>`，把【类型】也当作一个变化的要素，像参数一样传递过来，这样就可以派生出结构相似的新类型
 
 函数定义也支持泛型
 
-```
+```js
 function ref<T>(n: T): Ref<T> {
-  return { value: n }
+  return { value: n };
 }
 
-const v1 = ref("hello"); 	// Ref<string>
-const v2 = ref(123.3333);	// Ref<number>
+const v1 = ref("hello"); // Ref<string>
+const v2 = ref(123.3333); // Ref<number>
 
-v1.value.toLocaleLowerCase()
-v2.value.toFixed(2)
+v1.value.toLocaleLowerCase();
+v2.value.toFixed(2);
 ```
 
-## Vue
+## Vue-文档自学（废）
 
 Vue.js 是一套构建用户界面的 **渐进式框架**。与其他重量级框架不同的是，Vue 采用自底向上增量开发的设计。Vue 的核心库只关注视图层，并且非常容易学习，非常容易与其它库或已有项目整合。Vue.js 的目标是通过尽可能简单的 API 实现**响应的数据绑定**和**组合的视图组件**。
 
@@ -1035,7 +1037,7 @@ MVVM:其实是 Model-View-ViewModel 的缩写，有 3 个单词，具体释义�
 
 使用 `vite` 作为前端项目的打包、构建工具
 
-```
+```shell
 npm init vite@latest
 
 cd <my-project>
@@ -1045,7 +1047,7 @@ npm run dev
 
 #### 修改端口
 
-```
+```ts
 // vite.config.ts
 
 export default defineConfig({
@@ -1054,15 +1056,15 @@ export default defineConfig({
   server: {
     port: 3000,
     host: "0.0.0.0",
-  }
-})
+  },
+});
 ```
 
 #### 配置代理
 
 为了避免前后端服务器联调时，相关请求产生跨域问题，需要配置代理
 
-```
+```ts
 // vite.config.ts
 
 export default defineConfig({
@@ -1072,13 +1074,13 @@ export default defineConfig({
     //...
 
     proxy: {
-      '/api':{
-        target: 'http://localhost:4000',
+      "/api": {
+        target: "http://localhost:4000",
         changeOrigin: true,
-      }
-    }
-  }
-})
+      },
+    },
+  },
+});
 ```
 
 #### 项目结构
@@ -1113,11 +1115,11 @@ vite.config.ts
 
 每个 Vue 应用都是通过`createApp`函数创建一个新的应用实例
 
-```
-import { createApp } from 'vue'
+```js
+import { createApp } from "vue";
 const app = createApp({
   /* 根组件选项 */
-})
+});
 ```
 
 **根组件**`src/App.vue`：传入的`createApp`对象实际上是一个组件，每个应用都需要一个“根组件”，其他组件将作为其子组件嵌套在根组件下。
@@ -1126,7 +1128,7 @@ const app = createApp({
 
 Vue 组件文件是以`.vue`结尾，每个组件由三个部分组成
 
-```
+```vue
 <script setup lang="ts"></script>
 
 <template></template>
@@ -1140,11 +1142,11 @@ Vue 组件文件是以`.vue`结尾，每个组件由三个部分组成
 
 #### main.ts
 
-```
-import { createApp } from 'vue'
-import App from './App.vue'
+```ts
+import { createApp } from "vue";
+import App from "./App.vue";
 
-createApp(App).mount('#app')
+createApp(App).mount("#app");
 ```
 
 - createApp 就是创建一个 Vue 应用实例，它接受的参数 App 即根组件
@@ -1157,7 +1159,7 @@ createApp(App).mount('#app')
 
 - reactive 只能将对象类型变为【响应式】，对基本类型无效（例如 string，number，boolean）
 
-```
+```ts
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 const u1 = ref({ name: '张三' })
@@ -1185,7 +1187,7 @@ test()
 
 #### 属性绑定
 
-```
+```ts
 <script setup lang="ts">
 import { ref } from 'vue'
 const path = ref('/src/assets/vue.svg')
@@ -1201,7 +1203,7 @@ const path = ref('/src/assets/vue.svg')
 
 #### 事件绑定
 
-```
+```ts
 <script setup lang="ts">
 import { ref } from 'vue'
 const count = ref(0)
@@ -1236,10 +1238,8 @@ function inc() {
 
 #### 计算属性
 
-```
-computed(()=>{
-
-})
+```ts
+computed(() => {});
 ```
 
 - 计算属性具备缓存功能，即传入参数的值发生了变化，才会重新计算
@@ -1248,17 +1248,17 @@ computed(()=>{
 
 #### xhr 请求
 
-```
-const xhr = new XMLHttpRequest() // 创建 XMLHttpRequest 对象
+```ts
+const xhr = new XMLHttpRequest(); // 创建 XMLHttpRequest 对象
 
 // 当响应返回时，会触发 onload 事件
-xhr.onload = function() {
-  console.log(xhr.response) // 响应数据
-}
+xhr.onload = function () {
+  console.log(xhr.response); // 响应数据
+};
 
-xhr.open('Get', url) // 打开请求
-xhr.responseType = 'json' // 设置响应类型
-xhr.send() // 发送请求
+xhr.open("Get", url); // 打开请求
+xhr.responseType = "json"; // 设置响应类型
+xhr.send(); // 发送请求
 ```
 
 ### 模板语法
@@ -1271,7 +1271,7 @@ Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实�
 
 最基础的数据绑定形式是文本插值，使用的是 `{{ }}` 语法，该语法会被替换为相应组件实例中 `msg` 属性的值，每次 `msg` 属性更改时也会同步更新
 
-```
+```vue
 <span>Message: {{ message }}</span>
 ```
 
@@ -1289,7 +1289,7 @@ Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实�
 
 将常用的 `v-bind` 指令缩写为 `: `：
 
-```
+```vue
 <div :id="dynamicId"></div>
 ```
 
@@ -1297,7 +1297,7 @@ Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实�
 
 如果 attribute 的名称与绑定的 JavaScript 值的名称相同，那么可以进一步简化语法，省略 attribute 值：
 
-```
+```vue
 <!-- 与 :id="id" 等效 -->
 <div :id="id"></div>
 ```
@@ -1308,7 +1308,7 @@ Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实�
 
 `v-bind` 在这种场景下有所不同：
 
-```
+```vue
 <button :disabled="isButtonDisabled">Button</button>
 ```
 
@@ -1318,7 +1318,7 @@ Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实�
 
 ##### 动态绑定多个值
 
-```
+```ts
 const objectOfAttrs = {
   id: 'container',
   class: 'wrapper',
@@ -1350,7 +1350,7 @@ Vue 提供了很多内置指令， 指令 attribute 的期望值为一个 JavaSc
 
 某些指令需要一个参数，在指令后通过一个冒号 `:` 来指定参数
 
-```
+```vue
 <a :href="url">...</a>
 ```
 
@@ -1360,7 +1360,7 @@ Vue 提供了很多内置指令， 指令 attribute 的期望值为一个 JavaSc
 
 在指令参数上也可以使用一个 JavaScript 表达式，需要包含在 `[ ]` 内：
 
-```
+```vue
 <a :[key]="url">...</a>
 ```
 
@@ -1378,30 +1378,30 @@ Vue 提供了很多内置指令， 指令 attribute 的期望值为一个 JavaSc
 
 ##### `ref()`
 
-```
-import { ref } from 'vue'
+```ts
+import { ref } from "vue";
 
-const count = ref(0)
+const count = ref(0);
 ```
 
 `ref()` 接收参数，并将其包裹在一个带有 `.value` 属性的 ref 对象中返回
 
-```
-const count = ref(0)
+```ts
+const count = ref(0);
 
-console.log(count.value) // {{ value: 0 }}
-console.log(count) // 0
+console.log(count.value); // {{ value: 0 }}
+console.log(count); // 0
 
-count.value++
+count.value++;
 
-console.log(count.value) // 1
+console.log(count.value); // 1
 ```
 
 ##### `<script setup>`
 
 在 `setup()` 函数中手动暴露大量的状态和方法十分繁琐，可以通过单文件组件来避免，使用 `<script setup>` 来大幅度简化代码
 
-```
+```ts
 <script setup>
 import { ref } from 'vue'
 
@@ -1439,12 +1439,12 @@ Ref 可以持有任何类型的值，包括深层嵌套的对象、数组或者 
 
 要等待 DOM 更新完成后再执行额外的代码，可以使用 `nextTick()` 全局 API：
 
-```
-import { nextTick } from 'vue'
+```ts
+import { nextTick } from "vue";
 
 async function increment() {
-  count.value++
-  await nextTick()
+  count.value++;
+  await nextTick();
   // 现在 DOM 已经更新了
 }
 ```
@@ -1453,7 +1453,7 @@ async function increment() {
 
 使用**计算属性**来描述依赖响应式状态的复杂逻辑
 
-```
+```ts
 <script setup>
 import { ref, computed } from 'vue'
 
@@ -1480,9 +1480,9 @@ Vue 的计算属性会自动追踪响应式依赖。它会检测到 `publishedBo
 
 若使用
 
-```
+```ts
 function caculateBooksMessage() {
-  return books.value.length > 0 ? "yes" : "no"
+  return books.value.length > 0 ? "yes" : "no";
 }
 ```
 
@@ -1540,7 +1540,7 @@ function caculateBooksMessage() {
 
 可以使用 `v-for` 来渲染一个数字范围，会基于 `1 ... n`的取值范围来渲染。
 
-```
+```vue
 <span v-for="n in 10">{{ n }}</span>
 ```
 
@@ -1562,7 +1562,7 @@ function caculateBooksMessage() {
 
 常用于简单场景
 
-```
+```vue
 const count = ref(0)
 
 <button @click="count++">{{ count }}</button>
@@ -1572,7 +1572,7 @@ const count = ref(0)
 
 1. `$event`：原生 DOM 事件对象
 
-```
+```vue
 <!-- 使用特殊的 $event 变量 -->
 <button @click="warn('Form cannot be submitted yet.', $event)">
   Submit
@@ -1581,7 +1581,7 @@ const count = ref(0)
 
 2. 使用内联箭头函数
 
-```
+```vue
 <!-- 使用内联箭头函数 -->
 <button @click="(event) => warn('Form cannot be submitted yet.', event)">
   Submit
@@ -1592,7 +1592,7 @@ const count = ref(0)
 
 `v-on` 可以接受一个方法名或对某个方法的调用
 
-```
+```ts
 const name = ref('Vue.js')
 
 function greet(event) {
@@ -1621,7 +1621,7 @@ function greet(event) {
 - `.once`
 - `.passive`
 
-```
+```vue
 <!-- 单击事件将停止传递 -->
 <a @click.stop="doThis"></a>
 
@@ -1654,7 +1654,7 @@ function greet(event) {
 
 可以使用 `v-on` 监听按键事件时添加按键修饰符
 
-```
+```vue
 <!-- 仅在 `key` 为 `Enter` 时调用 `submit` -->
 <input @keyup.enter="submit" />
 ```
@@ -1682,7 +1682,7 @@ function greet(event) {
 
 `.exact` 修饰符允许精确控制触发事件所需的系统修饰符的组合
 
-```
+```vue
 <!-- 当按下 Ctrl 时，即使同时按下 Alt 或 Shift 也会触发 -->
 <button @click.ctrl="onClick">A</button>
 
@@ -1727,53 +1727,53 @@ v-model 还可以用于各种不同类型的输入，`<textarea>`、`<select>` �
 
 `onMounted` 钩子可以用来在组件完成初始渲染并创建 DOM 节点后运行代码
 
-```
+```vue
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted } from "vue";
 
 onMounted(() => {
-  console.log(`the component is now mounted.`)
-})
+  console.log(`the component is now mounted.`);
+});
 </script>
 ```
 
 `onUpdated` 钩子可以用来在组件完成重新渲染后运行代码
 
-```
+```vue
 <script setup>
-import { onUpdated } from 'vue'
+import { onUpdated } from "vue";
 
 onUpdated(() => {
-  console.log(`the component is now updated.`)
-})
+  console.log(`the component is now updated.`);
+});
 </script>
 ```
 
 `onBeforeMount` 钩子可以用来在组件开始渲染前运行代码
 
-```
+```vue
 <script setup>
-import { onBeforeMount } from 'vue'
+import { onBeforeMount } from "vue";
 
 onBeforeMount(() => {
-  console.log(`the component is about to be mounted.`)
-})
+  console.log(`the component is about to be mounted.`);
+});
 </script>
 ```
 
 `onBeforeUpdate` 钩子可以用来在组件重新渲染前运行代码
 
-```
+```vue
 <script setup>
-import { onBeforeUpdate } from 'vue'
+import { onBeforeUpdate } from "vue";
 
 onBeforeUpdate(() => {
-  console.log(`the component is about to be updated.`)
-})
+  console.log(`the component is about to be updated.`);
+});
 </script>
 ```
 
-## Ajax
+## Ajax-文档自学（废）
 
 Ajax: 全称 Asynchronous JavaScript And XML，异步的 JavaScript 和 XML
 
@@ -1944,3 +1944,775 @@ App-1
   - html 文件用于存储 Web 项目的页面文件
 
 最后可以通过项目结构来查看目前项目有什么环境依赖
+
+#### IDEA 部署、运行 WEB 项目
+
+> 检查 idea 是否识别 modules 为 web 项目并存在将项目构建成发布结构的配置
+
+- 检查工程目录下，Web 目录有无特殊标记（蓝圈）
+
+- 项目设置中，工件（artifacts） 下，有没有对应的输出目录
+
+- 编辑运行/调试配置，添加本地 Tomcat 服务器，然后在部署（development）中选择刚才创建的 Web Module，回到服务器（Server）选择中，默认打开浏览器并且输入对应地址访问项目，然后应用运行配置，运行项目
+
+> 工程结构和可以发布的项目结构之间的目录对应关系
+
+![工程结构和可以发布的项目结构之间的目录对应关系](img/Web_23.png)
+
+> IDEA 部署并运行项目的原理
+
+- idea 并没有直接进将编译好的项目放入 tomcat 的 webapps 中
+
+- idea 根据关联的 tomcat,创建了一个 tomcat 副本,将项目部署到了这个副本中
+
+- idea 的 tomcat 副本在 C:\用户\当前用户\AppData\Local\JetBrains\IntelliJIdea2022.2\tomcat\中
+
+- idea 的 tomcat 副本并不是一个完整的 tomcat,副本里只是准备了和当前项目相关的配置文件而已
+
+- idea 启动 tomcat 时,是让本地 tomcat 程序按照 tomcat 副本里的配置文件运行
+- idea 的 tomcat 副本部署项目的模式是通过 conf/Catalina/localhost/\*.xml 配置文件的形式实现项目部署的
+
+![IDEA 部署并运行项目的原理](img/Web_24.png)
+
+## HTTP 简介
+
+![HTTP 协议](img/Web_25.png)
+
+> **HTTP 超文本传输协议** (HTTP-Hyper Text transfer protocol)，是一个属于应用层的面向对象的协议，由于其简捷、快速的方式，适用于分布式超媒体信息系统。它于 1990 年提出，经过十几年的使用与发展，得到不断地完善和扩展。**它是一种详细规定了浏览器和万维网服务器之间互相通信的规则**，通过因特网传送万维网文档的数据传送协议。客户端与服务端通信时传输的内容我们称之为**报文**。**HTTP 协议就是规定报文的格式。**HTTP 就是一个通信规则，这个规则规定了客户端发送给服务器的报文格式，也规定了服务器发送给客户端的报文格式。实际我们要学习的就是这两种报文。**客户端发送给服务器的称为"请求报文"**，**服务器发送给客户端的称为"响应报文"**。
+
+### HTTP 协议的会话方式
+
+浏览器与服务器之间的通信过程要经历四个步骤：
+
+![浏览器与服务器之间的通信过程](img/Web_26.png)
+
+- 浏览器和 Web 服务器的连接过程是短暂的，每次连接只处理一个请求和响应。对每一个页面的访问，浏览器与 Web 服务器都要建立一次单独的连接
+
+- 浏览器到 Web 服务器之间的所有通讯都是完全独立分开的请求和响应对
+
+### 请求和相应报文
+
+#### 报文格式
+
+> 主体上氛围报文首部和报文主体，中间空行隔开
+
+![报文格式](img/Web_27.png)
+
+> 报文部首可以继续细分为“行”和“头”
+
+![报文部首](img/Web_28.png)
+
+#### 请求报文
+
+> 客户端发送给服务端的报文
+
+- 请求格式报文
+
+  - 请求首行（**请求行**）；GET/POST 资源路径?参数 HTTP/1.1
+
+  - 请求头信息（**请求头**）；
+
+  - 空行；
+
+  - 请求体；POST 请求才有请求体
+
+##### GET 请求
+
+> form 表单发送 GET 请求特点
+
+1. 由于请求参数在请求首行中已经携带了，所以没有请求体，也没有请求空行
+
+2. 请求参数拼接在 url 地址中，地址栏可见（url?name1=value1\&name2=value2），不安全
+
+3. 由于参数在地址栏中携带，所以由大小限制（地址栏数据大小一般限制为 4k），只能携带纯文本
+
+4. get 请求参数只能上传文本数据
+
+5. 没有请求体。所以封装和解析都快，效率高， 浏览器默认提交的请求都是 get 请求比如：地址栏输入回车,超链接,表单默认的提交方式
+
+> 查看 GET 请求行，请求头，请求体
+
+- 请求行组成部分
+
+  - 请求方式 GET
+
+  - 访问服务器的资源路径?参数一=值一&参数二=值二
+
+  - 协议及版本 HTTP/1.1
+
+`GET /index.html?name1=value1&name2=value2 HTTP/1.1`
+
+- 请求头
+
+- 请求空行
+
+- 请求体
+
+  - GET 请求数据不放在请求体
+
+##### POST 请求
+
+> form 表单发送 POST 请求特点
+
+1. POST 请求有请求体，而 GET 请求没有请求体。
+
+2. post 请求数据在请求体中携带，请求体数据大小没有限制，可以用来上传所有内容（文件、文本）
+
+3. 只能使用 post 请求上传文件
+
+4. post 请求报文多了和请求体相关的配置\[请求头]
+
+5. 地址栏参数不可见，相对安全
+
+6. post 效率比 get 低
+
+> 查看 post 的请求行 请求头 请求体
+
+- 请求行组成部分
+
+  - 请求方式 POST
+
+  - 访问服务器的资源路径
+
+  - 协议及版本 HTTP/1.1
+
+`POST /index.html HTTP/1.1`
+
+- 请求头
+
+- 请求空行
+
+- 请求体：路蓝旗提交给服务器的数据
+
+`username=admin&password=123456`
+
+#### 响应报文
+
+> 响应报文格式
+
+- 响应首行（**响应行**）； 协议/版本 状态码 状态码描述
+
+```
+HTTP/1.1 200 OK
+说明：响应协议为HTTP1.1，响应状态码为200，表示请求成功；
+```
+
+- 响应头信息（**响应头**）；
+
+- 空行；
+
+- 响应体；
+
+> 响应状态码：响应码对浏览器来说很重要，它告诉浏览器响应的结果。比较有代表性的响应码如下
+
+- **200：** 请求成功，浏览器会把响应体内容（通常是 html）显示在浏览器中；
+
+- **302：** 重定向，当响应码为 302 时，表示服务器要求浏览器重新再发一个请求，服务器会发送一个响应头 Location 指定新请求的 URL 地址；
+
+- **304：** 使用了本地缓存
+
+- **404：** 请求的资源没有找到，说明客户端错误的请求了不存在的资源；
+
+- **405：** 请求的方式不允许
+
+- **500：** 请求资源找到了，但服务器内部出现了错误；
+
+## Servlet
+
+### 动态资源和静态资源
+
+- 静态资源
+
+  - 无需在程序运行时，通过代码运行生成的资源，在程序运行之前就写好的资源，如：html css js img，音频文件和视频文件
+
+- 动态资源
+
+  - 需要在程序运行时通过代码运行生成的资源，在程序运行之前无法确定的数据，运行时动态生成，如 Servlet、Thymeleaf
+
+  - 动态资源指的不是试图上的动画效果或是简单的人机互动效果
+
+### Servlet 简介
+
+> Servlet (server applet) 是运行在服务端(tomcat)的 Java 小程序，是 sun 公司提供一套定义动态资源规范; 从代码层面上来讲 Servlet 就是一个接口
+
+- 用来接收、处理客户端请求、响应给浏览器的动态资源。在整个 Web 应用中，Servlet 主要负责接收处理请求、协同调度功能以及响应数据。我们可以把 Servlet 称为 Web 应用中的**控制器**
+
+![Web 应用过程](img/Web_29.png)
+
+- 不是所有 Java 类都可以用于处理客户端请求，能处理客户端请求并做出响应的一套技术标准就是 Servlet
+
+- Sercket 试运行在服务端的，所以 Servlet 必须在 Web 项目中开发，且在 Tomcat 这样的服务器中运行
+
+> 请求响应与 HttpServletRequest 和 HttpServletResponse 之间的对应关系
+
+![请求响应与 HttpServletRequest 和 HttpServletResponse 之间的对应关系](img/Web_30.png)
+
+1. Tomcat 接收到请求后，会将请求报文的信息转换成一个 HttpServletRequest 对象，该对象中包含了请求报文中的所有信息
+
+2. Tomcat 同时创建了一个 HttpServletResponse 对象，该对象用于承装要响应给客户端的信息，该对象会被转换成响应报文
+
+3. Tomcat 根据请求中的资源路径找到对应的 servlet，将 servlet 实例化，调用 service 方法，同时将 HttpServletRequest 和 HttpServletResponse 对象作为参数传入
+
+#### 开发 Servlet 过程
+
+- 步骤一：开发一个 web 类型的 module
+
+- 步骤二：开发一个 UserServlet 类，继承 HttpServlet 类
+
+```java
+public class UserServlet extends HttpServlet {
+  protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    // 1. 从request对象中获取请求的所有信息（参数）
+      String username = request.getParameter("username");// 根据参数名获取参数值
+    // 2. 根据参数生成要响应给客户端的数据
+      String info = "YES";
+      if(username.equals("admin"))
+        info = "NO";
+    // 3. 将相应的数据放入response对象
+      PrintWriter writer = response.getWriter();
+      writer.write(info);
+  }
+}
+```
+
+- 步骤三：在 web.xml 中为 UserServlet 配置请求的映射路径
+
+```xml
+<servlet>
+  <!--给UserServlet起一个别名-->
+  <servlet-name>UserServlet</servlet-name>
+  <servlet-class>com.example.UserServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+  <!--关联别名和映射路径-->
+  <servlet-name>userServlet</servlet-name>
+  <!--可以为一个Servlet匹配多个不同的映射路径,但是不同的Servlet不能使用相同的url-pattern-->
+  <url-pattern>/userServlet</url-pattern>
+  <!-- <url-pattern>/userServlet2</url-pattern>-->
+  <!--
+      /        表示通配所有资源,不包括jsp文件
+      /*       表示通配所有资源,包括jsp文件
+      /a/*     匹配所有以a前缀的映射路径
+      *.action 匹配所有以action为后缀的映射路径
+  -->
+  <!-- <url-pattern>/*</url-pattern>-->
+</servlet-mapping>
+```
+
+- 步骤四：开发一个 form 表单，向 servlet 发送一个 get 请求并携带 username 参数
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Title</title>
+  </head>
+  <body>
+    <form action="userServlet">
+      请输入用户名:<input type="text" name="username" /> <br />
+      <input type="submit" value="校验" />
+    </form>
+  </body>
+</html>
+```
+
+1. servlet-api.jar 导入：
+
+- servlet-api 在编码时候需要，在运行的时候，在服务器的环境中，由服务软件（Tomcat）提供，因此我们的 JavaWeb 项目中，在打包/构建的时候，是无需携带 servlet-api.jar 的。
+
+2. Content-Type 响应头：
+
+- MINE 类型响应头 媒体类型，文件类型，响应的数据类型
+
+- MINE 类型用于告诉客户端相应的数据是什么类型的数据，客户端以此类型决定用什么方式解析响应体。
+
+- 设置 Content-Type 响应头
+
+```java
+response.setHeader("Content-Type", "text/html;charset=UTF-8");
+
+response.setContentType("text/html;charset=UTF-8");
+```
+
+- 一个 servlet-name 可以同时对应多个 servlet-mapping, url-pattern
+
+- 不同的 servlet 不能使用相同的 url-pattern
+
+- url-pattern 匹配规则：
+
+  - url-pattern 精确匹配：/userServlet
+
+  - url-pattern 通配符匹配：
+
+    - `/*`， \*代表模糊
+
+    - `/`，匹配全部，不包含 jsp 文件
+
+    - `/*`，匹配全部，包含 jsp 文件
+
+    - `/a/*`，匹配以 a 开头的路径，不包含 jsp 文件
+
+    - `*.action`，匹配以 action 结尾的路径，不包含 jsp 文件
+
+- `@WebServlet(urlPatterns = {"/userServlet"})`/`WebServlet("/userServlet")`使用注解配置可以省略 xml 配置，但是两种方式不能同时使用
+
+- `<load-on-startup>`标签（在`<servlet>`标签中）：默认值-1 代表 tomcat 启动时不会实例化该 servlet，设置值大于 0 时，代表在启动时就实例化该 servlet，设置值越小，启动时实例化的优先级越高。
+
+- `default-servlet`：默认 servlet 是指当服务器找不到请求的资源时，会默认调用的 servlet，可以配置多个 default-servlet，但是只能有一个 default-servlet 被激活。
+
+#### Servlet 生命周期
+
+##### 生命周期简介
+
+> 什么是 Servlet 生命周期？
+
+- 应用程序中的对象不仅在空间上有层次结构的关系，在时间上也会因为处于程序运行中的不同阶段而表现出不同状态和不同行为——这就是对象的生命周期
+
+- 简单的叙述生命周期，就是对象在容器中从开始创建到销毁的过程
+
+> Servlet 容器
+
+- Servlet 对象是 Servlet 容器创建的，生命周期方法都是由容器（目前我们使用的是 Tomcat）调用的。
+
+> Servlet 主要的生命周期执行特点
+
+| 生命周期 | 对应方法                                                 | 执行时机               | 执行次数 |
+| -------- | -------------------------------------------------------- | ---------------------- | -------- |
+| 构造对象 | 构造器                                                   | 第一次请求或者容器启动 | 1        |
+| 初始化   | init()                                                   | 构造完毕后             | 1        |
+| 处理服务 | service(HttpServletRequest req,HttpServletResponse resp) | 每次请求               | 多次     |
+| 销毁     | destory()                                                | 容器关闭               | 1        |
+
+#### Servlet 继承结构
+
+##### Servlet 接口
+
+Servlet 规范接口,所有的 Servlet 必须实现
+
+- public void init(ServletConfig config) throws ServletException;
+
+  - 初始化方法,容器在构造 servlet 对象后,自动调用的方法,容器负责实例化一个 ServletConfig 对象,并在调用该方法时传入
+
+  - ServletConfig 对象可以为 Servlet 提供初始化参数
+
+- public ServletConfig getServletConfig();
+
+  - 获取 ServletConfig 对象的方法,后续可以通过该对象获取 Servlet 初始化参数
+
+- public void service(ServletRequest req, ServletResponse res) throws ServletException, IOException;
+
+  - 处理请求并做出响应的服务方法,每次请求产生时由容器调用
+
+  - 容器创建一个 ServletRequest 对象和 ServletResponse 对象,容器在调用 service 方法时,传入这两个对象
+
+- public String getServletInfo();
+
+  - 获取 ServletInfo 信息的方法
+
+- public void destroy();
+
+  - Servlet 实例在销毁之前调用的方法
+
+##### GenericServlet 抽象类
+
+GenericServlet 抽象类是对 Servlet 接口一些固定功能的粗糙实现,以及对 service 方法的再次抽象声明,并定义了一些其他相关功能方法，侧重于除了 service 方法外的实现
+
+- private transient ServletConfig config;
+
+  - 初始化配置对象作为属性
+
+- public GenericServlet() { }
+
+  - 构造器,为了满足继承而准备
+
+- public void destroy() { }
+
+  - 销毁方法的平庸实现
+
+- public String getInitParameter(String name)
+
+  - 获取初始参数的快捷方法
+
+- public Enumeration<String> getInitParameterNames()
+
+  - 返回所有初始化参数名的方法
+
+- public ServletConfig getServletConfig()
+
+  - 获取初始 Servlet 初始配置对象 ServletConfig 的方法
+
+- public ServletContext getServletContext()
+
+  - 获取上下文对象 ServletContext 的方法
+
+- public String getServletInfo()
+
+  - 获取 Servlet 信息的平庸实现
+
+- public void init(ServletConfig config) throws ServletException()
+
+  - 初始化方法的实现,并在此调用了 init 的重载方法
+
+- public void init() throws ServletException
+
+  - 重载 init 方法,为了让我们自己定义初始化功能的方法
+
+- public void log(String msg)
+
+- public void log(String message, Throwable t)
+
+  - 打印日志的方法及重载
+
+- public abstract void service(ServletRequest req, ServletResponse res) throws ServletException, IOException;
+
+  - 服务方法再次声明
+
+- public String getServletName()
+
+  - 获取 ServletName 的方法
+
+##### HttpServlet 抽象类
+
+abstract class HttpServlet extends GenericServlet HttpServlet 抽象类,除了基本的实现以外,增加了更多的基础功能，侧重于 service 方法的具体实现
+
+- private static final String METHOD_DELETE = "DELETE";
+
+- private static final String METHOD_HEAD = "HEAD";
+
+- private static final String METHOD_GET = "GET";
+
+- private static final String METHOD_OPTIONS = "OPTIONS";
+
+- private static final String METHOD_POST = "POST";
+
+- private static final String METHOD_PUT = "PUT";
+
+- private static final String METHOD_TRACE = "TRACE";
+
+  - 上述属性用于定义常见请求方式名常量值
+
+- public HttpServlet() {}
+
+  - 构造器,用于处理继承
+
+- public void service(ServletRequest req, ServletResponse res) throws
+  ServletException, IOException
+
+  - 对服务方法的实现
+
+  - 在该方法中,将请求和响应对象转换成对应 HTTP 协议的 HttpServletRequest HttpServletResponse 对象
+
+  - 调用重载的 service 方法
+
+- public void service(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException
+
+  - 重载的 service 方法,被重写的 service 方法所调用
+
+  - 在该方法中,通过请求方式判断,调用具体的 do\*\*\*方法完成请求的处理
+
+- protected void doGet(HttpServletRequest req, HttpServletResponse
+  resp) throws ServletException, IOException
+
+- protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+- protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+- protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+- protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+- protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+- protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+
+  - 对应不同请求方式的处理方法
+
+  - 除了 doOptions 和 doTrace 方法,其他的 do\*\*\* 方法都在故意响应错误信息
+
+##### 继承结构图解
+
+![Servlet 继承结构图解](img/Web_31.png)
+
+#### ServletConfig 和 ServletContext
+
+> ServletConfig 是什么
+
+- 为 Servlet 提供初始配置参数的一种对象，每个 Servlet 都有自己独立唯一的 ServletConfig 对象
+
+- 容器会为每个 Servlet 实例化一个 ServletConfig 对象，并通过 Servlet 生命周期的 init 方法传入 Servlet 作为属性
+
+![ServletConfig 对象作用过程](img/Web_32.png)
+
+> ServletConfig 是一个接口，定义了如下 API
+
+```java
+package jakarta.servlet;
+import java.util.Enumeration;
+public interface ServletConfig {
+    String getServletName();
+    ServletContext getServletContext();
+    String getInitParameter(String var1);
+    Enumeration<String> getInitParameterNames();
+}
+```
+
+| 方法名                  | 作用                                                               |
+| ----------------------- | ------------------------------------------------------------------ |
+| getServletName()        | 获取\<servlet-name>HelloServlet\</servlet-name>定义的 Servlet 名称 |
+| getServletContext()     | 获取 ServletContext 对象                                           |
+| getInitParameter()      | 获取配置 Servlet 时设置的『初始化参数』，根据名字获取值            |
+| getInitParameterNames() | 获取所有初始化参数名组成的 Enumeration 对象                        |
+
+> ServletContext 是什么
+
+- ServletContext 对象又称呼为上下文对象，或者叫应用域对象
+
+- 容器会为每个 app 创建一个独立的唯一的 ServletContext 对象
+
+- ServletContext 对象为所有的 Servlet 所共享
+
+- ServletContext 可以为所有的 Servlet 提供初始配置参数
+
+![ServletContext 对象作用过程](img/Web_33.png)
+
+> ServletContext 用法
+
+- 配置 ServletContext 参数
+
+```xml
+    <context-param>
+        <param-name>paramA</param-name>
+        <param-value>valueA</param-value>
+    </context-param>
+    <context-param>
+        <param-name>paramB</param-name>
+        <param-value>valueB</param-value>
+    </context-param>
+```
+
+- 获取 ServletContext 对象
+
+```java
+ServletContext servletContext1 = servletConfig.etServletContext();
+ServletContext servletContext2=req.getServletContext();ServletContext servletContext3=getServletContext();
+```
+
+- 获取 ServletContext 参数
+
+```java
+String paramA = servletContext1.getInitParameter("paramA");
+String paramB = servletContext1.getInitParameter("paramB");
+
+Enumeration<String> paramNames = servletContext1.getInitParameterNames();
+while(paramNames.hasMoreElements())
+  String paramName = paramNames.nextElement();
+```
+
+##### ServletContext 的重要 API
+
+> 获取资源的真实路径
+
+```java
+String realPath = getServletContext().getRealPath("资源在web目录中的路径");
+```
+
+- 如果目标是需要获取项目中某个静态资源的路径，不是工程目录中的路径，而是**部署目录中的路径**；如果直接拷贝其在电脑中的完整路径的话其实是有问题的，因为如果该项目以后部署到公司服务器上的话，路径肯定是会发生改变的，所以需要使用代码动态获取资源的真实路径. 只要使用了 servletContext 动态获取资源的真实路径，**那么无论项目的部署路径发生什么变化，都会动态获取项目运行时候的实际路径**，所以就不会发生由于写死真实路径而导致项目部署位置改变引发的路径错误问题
+
+> 获取请求的上下文路径
+
+```java
+String contextPath = getServletContext().getContextPath();
+```
+
+- 项目的部署名称,也叫项目的上下文路径,在部署进入 tomcat 时所使用的路径,该路径是可能发生变化的,通过该 API 动态获取项目真实的上下文路径,可以**帮助解决一些后端页面渲染技术或者请求转发和响应重定向中的路径问题**
+
+> 域对象的相关 API
+
+- 域对象: 一些用于存储数据和传递数据的对象,传递数据不同的范围,称之为不同的域,不同的域对象代表不同的域,共享数据的范围也不同
+
+- ServletContext 代表应用,所以 ServletContext 域也叫作应用域,是 webapp 中最大的域,可以在本应用内实现数据的共享和传递
+
+- webapp 中的三大域对象,分别是应用域,会话域,请求域
+
+- 三大域对象都具有的 API 如下
+
+| API                                         | 功能解释            |
+| ------------------------------------------- | ------------------- |
+| void setAttribute(String key,Object value); | 向域中存储/修改数据 |
+| Object getAttribute(String key);            | 获得域中的数据      |
+| void removeAttribute(String key);           | 移除域中的数据      |
+
+#### HttpServletRequest
+
+##### HttpServletRequest 简介
+
+> HttpServletRequest 是什么
+
+- HttpServletRequest 是一个接口,其父接口是 ServletRequest
+
+- HttpServletRequest 是 Tomcat 将请求报文转换封装而来的对象,在 Tomcat 调用 service 方法时传入
+
+- HttpServletRequest 代表客户端发来的请求,所有请求中的信息都可以通过该对象获得
+
+##### HttpServletRequest 常见 API
+
+- 获取请求行信息相关(方式,请求的 url,协议及版本)
+
+| API                           | 功能解释                       |
+| ----------------------------- | ------------------------------ |
+| StringBuffer getRequestURL(); | 获取客户端请求的 url           |
+| String getRequestURI();       | 获取客户端请求项目中的具体资源 |
+| int getServerPort();          | 获取客户端发送请求时的端口     |
+| int getLocalPort();           | 获取本应用在所在容器的端口     |
+| int getRemotePort();          | 获取客户端程序的端口           |
+| String getScheme();           | 获取请求协议                   |
+| String getProtocol();         | 获取请求协议及版本号           |
+| String getMethod();           | 获取请求方式                   |
+
+- 获得请求头信息相关
+
+| API                                   | 功能解释                 |
+| ------------------------------------- | ------------------------ |
+| String getHeader(String headerName);  | 根据头名称获取请求头     |
+| Enumeration<String> getHeaderNames(); | 获取所有的请求头名字     |
+| String getContentType();              | 获取 content-type 请求头 |
+
+- 获得请求参数相关
+
+| API                                                     | 功能解释                             |
+| ------------------------------------------------------- | ------------------------------------ |
+| String getParameter(String parameterName);              | 根据请求参数名获取请求单个参数值     |
+| String[] getParameterValues(String parameterName);      | 根据请求参数名获取请求多个参数值数组 |
+| Enumeration<String> getParameterNames();                | 获取所有请求参数名                   |
+| Map<String, String[]> getParameterMap();                | 获取所有请求参数的键值对集合         |
+| BufferedReader getReader() throws IOException;          | 获取读取请求体的字符输入流           |
+| ServletInputStream getInputStream() throws IOException; | 获取读取请求体的字节输入流           |
+| int getContentLength();                                 | 获得请求体长度的字节数               |
+
+- 其他 API
+
+| API                                          | 功能解释                      |
+| -------------------------------------------- | ----------------------------- |
+| String getServletPath();                     | 获取请求的 Servlet 的映射路径 |
+| ServletContext getServletContext();          | 获取 ServletContext 对象      |
+| Cookie[] getCookies();                       | 获取请求中的所有 cookie       |
+| HttpSession getSession();                    | 获取 Session 对象             |
+| void setCharacterEncoding(String encoding) ; | 设置请求体字符集              |
+
+#### HttpServletResponse
+
+##### HttpServletResponse 简介
+
+> HttpServletResponse 是什么
+
+- HttpServletResponse 是一个接口,其父接口是 ServletResponse
+
+- HttpServletResponse 是 Tomcat 预先创建的,在 Tomcat 调用 service 方法时传入
+
+- HttpServletResponse 代表对客户端的响应,该对象会被转换成响应的报文发送给客户端,通过该对象我们可以设置响应信息
+
+##### HttpServletResponse 常见 API
+
+- 设置响应行相关
+
+| API                       | 功能解释       |
+| ------------------------- | -------------- |
+| void setStatus(int code); | 设置响应状态码 |
+
+- 设置响应头相关
+
+| API                                                    | 功能解释                                             |
+| ------------------------------------------------------ | ---------------------------------------------------- |
+| void setHeader(String headerName, String headerValue); | 设置/修改响应头键值对                                |
+| void setContentType(String contentType);               | 设置 content-type 响应头及响应字符集(设置 MIME 类型) |
+
+- 设置响应体相关
+
+| API                                                       | 功能解释                                                  |
+| --------------------------------------------------------- | --------------------------------------------------------- |
+| PrintWriter getWriter() throws IOException;               | 获得向响应体放入信息的字符输出流                          |
+| ServletOutputStream getOutputStream() throws IOException; | 获得向响应体放入信息的字节输出流                          |
+| void setContentLength(int length);                        | 设置响应体的字节长度,其实就是在设置 content-length 响应头 |
+
+- 其他 API
+
+| API                                                          | 功能解释                                            |
+| ------------------------------------------------------------ | --------------------------------------------------- |
+| void sendError(int code, String message) throws IOException; | 向客户端响应错误信息的方法,需要指定响应码和响应信息 |
+| void addCookie(Cookie cookie);                               | 向响应体中增加 cookie                               |
+| void setCharacterEncoding(String encoding);                  | 设置响应体字符集                                    |
+
+> MIME 类型
+
+- MIME 类型,可以理解为文档类型,用户表示传递的数据是属于什么类型的文档
+
+- 浏览器可以根据 MIME 类型决定该用什么样的方式解析接收到的响应体数据
+
+- 可以这样理解: 前后端交互数据时,告诉对方发给对方的是 html/css/js/图片/声音/视频/... ...
+
+- tomcat/conf/web.xml 中配置了常见文件的拓展名和 MIMIE 类型的对应关系
+
+- 常见的 MIME 类型举例如下
+
+| 文件拓展名                  | MIME 类型              |
+| --------------------------- | ---------------------- |
+| .html                       | text/html              |
+| .css                        | text/css               |
+| .js                         | application/javascript |
+| .png /.jpeg/.jpg/... ...    | image/jpeg             |
+| .mp3/.mpe/.mpeg/ ... ...    | audio/mpeg             |
+| .mp4                        | video/mp4              |
+| .m1v/.m1v/.m2v/.mpe/... ... | video/mpeg             |
+
+#### 请求转发和响应重定向
+
+- 请求转发和响应重定向是 web 应用中间接访问项目资源的两种手段,也是 Servlet 控制页面跳转的两种手段
+
+- 请求转发通过 HttpServletRequest 实现,响应重定向通过 HttpServletResponse 实现
+
+##### 请求转发
+
+![请求转发逻辑图](img/Web_34.png)
+
+- 请求转发通过 HttpServletRequest 对象获取请求转发器实现
+
+- 请求转发是服务器内部的行为,对客户端是屏蔽的
+
+- 客户端只发送了一次请求,客户端地址栏不变
+
+- 服务端只产生了一对请求和响应对象,这一对请求和响应对象会继续传递给下一个资源
+
+- 因为全程只有一个 HttpServletRequset 对象,所以请求参数可以传递,请求域中的数据也可以传递
+
+- 请求转发可以转发给其他 Servlet 动态资源,也可以转发给一些静态资源以实现页面跳
+  转
+
+- 请求转发可以转发给 WEB-INF 下受保护的资源，该方式也是 WEB-INF 下的资源唯一访问方式
+
+- 请求转发不能转发到本项目以外的外部资源
+
+##### 响应重定向
+
+![响应重定向逻辑图](img/Web_35.png)
+
+- 响应重定向通过 HttpServletResponse 对象的 sendRedirect 方法实现
+
+- 响应重定向是服务端通过 302 响应码和路径,告诉客户端自己去找其他资源,是在服务端提示下的,客户端的行为
+
+- 客户端至少发送了两次请求,客户端地址栏是要变化的
+
+- 服务端产生了多对请求和响应对象,且请求和响应对象不会传递给下一个资源
+
+- 因为全程产生了多个 HttpServletRequset 对象,所以请求参数不可以传递,请求域中的数据也不可以传递
+
+- 重定向可以是其他 Servlet 动态资源,也可以是一些静态资源以实现页面跳转
+
+- 重定向不可以到给 WEB-INF 下受保护的资源
+
+- 重定向可以到本项目以外的外部资源
+
+##### 总结
+
+同样能实现页面跳转，优先使用响应重定向
