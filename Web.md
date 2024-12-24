@@ -2820,3 +2820,15 @@ String contextPath = getServletContext().getContextPath();
   1. web 目录下的视图资源 html css js img 等
 
   2. 前端工程化后,在后端项目中已经不存在了
+
+**非前后端分离的 MVC**
+
+![非前后端分离的 MVC](img/Web_37.png)
+
+**前后端分离的 MVC**
+
+![前后端分离的 MVC](img/Web_38.png)
+
+**项目结构**
+
+![项目结构](img/Web_39.png)
