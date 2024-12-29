@@ -1033,7 +1033,7 @@ Sticky Bit 粘滞位（若赋予其他人执行权限会覆盖 t 权限）
 
 输入如下指令进行配置网络
 
-`vi /etc/sysconfig/network-scripts/ificg-ens33`
+`vi /etc/sysconfig/network-scripts/ifcfg-ens33`
 
 使用`i`指令进入 INSERT 编辑模式
 
