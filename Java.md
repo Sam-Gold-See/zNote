@@ -3207,10 +3207,10 @@ Logback 是基于 slf4j 的日志规范实现的框架，性能比之前使用�
 <configuration>
     <!-- CONSOLE ：表示当前的日志信息是可以输出到控制台的 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <!--输出流对象 默认 System.out 改为 System.err  其中err：控制台输出日志为红色，而out为黑色-->
+        <!-- 输出流对象 默认 System.out 改为 System.err  其中err：控制台输出日志为红色，而out为黑色 -->
         <target>System.out</target>
         <encoder>
-            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符-->
+            <!-- 格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度 %msg：日志消息，%n是换行符 -->
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level]  %c [%thread] : %msg%n</pattern>
         </encoder>
     </appender>
@@ -3221,14 +3221,14 @@ Logback 是基于 slf4j 的日志规范实现的框架，性能比之前使用�
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
             <charset>utf-8</charset>
         </encoder>
-        <!--日志输出路径(logback_message.log是文档名，下方还有一处文件名（不用写.log）)-->
+        <!-- 日志输出路径(logback_message.log是文档名，下方还有一处文件名（不用写.log）) -->
         <file>C:\Hcx\Code\Java\log\test.log</file>
-        <!--指定日志文件拆分和压缩规则（防止文件过大）-->
+        <!-- 指定日志文件拆分和压缩规则（防止文件过大） -->
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <!--通过指定压缩文件名称，来确定分割文件方式-->
+            <!-- 通过指定压缩文件名称，来确定分割文件方式 -->
             <fileNamePattern>C:\Hcx\Code\Java\log\test-%d{yyyy-MMdd}.log%i.gz</fileNamePattern>
-            <maxFileSize>1MB</maxFileSize> <!--文件拆分大小-->
+            <maxFileSize>1MB</maxFileSize> <!-- 文件拆分大小 -->
         </rollingPolicy>
     </appender>
 
@@ -3236,8 +3236,8 @@ Logback 是基于 slf4j 的日志规范实现的框架，性能比之前使用�
     level:用来设置打印级别，大小写无关：TRACE, DEBUG, INFO, WARN, ERROR, ALL 和 OFF (关掉)， 默认debug（可忽略大小写）
     <root>可以包含零个或多个<appender-ref>元素，标识这个输出位置将会被本日志级别控制。
     -->
-    <root level="INFO"> <!--打印规则：只打印不低于当前级别的日志-->
-        <appender-ref ref="CONSOLE"/> <!--如果这个地方不配置关联打印的位置，改位置将不会记录日志-->
+    <root level="INFO"> <!-- 打印规则：只打印不低于当前级别的日志 -->
+        <appender-ref ref="CONSOLE"/> <!-- 如果这个地方不配置关联打印的位置，改位置将不会记录日志 -->
         <appender-ref ref="FILE" />
     </root>
 </configuration>
@@ -3934,13 +3934,13 @@ Maven 的作用：
 
 ```xml
 <mirror>
-  <!--此镜像的唯一标识符，用来区分不同的mirror元素-->
+  <!-- 此镜像的唯一标识符，用来区分不同的mirror元素 -->
   <id>nexus-aliyun</id>
-  <!--对哪种仓库进行镜像，简单来说就是替代哪个仓库-->
+  <!-- 对哪种仓库进行镜像，简单来说就是替代哪个仓库 -->
   <mirrorOf>central</mirrorOf>
-  <!--镜像名称-->
+  <!-- 镜像名称 -->
   <name>Nexus aliyun</name>
-  <!--镜像url-->
+  <!-- 镜像url -->
   <url>http://maven.aliyun.com/nexus/content/groups/public</url>
 </mirror>
 ```
@@ -4000,19 +4000,152 @@ mvn install # 安装项目到本地仓库
 mvn archetype:generate -DgroupID={project-packaging} -DartifactId={project-name} -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
 ```
 
-创建Java工程
+创建 Java 工程
 
 ```shell
 mvn archetype:generate -DgroupId=com.itheima -DartifactId=java-project -DarchetypeArtifactId=maven-archetype-quickstart -Dversion=0.0.1-snapshot -DinteractiveMode=false
 ```
 
-创建Web工程
+创建 Web 工程
 
 ```shell
 mvn archetype:generate -DgroupId=com.itheima -DartifactId=web-project -DarchetypeArtifactId=maven-archetype-webapp -Dversion=0.0.1-snapshot -DinteractiveMode=false
 ```
 
+#### 依赖配置
 
+在`pom.xml`文件中
+
+```xml
+<!-- 设置当前项目所依赖的所有jar -->
+<dependencies>
+  <!-- 设置具体的依赖 -->
+  <dependency>
+    <!-- 依赖所属群组id -->
+    <groupId>junit</groupId>
+    <!-- 依赖所属项目id -->
+    <artifactId>junit</artifactId>
+    <!-- 依赖版本号 -->
+    <version>4.12</version>
+  </dependency>
+</dependencies>
+```
+
+**依赖传递**
+
+- 依赖具有传递性：
+
+  - 直接依赖：在当前项目中通过依赖配置建立的依赖关系
+
+  - 间接依赖：被依赖的资源如果依赖其他资源，当前项目间接依赖其他资源
+
+**依赖冲突问题**
+
+- 路径优先：当依赖中出现相同的资源时，层级越低，优先级越低；层级越浅，优先级越高
+
+- 声明优先：当资源在相同层级被依赖时，配置顺序靠前的覆盖配置顺序靠后的
+
+- 特殊优先：当同级配置了相同资源的不同版本，后配置的覆盖先配置的
+
+**可选依赖**
+
+- 可选依赖指对外隐藏当前所依赖的资源——不透明，将标签`<optional></optional>`的值设置为 true
+
+**排除依赖**
+
+在资源下，创建`exclusion`标签，用于排除依赖
+
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.itheima</groupId>
+    <artifactId>project</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <exclusions>
+      <exclusion>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+      </exclusion>
+    </exclusions>
+  </dependency>
+</dependencies>
+```
+
+**依赖范围**
+
+依赖的 jar 默认情况可以在任何地方使用，可以通过`<scope></scope>`标签设定其作用范围
+
+作用范围：
+
+- 主程序范围有效（main 文件夹范围内）
+
+- 测试程序范围内有效（test 文件夹范围内）
+
+- 是否参与打包（package 指令范围内）
+
+| scope    | 主代码 | 测试代码 | 打包 | 范例        |
+| -------- | ------ | -------- | ---- | ----------- |
+| compile  | Y      | Y        | Y    | log4j       |
+| test     | N      | Y        | N    | junit       |
+| provided | Y      | Y        | N    | servlet-api |
+| runtime  | N      | N        | Y    | jdbc        |
+
+**依赖范围的传递性**
+
+- 带有以来范围的资源在进行传递时，作用范围将受到影响
+
+| ROW 直接依赖，COL 间接依赖 | scmpile | test | provided | runtime |
+| -------------------------- | ------- | ---- | -------- | ------- |
+| compile                    | compile | test | provided | runtime |
+| test                       | None    | None | None     | None    |
+| provided                   | None    | None | None     | None    |
+| runtime                    | runtime | test | provied  | runtime |
+
+### 生命周期与插件
+
+#### 项目构建生命周期
+
+compile -> test-compile -> test -> package -> install
+
+Maven 对项目构建的生命周期划分为 3 套
+
+- clean：清理工作
+
+  - pre-clean：执行一些需要在clean之前完成的工作
+
+  - clean：移除所有上一次构建生成的文件
+
+  - post-clean：执行一些需要在clean后立刻完成的工作
+
+- default：核心工作，例如编译、测试、打包、部署等（部分）
+
+  - compile：编译项目的源代码
+
+  - test-compile：编译测试源代码
+
+  - test：运行测试
+
+  - package：打包项目
+
+  - install：安装项目到本地仓库
+
+- site：产生报告，发布站点等
+
+  - pre-site：执行一些需要在生成站点文档之前完成的工作
+
+  - site：生成项目的站点文档
+
+  - post-site：执行一些需要在生成站点文档之后完成的工作，并且为部署准备
+
+  - site-deploy：将生成的站点文档部署到特定的服务器上
+
+#### 插件
+
+- 插件与生命周期内的阶段绑定，在执行到对应生命周期时执行对应的插件功能
+
+- 默认maven在各个生命周期上绑定有预设的功能
+
+- 通过插件可以自定义其他功能
 
 ## JavaSSM 框架
 
