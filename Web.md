@@ -2829,6 +2829,118 @@ String contextPath = getServletContext().getContextPath();
 
 ![前后端分离的 MVC](img/Web_38.png)
 
-**项目结构**
+## 会话
 
-![项目结构](img/Web_39.png)
+### 会话管理概述
+
+> HTTP 是无状态协议
+
+- 无状态就是不保存状态，即无状态协议(stateless)，HTTP 协议自身不对请求和响应之间的通信状态进行保存，也就是说，在 HTTP 协议这个级别，协议对发送过的请求或者响应都不做持久化处理
+
+- 浏览器发送请求，服务器接受并响应，但是服务器不记录请求是否来自哪个浏览器，服务器没记录浏览器的特征，即客户端的状态
+
+> 实现会话管理：Cookie 和 Session
+
+- cookie 是在客户端保留少量数据的技术，主要通过响应头向客户端响应一些客户端要保留的信息
+
+- session 是在服务端保留更多数据的技术，主要通过 HttpSession 对象保存一些和客户端相关的信息
+
+- cookie 和 session 配合记录请求状态
+
+### Cookie
+
+> Cookie 是一种客户端会话技术，Cookie 由服务端产生，它是服务器存放在浏览器的一小份数据，浏览器以后每次访问该服务器的时候都会将这小份数据携带到服务器
+
+- 服务端创建 cookie，将 cookie 放入响应对象中，Tomcat 容器将 cookie 转化为`set-cookie`的响应头，响应给客户端
+
+- 客户端在收到 cookie 的响应头，在下次请求该服务的资源时，会以 cookie 请求头的形式携带之前收到的 cookie
+
+- cookie 是一种键值对格式的数据，从 tomcat8.5 开始保存中文，但是不推荐
+
+- 由于 cookie 是存储于客户端的数据，比较容易暴露，一般不存储一些敏感或者影响安全的数据
+
+> 原理图：
+
+![Cookie原理图](img/Web_39.png)
+
+常见应用场景有：记录用户名、保存电影播放进度
+
+#### Cookie 的使用
+
+> ServletA 向响应中增加 Cookie
+
+```java
+@WebServlet("/servletA")
+public class ServletA extends HttpServlet {
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // 创建Cookie
+    Cookie cookie1 = new Cookie("c1","c1_message");
+    Cookie cookie2 = new Cookie("c2","c2_message");
+    // 将cookie放入响应对象
+    resp.addCookie(cookie1);
+    resp.addCookie(cookie2);
+  }
+}
+```
+
+> ServletB 从请求中读取 Cookie
+
+```java
+@WebServlet("/servletB")
+public class ServletB extends HttpServlet {
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // 获取请求中的cookie
+    Cookie[] cookies = req.getCookies();
+    // 迭代cookies数组
+    if(null != cookies && cookies.length > 0)
+      for(Cookie cookie : cookies)
+        System.out.println(cookie.getName() + ":" + cookie.getValue());
+}
+```
+
+#### Cookie 的时效性
+
+> 默认情况下 Cookie 的有效期是一次会话范围内，我们可以通过 cookie 的`setMaxAge()`方法让 Cookie 持久化保存到浏览器上
+
+- 会话级 Cookie
+
+  - 服务器端并没有明确指定 Cookie 的存在时间
+
+  - 在浏览器端，Cookie 数据存在于内存中
+
+  - 只要浏览器还开着，Cookie 数据就一直存在
+
+  - 浏览器关闭，内存中的 Cookie 数据就会被释放
+
+- 持久化 Cookie
+
+  - 服务器明确设置了 Cookie 的存在时间
+  - 在浏览器端，Cookie 数据会被保存到硬盘上
+  - Cookie 在硬盘上存在的时间根据服务器端限定的时间来管控，不受浏览器关闭的影响
+  - 持久化 Cookie 达到了预设的时间会被释放
+
+`cookie.setMaxAge(int expiry)`参数单位秒，表示 cookie 的持久化时间，如果设置参数为 0，表示将浏览器中保存的该 cookie 删除
+
+#### Cookie 的提交路径
+
+> 访问互联网资源时不能每次都需要把所有 Cookie 带上，访问不同的资源时，可以携带不同的 Cookie。可以通过 Cookie 的`setPath(String path)`对 Cookie 的路径进行设置
+
+```java
+public class ServletA extends HttpServlet {
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        // 创建Cookie
+        Cookie cookie1 =new Cookie("c1","c1_message");
+        // 设置cookie的提交路径
+        cookie1.setPath("/web03_war_exploded/servletB");
+        Cookie cookie2 =new Cookie("c2","c2_message");
+        // 将cookie放入响应对象
+        resp.addCookie(cookie1);
+        resp.addCookie(cookie2);
+    }
+}
+```
+
+经过以上设置，只有访问`/web03_war_exploded/servletB`时，才会带上`c1`这个 Cookie
