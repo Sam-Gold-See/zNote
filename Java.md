@@ -3810,7 +3810,7 @@ Dao 层一般需要定义接口和实现类（接口用于定义方法，实现�
 
 接口处要添加合理的文档注释
 
-```
+```java
 /**
  * 介绍一下当前类...
  * 作者：
@@ -3928,7 +3928,7 @@ Maven 的作用：
 
 #### 远程仓库配置
 
-在 `maven-model-builder-<version>.jar/org/apache/maven/model/pom-4.0.0.xml` 中 `<repositories>` 可以发现初始定位
+在 `maven-model-builder-{version}.jar/org/apache/maven/model/pom-4.0.0.xml` 中 `<repositories>` 可以发现初始定位
 
 仍然在 `setting.xml` 中进行配置， `<mirrors>` 标签中添加如下内容
 
@@ -3945,11 +3945,74 @@ Maven 的作用：
 </mirror>
 ```
 
-### Maven构建项目
+### Maven 构建项目
 
-Maven工程目录结构：
+Maven 工程目录结构：
 
 ![Maven工程目录结构](img/Java_21.png)
+
+在`src`同级目录中创建`pom.xml`文件
+
+基础`pom.xml`文件结构
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>myproject</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+    <dependency>
+  </dependencies>
+
+</project>
+```
+
+#### Maven 项目构建命令
+
+- Maven 构建命令使用`mvn`开头，后面添加功能参数，可以一次执行多个命令，使用空格分隔
+
+```shell
+mvn compile # 编译项目
+mvn clean   # 清理项目
+mvn test    # 运行测试用例
+mvn package # 打包项目
+mvn install # 安装项目到本地仓库
+```
+
+#### 插件创建工程
+
+创建工程
+
+```shell
+mvn archetype:generate -DgroupID={project-packaging} -DartifactId={project-name} -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false
+```
+
+创建Java工程
+
+```shell
+mvn archetype:generate -DgroupId=com.itheima -DartifactId=java-project -DarchetypeArtifactId=maven-archetype-quickstart -Dversion=0.0.1-snapshot -DinteractiveMode=false
+```
+
+创建Web工程
+
+```shell
+mvn archetype:generate -DgroupId=com.itheima -DartifactId=web-project -DarchetypeArtifactId=maven-archetype-webapp -Dversion=0.0.1-snapshot -DinteractiveMode=false
+```
+
+
 
 ## JavaSSM 框架
 
