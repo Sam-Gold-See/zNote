@@ -2259,6 +2259,99 @@ response.setContentType("text/html;charset=UTF-8");
 
 - `@WebServlet(urlPatterns = {"/userServlet"})`/`WebServlet("/userServlet")`使用注解配置可以省略 xml 配置，但是两种方式不能同时使用
 
+> @WebServlet 注解的源码解析
+
+```java
+package jakarta.servlet.annotation;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+/**
+ * @since Servlet 3.0
+ */
+@Target({ ElementType.TYPE })
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface WebServlet {
+
+    /**
+     * The name of the servlet
+     * 相当于 servlet-name
+     * @return the name of the servlet
+     */
+    String name() default "";
+
+    /**
+     * The URL patterns of the servlet
+     * 如果只配置一个url-pattern ,则通过该属性即可,和urlPatterns属性互斥
+     * @return the URL patterns of the servlet
+     */
+    String[] value() default {};
+
+    /**
+     * The URL patterns of the servlet
+     * 如果要配置多个url-pattern ,需要通过该属性,和value属性互斥
+     * @return the URL patterns of the servlet
+     */
+    String[] urlPatterns() default {};
+
+    /**
+     * The load-on-startup order of the servlet
+     * 配置Servlet是否在项目加载时实例化
+     * @return the load-on-startup order of the servlet
+     */
+    int loadOnStartup() default -1;
+
+    /**
+     * The init parameters of the servlet
+     * 配置初始化参数
+     * @return the init parameters of the servlet
+     */
+    WebInitParam[] initParams() default {};
+
+    /**
+     * Declares whether the servlet supports asynchronous operation mode.
+     *
+     * @return {@code true} if the servlet supports asynchronous operation mode
+     * @see jakarta.servlet.ServletRequest#startAsync
+     * @see jakarta.servlet.ServletRequest#startAsync( jakarta.servlet.ServletRequest,jakarta.servlet.ServletResponse)
+     */
+    boolean asyncSupported() default false;
+
+    /**
+     * The small-icon of the servlet
+     *
+     * @return the small-icon of the servlet
+     */
+    String smallIcon() default "";
+
+    /**
+     * The large-icon of the servlet
+     *
+     * @return the large-icon of the servlet
+     */
+    String largeIcon() default "";
+
+    /**
+     * The description of the servlet
+     *
+     * @return the description of the servlet
+     */
+    String description() default "";
+
+    /**
+     * The display name of the servlet
+     *
+     * @return the display name of the servlet
+     */
+    String displayName() default "";
+}
+```
+
 - `<load-on-startup>`标签（在`<servlet>`标签中）：默认值-1 代表 tomcat 启动时不会实例化该 servlet，设置值大于 0 时，代表在启动时就实例化该 servlet，设置值越小，启动时实例化的优先级越高。
 
 - `default-servlet`：默认 servlet 是指当服务器找不到请求的资源时，会默认调用的 servlet，可以配置多个 default-servlet，但是只能有一个 default-servlet 被激活。
@@ -2944,3 +3037,526 @@ public class ServletA extends HttpServlet {
 ```
 
 经过以上设置，只有访问`/web03_war_exploded/servletB`时，才会带上`c1`这个 Cookie
+
+### Session
+
+#### Session 概述
+
+> HttpSession 是一种保留更多信息在服务端的一种技术，服务器会为每一个客户端开辟一块内存空间，即 session 对象，客户端在发送请求时，都可以使用自己的 session，这样服务端就可以通过 session 来记录某客客户端的状态
+
+- 服务端在为客户端创建 session 时，会同时将 session 对象的 id，即 JSESSION 以 Cookie 的形式放入响应对象
+
+- 后端创建完 Session 后，客户端会收到一个特殊的 Cookie，叫做 JSESSION
+
+- 客户端下一次请求携带 JSESSIONID，后端收到后根据 JSESSIONID 找到对应的 Session 对象
+
+- 通过该机制，服务端通过 Session 就可以存储一些专门针对某个客户端的信息了
+
+> 原理图：
+
+![Session原理图](img/Web_40.png)
+
+应用场景有：记录用户的登录状态、记录用户操作的历史
+
+#### HttpSession 的使用
+
+> 用户提交 form 表单到 ServletA，携带用户名，ServletA 获取 Session 将用户名存到 Session，用户再请求其他任意 Servlet，获取之间存储的用户
+
+- 定义 ServletA，将用户名存入 Session
+
+```java
+@WebServlet("/servletA")
+public class ServletA extends HttpServlet {
+  @Override
+  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    // 获取请求中的参数
+    String username = req.getParameter("username");
+    // 获取Session对象
+    HttpSession session = req.getSession();
+    // 获取Session的ID
+    String jSessionID = session.getId();
+    // 判断Session是否是新创建的Session
+    boolean isNew = session.isNew();
+    // 向session对象中存入数据
+    session.setAttribute("username",username);
+  }
+}
+```
+
+![getSession方法的处理逻辑](img/Web_41.png)
+
+#### HttpSession 的时效性
+
+- 用户量很大之后，Session 对象相应的也要创建很多，如果一味创建不释放，那么服务器端的内存迟早要被耗尽
+
+- 客户端关闭行为无法被服务端直接侦测，或者客户端长时间不操作也经常出现，就需要设置 Session 的时效性了
+
+> 默认的 Session 最大限制时间在 Tomcat/conf/web.xml 中默认为 30 分钟，如果需要更改可以在当前项目的 web.xml 中进行配置（单位为分钟）
+
+```xml
+<session-config>
+  <session-timeout>60</session-timeout>
+</session-config>
+```
+
+> 也可以通过 HttpSession 的 API 对最大闲置时间进行设置，同时此处时间单位为秒，表示当前 session 在指定时间内若没有与服务器发生任何交互后失效，期间用户的任何活动都将刷新 Session 的失效时间
+
+```java
+session.setMaxInactiveInterval(int seconds);
+```
+
+> 三种修改的优先级：**代码设置** > **项目 web.xml 设置** > **容器 web.xml 设置值**
+
+> 也可以直接让 Session 失效
+
+```java
+session.invalidate();
+```
+
+### 三大域对象
+
+#### 域对象概述
+
+> 域对象：一些用于存储数据和传递数据的对象，传递数据不同的范围，我们称之为不同的域，不同的域对象代表不同的域，共享数据的范围也不同
+
+- web 项目中需要熟练使用的域对象分别是，请求域、会话域、应用域
+
+- 请求域对象是 HttpServletRequest，传递数据的范围是一次请之内以及请求转发
+
+- 会话域对象是 HttpSession，传递数据的范围是一次会话之内，可以跨多个请求
+
+- 应用域对象是 ServletContext， 传递数据的范围是本应用之内，可以跨多个会话
+
+> 三大域对象的数据作用范围图解：
+
+- 请求域
+
+![请求域](img/Web_42.png)
+
+- 会话域
+
+![会话域](img/Web_43.png)
+
+- 应用域
+
+![应用域](img/Web_44.png)
+
+综合三大域对象：
+
+![三大域对象](img/Web_45.png)
+
+#### 域对象的使用
+
+> 域对象的 API
+
+| API                                         | 功能                    |
+| ------------------------------------------- | ----------------------- |
+| void setAttribute(String name,String value) | 向域对象中添加/修改数据 |
+| Object getAttribute(String name);           | 从域对象中获取数据      |
+| removeAttribute(String name);               | 移除域对象中的数据      |
+
+- 请求转发时，请求域可以传递数据，请求域内一般放本次请求业务有关的数据
+
+- 同一个会化内，不用请求转发，会话域可以传递数据，会话域内一般放本次会话的客户端有关的数据
+
+- 同一个 APP 内，不同的客户端，应用域可以传递数据，应用域内一般放本程序应用有关的数据
+
+## 过滤器
+
+### 过滤器概述
+
+> Filter 即过滤器，是 JAVAEE 技术规范之一，作用目标资源的请求进行过滤的一套技术规范，是 Java Web 项目中最实用的技术之一
+
+- Filter 接口定义了过滤器的开发规范，所有的过滤器都要实现该接口
+
+- Filter 的工作位置是项目中所有目标资源之前，容器在创建 HttpServletRequest 和 HttpServletResponse 对象后，会先调用 Filter 的 doFilter 方法
+
+- Filter 的 doFilter 方法可以控制请求是否继续，如果放行，则请求继续，如果拒绝，则请求到此为止，由过滤器本身作出相应
+
+- Filter 不仅可以对请求做出过滤，也可以在目标资源做出响应前，对响应再次进行处理
+
+- Filter 是 GOF 中责任链模式的典型案例
+
+- Filter 的常用应用包括但不限于：登录权限检查，解决网站乱码，过滤敏感字符，日志记录，性能分析，事务控制
+
+> 过滤器工作位置：
+
+![过滤器工作位置](img/Web_46.png)
+
+> Filter 接口 API：
+
+| API                                                                                       | 目标                                                                     |
+| ----------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| default public void init(FilterConfig filterConfig)                                       | 初始化方法,由容器调用并传入初始配置信息 filterConfig 对象                |
+| public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) | 过滤方法,核心方法,过滤请求,决定是否放行,响应之前的其他处理等都在该方法中 |
+| default public void destroy()                                                             | 销毁方法,容器在回收过滤器对象之前调用的方法                              |
+
+### 过滤器的使用
+
+> 过滤流程图解
+
+![过滤器流程图解](img/Web_47.png)
+
+> 开发过滤器流程
+
+- 实现 Filter 接口
+
+- 重写过滤方法
+
+- 配置过滤器的映射路径：
+
+  - web.xml 中配置
+
+  - 在注解中配置
+
+> 过滤请求的和响应的方法
+
+- 请求到达目标资源之前，先经过该方法
+
+- 该方法有能力控制请求是否继续向后到达目标资源 可以在该方法内直接向客户端做相应处理
+
+- 请求到达目标资源后，相应之前，还会经过该方法
+
+```java
+public class LoggingFilter implements Filter {
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    // 1.请求到达目标资源之前的功能代码：校验权限是否满足、判断是否登录
+
+    // 2.放行代码
+    filterChain.doFilter(request, response);
+
+    // 3.响应之前 HttpServletResponse 转换为响应报文之前的功能代码
+  }
+}
+```
+
+- 说明
+
+  - doFilter 方法中的请求和响应对象是以父接口的形式声明的，实际传入的实参就是 HttpServletRequest 和 HttpServletResponse 子接口级别的，可以安全强转
+
+  - filterChain.doFilter(request, response) 这行代码的功能是放行请求，如果没有这行代码，则请求到此为止
+
+  - filterChain.doFilter(request, response) 在放行时需要传入 request 和 response 对象，意味着请求和响应对象要继续传递给后续的资源，这里没有产生新的 request 和 reponse 对象
+
+```xml
+<filter>
+  <filter-name>loggingFilter</filter-name>
+  <filter-class>com.example.LoggingFilter</filter-class>
+</filter>
+<filter-mapping>
+  <filter-name>loggingFilter</filter-name>
+  <!--
+  url-pattern 根据请求的资源路径，对指定的请求惊醒过滤
+    /* 代表所有资源
+    /a/* 代表以a开头的资源
+    *.html 代表过滤以html为后缀的资源
+    /servlet1 代表对制定的servlet进行过滤
+  servlet-name 根据请求的servlet的别名，对制定的servlet进行过滤
+
+  一个 filter-mapping 中，可以同时存在多个 url-pattern 和 servlet-name
+  -->
+  <url-pattern>/*</url-pattern>
+</filter-mapping>
+```
+
+- 说明
+
+  - filter-mapping 标签中定义了过滤器对那些资源进行过滤
+
+  - 子标签 url-pattern 通过映射路径确定过滤范围
+
+    - /servletA 精确匹配,表示对 servletA 资源的请求进行过滤
+
+    - \*.html 表示对以.action 结尾的路径进行过滤
+
+    - /\* 表示对所有资源进行过滤
+
+    - 一个 filter-mapping 下可以配置多个 url-pattern
+
+  - 子标签 servlet-name 通过 servlet 别名确定对那些 servlet 进行过滤
+
+    - 使用该标签确定目标资源的前提是 servlet 已经起了别名
+
+    - 一个 filter-mapping 下可以定义多个 servlet-name
+
+    - 一个 filter-mapping 下,servlet-name 和 url-pattern 子标签可以同时存在
+
+### 过滤器的生命周期
+
+> 过滤器作为 Web 项目的组件之一，和 Servlet 的生命周期类似，略有不同，没有 Servlet 的 load-on-startup 的配置，默认就是系统启动立刻构造
+
+| 阶段       | 对应方法                                                                                               | 执行时机       | 执行次数 |
+| ---------- | ------------------------------------------------------------------------------------------------------ | -------------- | -------- |
+| 创建对象   | 构造器                                                                                                 | web 应用启动时 | 1        |
+| 初始化方法 | void init(FilterConfig filterConfig)                                                                   | 构造完毕       | 1        |
+| 过滤请求   | void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) | 每次请求       | 多次     |
+| 销毁       | default void destroy()                                                                                 | web 应用关闭时 | 1 次     |
+
+### 过滤器链的使用
+
+> 一个 Web 项目中可以同时定义多个过滤器，多个过滤器对同一个资源进行过滤时，工作位置有先后，整体形成一个工作链，称之为过滤连
+
+- 过滤器链中的过滤器的顺序由 filter-mapping 顺序决定
+
+- 每个过滤器过滤的范围不同，针对同一个资源来说，过滤器链中的过滤器个数可能是不同的
+
+- 如果某个 Filter 是使用 ServletName 进行匹配规则的配置，那么这个 Filter 执行的优先级要更低
+
+> 图解过滤器链
+
+![图解过滤器链](img/Web_48.png)
+
+> 工作流程图解
+
+![工作流程图解](img/Web_49.png)
+
+### 注解方式配置过滤器
+
+> @WebFilter 注解的源码
+
+```java
+package jakarta.servlet.annotation;
+
+import jakarta.servlet.DispatcherType;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+public @interface WebFilter {
+    String description() default "";
+
+    String displayName() default "";
+
+    WebInitParam[] initParams() default {};
+
+    String filterName() default "";
+
+    String smallIcon() default "";
+
+    String largeIcon() default "";
+
+    String[] servletNames() default {};
+
+    String[] value() default {};
+
+    String[] urlPatterns() default {};
+
+    DispatcherType[] dispatcherTypes() default {DispatcherType.REQUEST};
+
+    boolean asyncSupported() default false;
+}
+```
+
+## 监听器
+
+### 监听器概述
+
+> 监听器：专门用于对域对象身上发生的事件或状态改变进行监听和相应处理的对象
+
+- 监听器是 GOF 设计模式中，观察者模式的典型案例
+
+- 观察者模式：当被观察的对象发生某些改变时，观察者自动采取对应行动的一种设计模式
+
+- 监听器使用的感受类似 JS 中的事件，被观察的对象发生某些情况时吗，自动触发代码的执行
+
+- 监听器并不监听 Web 项目中的所有组件，仅仅是对三大域对象做相关的事件监听
+
+> 监听器的分类
+
+- Web 中定义八个监听器接口作为监听器的规范，这八个接口按照不同的标准可以形成不同的分类
+
+- 按监听的对象划分
+
+  - application 域监听器 ServletContextListener ServletContextAttributeListener
+
+  - session 域监听器 HttpSessionListener HttpSessionAttributeListener HttpSessionBindingListener HttpSessionActivationListener
+
+  - request 域监听器 ServletRequestListener ServletRequestAttributeListener
+
+- 按监听的事件划分
+
+  - 域对象的创建和销毁监听器 ServletContextListener HttpSessionListener ServletRequestListener
+
+  - 域对象数据增删改事件监听器 ServletContextAttributeListener HttpSessionAttributeListener ServletRequestAttributeListener
+
+  - 其他监听器 HttpSessionBindingListener HttpSessionActivationListener
+
+> 配置监听器
+
+1. 在 web.xml 中配置监听器
+
+```xml
+<listener>
+  <listener-class>com.example.MyListener</listener-class>
+</listener>
+```
+
+2. 在注解中配置监听器，使用 `@WebListener` 注解
+
+### 监听器的六个主要接口
+
+#### application 域监听器
+
+> ServletContextListener 监听 ServletContext 对象创建和销毁
+
+| 方法名                                      | 作用                      |
+| ------------------------------------------- | ------------------------- |
+| contextInitialized(ServletContextEvent sce) | ServletContext 创建时调用 |
+| contextDestroyed(ServletContextEvent sce)   | ServletContext 销毁时调用 |
+
+- ServletContextEvent 对象代表从 ServletContext 对象上捕获到的事件，通过这个事件对象我们可以获取到 ServletContext 对象
+
+> ServletContextAttributeListener 监听 ServletContext 中属性的添加、移除和修改
+
+| 方法名                                               | 作用                                   |
+| ---------------------------------------------------- | -------------------------------------- |
+| attributeAdded(ServletContextAttributeEvent scab)    | 向 ServletContext 中添加属性时调用     |
+| attributeRemoved(ServletContextAttributeEvent scab)  | 从 ServletContext 中移除属性时调用     |
+| attributeReplaced(ServletContextAttributeEvent scab) | 当 ServletContext 中的属性被修改时调用 |
+
+- ServletContextAttributeEvent 对象代表属性变化事件，包含的方法如下：
+
+| 方法名              | 作用                     |
+| ------------------- | ------------------------ |
+| getName()           | 获取修改或添加的属性名   |
+| getValue()          | 获取被修改或添加的属性值 |
+| getServletContext() | 获取 ServletContext 对象 |
+
+#### session 域监听器
+
+> HttpSessionListener 监听 HttpSession 对象的创建与销毁
+
+| 方法名                                 | 作用                       |
+| -------------------------------------- | -------------------------- |
+| sessionCreated(HttpSessionEvent hse)   | HttpSession 对象创建时调用 |
+| sessionDestroyed(HttpSessionEvent hse) | HttpSession 对象销毁时调用 |
+
+- HttpSessionEvent 对象代表从 HttpSession 对象身上捕获到的事件，通过这个事件对象可以获取到触发事件的 HttpSession 对象。
+
+> HttpSessionAttributeListener 监听 HttpSession 中属性的添加、移除和修改
+
+| 方法名                                        | 作用                                |
+| --------------------------------------------- | ----------------------------------- |
+| attributeAdded(HttpSessionBindingEvent se)    | 向 HttpSession 中添加属性时调用     |
+| attributeRemoved(HttpSessionBindingEvent se)  | 从 HttpSession 中移除属性时调用     |
+| attributeReplaced(HttpSessionBindingEvent se) | 当 HttpSession 中的属性被修改时调用 |
+
+- HttpSessionBindingEvent 对象代表属性变化事件，它包含的方法如下：
+
+| 方法名       | 作用                            |
+| ------------ | ------------------------------- |
+| getName()    | 获取修改或添加的属性名          |
+| getValue()   | 获取被修改或添加的属性值        |
+| getSession() | 获取触发事件的 HttpSession 对象 |
+
+#### request 域监听器
+
+> ServletRequestListener 监听 ServletRequest 对象的创建与销毁
+
+| 方法名                                      | 作用                          |
+| ------------------------------------------- | ----------------------------- |
+| requestInitialized(ServletRequestEvent sre) | ServletRequest 对象创建时调用 |
+| requestDestroyed(ServletRequestEvent sre)   | ServletRequest 对象销毁时调用 |
+
+- ServletRequestEvent 对象代表从 HttpServletRequest 对象身上捕获到的事件，通过这个事件对象我们可以获取到触发事件的 HttpServletRequest 对象。另外还有一个方法可以获取到当前 Web 应用的 ServletContext 对象。
+
+> ServletRequestAttributeListener 监听 ServletRequest 中属性的添加、移除和修改
+
+| 方法名                                               | 作用                                   |
+| ---------------------------------------------------- | -------------------------------------- |
+| attributeAdded(ServletRequestAttributeEvent srae)    | 向 ServletRequest 中添加属性时调用     |
+| attributeRemoved(ServletRequestAttributeEvent srae)  | 从 ServletRequest 中移除属性时调用     |
+| attributeReplaced(ServletRequestAttributeEvent srae) | 当 ServletRequest 中的属性被修改时调用 |
+
+- ServletRequestAttributeEvent 对象代表属性变化事件，它包含的方法如下：
+
+| 方法名               | 作用                               |
+| -------------------- | ---------------------------------- |
+| getName()            | 获取修改或添加的属性名             |
+| getValue()           | 获取被修改或添加的属性值           |
+| getServletRequest () | 获取触发事件的 ServletRequest 对象 |
+
+#### session 域的两个特殊监听器
+
+##### session 绑定监听器
+
+> HttpSessionBindingListener 监听当前监听器对象在 Session 域中的增加与移除
+
+| 方法名                                      | 作用                                |
+| ------------------------------------------- | ----------------------------------- |
+| valueBound(HttpSessionBindingEvent event)   | 该类的实例被放到 Session 域中时调用 |
+| valueUnbound(HttpSessionBindingEvent event) | 该类的实例从 Session 中移除时调用   |
+
+- HttpSessionBindingEvent 对象代表属性变化事件，它包含的方法如下：
+
+| 方法名       | 作用                            |
+| ------------ | ------------------------------- |
+| getName()    | 获取当前事件涉及的属性名        |
+| getValue()   | 获取当前事件涉及的属性值        |
+| getSession() | 获取触发事件的 HttpSession 对象 |
+
+##### 钝化活化监听器
+
+> HttpSessionActivationListener 监听某个对象在 Session 中的序列化与反序列化。
+
+| 方法名                                    | 作用                                    |
+| ----------------------------------------- | --------------------------------------- |
+| sessionWillPassivate(HttpSessionEvent se) | 该类实例和 Session 一起钝化到硬盘时调用 |
+| sessionDidActivate(HttpSessionEvent se)   | 该类实例和 Session 一起活化到内存时调用 |
+
+- HttpSessionEvent 对象代表事件对象，通过 getSession()方法获取事件涉及的 HttpSession 对象。
+
+> 什么是钝化活化
+
+- session 对象在服务端是以对象的形式存储于内存的,session 过多,服务器的内存也是吃不消的
+
+- 而且一旦服务器发生重启,所有的 session 对象都将被清除,也就意味着 session 中存储的不同客户端的登录状态丢失
+
+- 为了分摊内存 压力并且为了保证 session 重启不丢失,我们可以设置将 session 进行钝化处理
+
+- 在关闭服务器前或者到达了设定时间时,对 session 进行序列化到磁盘,这种情况叫做 session 的钝化
+
+- 在服务器启动后或者再次获取某个 session 时,将磁盘上的 session 进行反序列化到内存,这种情况叫做 session 的活化
+
+> 怎么配置钝化活化
+
+- 在 web 目录下,添加 META-INF 下创建 Context.xml
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Manager className="org.apache.catalina.session.PersistentManager" maxIdleSwap="1">
+        <Store className="org.apache.catalina.session.FileStore" directory="d:\mysession"></Store>
+    </Manager>
+</Context>
+```
+
+## Ajax
+
+> 什么是 Ajax
+
+- AJAX = Asynchronous JavaScript and XML （异步的 JavaScript 和 XML）
+
+- AJAX 不是新的编程语言，而是一种使用现有标准的新方法
+
+- AJAX 最大的优点实在不重新加载整个页面的情况下，可以与服务器交换数据并更新部分网页内容
+
+- AJAX 不需要任何浏览器插件，但需要用户允许 JavaScript 在浏览器上执行
+
+- XMLHttpRequest 只是实现 Ajax 的一种方式
+
+**Ajax 的工作原理**
+
+![Ajax的工作原理](img/Web_50.png)
+
+- 简单来说，之前发的请求通过类似 form 表单标签、 a 标签 这种方式，现在通过运行 js 代码动态决定什么时候发送什么样的请求
+
+- 通过运行 JS 代码发送的请求，浏览器可以不用跳转页面，我们可以在 JS 代码中决定是否要跳转页面
+
+- 通过运行 JS 代码发送的请求，接收到返回结果后，我们可以将结果通过 DOM 变成渲染到页面的某些元素上，实现局部更新
