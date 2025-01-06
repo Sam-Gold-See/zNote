@@ -4258,3 +4258,69 @@ public Person zhangsan(){
   return person;
 }
 ```
+
+在 Bean 注解中也可以指定容器名字（覆盖默认方法名）
+
+```java
+@Bean("{container-name}")
+```
+
+组件的创建时机：
+
+容器启动过程中就会创建组件对象，并放入容器中，容器启动完成后，组件对象就处于可用状态，同时对象有单实例特性，所有组件默认是单例的，每次获取直接从容器中拿
+
+#### 容器的获取
+
+**组件的四大特性**：
+
+- 名字，全局唯一，如果组件名重复，一定只会给容器放一个最先声明的那个
+
+- 类型
+
+- 对象
+
+- 作用域
+
+1. 根据组件名获取对象
+
+```java
+ConfigurableApplicationContext ioc = SpringApplication.run(Spring01IoCApplication.class, args);
+Object object = ioc.getBean("zhangsan");
+```
+
+2. 根据组件类型获取对象
+
+```java
+ConfigurableApplicationContext ioc = SpringApplication.run(Spring01IoCApplication.class, args);
+Person person = ioc.getBean(Person.class);
+```
+
+// 以上代码必须确保容器内有且仅有一个 Person 类型的组件，否则会报错
+
+```java
+ConfigurableApplicationContext ioc = SpringApplication.run(Spring01IoCApplication.class, args);
+Map<String, Person> map = ioc.getBeansOfType(Person.class);
+```
+
+3. 根据组件名字和类型获取对象
+
+```java
+ConfigurableApplicationContext ioc = SpringApplication.run(Spring01IoCApplication.class, args);
+Person person = ioc.getBean("zhangsan", Person.class);
+```
+
+**总结**：
+
+从容器中获取组件，
+
+1. 组件不存在，抛出异常：`NoSuchBeanDefinitionException`
+
+2. 组件不唯一
+
+- 按照类型只要一个，抛异常，`NoUniqueBeanDefinitionException`
+
+- 按照名字只要一个，精确获取到指定对象
+
+- 多个，返回所有组件的 List 集合
+
+3. 组件唯一存在，正确返回
