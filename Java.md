@@ -4111,11 +4111,11 @@ Maven 对项目构建的生命周期划分为 3 套
 
 - clean：清理工作
 
-  - pre-clean：执行一些需要在clean之前完成的工作
+  - pre-clean：执行一些需要在 clean 之前完成的工作
 
   - clean：移除所有上一次构建生成的文件
 
-  - post-clean：执行一些需要在clean后立刻完成的工作
+  - post-clean：执行一些需要在 clean 后立刻完成的工作
 
 - default：核心工作，例如编译、测试、打包、部署等（部分）
 
@@ -4143,9 +4143,32 @@ Maven 对项目构建的生命周期划分为 3 套
 
 - 插件与生命周期内的阶段绑定，在执行到对应生命周期时执行对应的插件功能
 
-- 默认maven在各个生命周期上绑定有预设的功能
+- 默认 maven 在各个生命周期上绑定有预设的功能
 
 - 通过插件可以自定义其他功能
+
+添加插件：在`pom.xml`文件中
+
+```xml
+<build>
+  <plugins>
+    <!-- 插件配置 -->
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-source-plugin</artifactId>
+      <version>2.2.1</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>jar</goal>
+          </goals>
+          <phase>generate-test-sources</phase>
+        </execution>
+      </executions>
+    </plugin>
+  </plugins>
+</build>
+```
 
 ## JavaSSM 框架
 
