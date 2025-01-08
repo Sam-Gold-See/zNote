@@ -3560,3 +3560,1289 @@ public @interface WebFilter {
 - 通过运行 JS 代码发送的请求，浏览器可以不用跳转页面，我们可以在 JS 代码中决定是否要跳转页面
 
 - 通过运行 JS 代码发送的请求，接收到返回结果后，我们可以将结果通过 DOM 变成渲染到页面的某些元素上，实现局部更新
+
+## 前端工程化
+
+> 前端工程化的概念
+
+**前端工程化** 是使用 **软件工程的方法** 来单独解决前端的开发流程中 模块化、组件化、规范化、自动化 的问题，其主要目的是为了提高效率和降低成本
+
+> 前端工程化实现技术栈
+
+- ECMAScript6 Vue3 中大量使用 ES6 语法
+
+- Nodejs 前端项目运行环境
+
+- npm 依赖下载工具
+
+- vite 前端项目构建工具
+
+- VUE3 渐进式前端框架
+
+- router 通过路由实现页面切换
+
+- pinia 通过状态管理实现组件数据传递
+
+- axios Ajax 异步请求封装技术实现前后端数据交互
+
+- Element-Plus 丰富的快速构建网页的组件仓库
+
+## ECMAScript6
+
+### ECMAScript6 简介
+
+> ECMAScript 6 ，简称 ES6，是 **JavaScript** 语言的一次重大更新。
+> ES6 带来了大量的新特性，包括箭头函数、模板字符串、let 和 const 关键字、解构、默认参数值、模块系统等等，大大提升了 JS 的开发体验。由于 VUE3 中大量使用了 ES6 的语法，所以 ES6 也是 VUE3 的基础。
+
+- ES6 对 JS 的改进在以下几个方面：
+
+1. 更加简洁：ES6 引入了一些新的语法，如箭头函数、类和模板字符串等，使代码更加简洁易懂
+
+2. 更强大的功能：ES6 引入一些新的 API、解构语法和迭代器等功能，从而使得 JS 更加强大
+
+3. 更好的适用性：ES6 引入的模块化功能为 JS 代码的组织和管理提供了更好的方式，不仅提高了程序的可维护性，还让 JS 更方便地应用于大型的应用程序
+
+> ES6 新增了 let 和 const，用来声明变量，使用的细节上也存在诸多差异
+
+#### let 和 var 的差别
+
+1. let 不能重复声明
+
+2. let 有块级作用域，非函数的花括号遇见 let 会有块级作用域，也就是只能在花括号里面访问
+
+3. let 不会预解析进行变量提升
+
+4. let 定义的全局变量不会作为 window 的属性
+
+5. let 在 ES6 中推荐优先使用
+
+```javascript
+// 1. let 只有在当前代码块有效代码块，代码块、函数、全局
+{
+  let a = 1;
+  var b = 2;
+}
+console.log(a); // a is not defined 花括号外面无法访问
+console.log(b); // 可以正常输出
+
+// 2. 不能重复声明
+{
+let name = '天真'
+let name = '无邪'
+}
+
+// 3. 不存在变量提升（先声明再使用）
+{
+  console.log(test1); // 可以，但是值为undefined
+  var test1 = 'test'
+  console.log(test2); // 不可以 let 命令改变了语法行为，它所声明的变量一定要在声明后使用，否则报错
+  let test2 = 'test'
+}
+
+// 4. 不会成为 window 的属性
+{
+  var a = 100;
+  console.log(window.a) // 100
+  let b = 200;
+  console.log(window.b) // undefined
+}
+
+// 5. 循环中推荐使用 let
+{
+  for (let i = 0; i < 10; i++) {
+    ...
+  }
+}
+```
+
+#### const 和 var 的差异
+
+1. 新增 const 和 let 类似，只是 const 定义的变量不能修改
+
+2. 并不是变量的值不得改动，而是变量指向的那个内存地址所保存的数据不得改动
+
+```javascript
+// 声明场景语法，建议变量名大写区分
+const PI = 3.1415926;
+
+// 1. 常量声明必须有初始化值
+const A; // 报错
+
+// 2. 常量的值不能修改
+const A = "hello"
+A = "world" // 报错
+
+// 3. 和let一样，块作用域
+
+  const A = "1"
+  console.log(A) // 1
+}
+console.log(A) // 报错
+
+// 4. 对应数组和对象元素修改，不算常量修改，修改值、不修改地址
+const TEAM = ['1','2','3']
+TEAM.push('4')
+TEAM = [] // 报错
+console.log(TEAM) // ['1', '2', '3', '4']
+```
+
+#### 模板字符串
+
+模板字符串是增强版的字符串，用反引号 (`) 标识
+
+1.  字符串中可以出现换行符
+
+2.  可以使用 `${xxx}` 形式输出和拼接变量
+
+```javascript
+// 1. 多行普通字符串
+let ulStr1 =
+  `<ul>` + "<li>JAVA</li>" + "<li>html</li>" + "<li>VUE</li>" + "</ul>";
+console.log(ulStr1);
+
+// 2. 多行模板字符串
+let ulStr2 = `
+        <ul>
+        	<li>JAVA</li>
+        	<li>html</li>
+        	<li>VUE</li>
+        </ul>`;
+console.log(ulStr2);
+
+// 3. 普通字符串拼接
+let str = "ABC";
+let infoStr1 = str + "DEF";
+console.log(infoStr1); // "ABCDEF"
+
+// 4. 模板字符串拼接
+let infoStr2 = `${str}DEF`;
+console.log(infoStr2); // "ABCDEF"
+```
+
+#### 解构表达式
+
+> ES6 的解构表达式是一种方便的语法，可以快速将数组或对象中的值拆分并赋值给变量。解构赋值的语法使用花括号表示对象，方括号表示数组。通过解构赋值，函数更方便进行参数接收
+
+##### 数组解构赋值
+
+- 可以通过数组解构将数组中的值赋值给变量
+
+```javascript
+let [a, b, c] = [1, 2, 3]; // 新增变量名任意合法即可，本质是按照顺序进行初始化变量的值
+console.log(a, b, c); // 1 2 3
+```
+
+- 该语句将数组`[1,2,3]`中的每个值依次赋值给第一个变量`a`，第二个变量`b`，第三个变量`c`，可以使用默认值为变量提供备选值，在数组中缺失对应位置的值时使用该默认值
+
+```javascript
+let [a, b, c = 4] = [1, 2];
+console.log(a, b, c); // 1 2 4
+```
+
+##### 对象解构赋值
+
+- 可以通过对象解构将对象中的值赋值给变量
+
+```javascript
+let { a, b } = { a: 1, b: 2 };
+// 新增变量名必须和属性名相同，本质是初始化变量的值为对象中的同名属性的值
+// 等价于 let a = 对象.a， let b = 对象.b
+
+console.log(a); // 1
+console.log(b); // 2
+```
+
+- 该语句将对象 `{a:1, b:2}` 中的 `a` 和 `b` 属性的值分别赋值给变量 `a` 和 `b`，可以为标识符分配不同的变量名称，使用 `:` 操作符制定新的变量名
+
+```javascript
+let { a: x, b: y } = { a: 1, b: 2 };
+console.log(x); // 1
+console.log(y); // 2
+```
+
+##### 函数参数解构赋值
+
+- 解构赋值也可以用于函数参数
+
+```javascript
+function add([x, y]) {
+  return x + y;
+}
+add([1, 2]); // 3
+```
+
+- 该函数接收一个数组作为参数，将其中的第一个值赋给 x， 第二个值赋给 y，然后返回它们的和
+
+- ES6 解构赋值让变量的初始化更加简单和便捷，我们可以访问到对象中的属性，并将其赋值给对应的变量，从而提高代码的可读性和可维护性
+
+#### 箭头函数
+
+> ES6 允许使用箭头定义函数，语法类 Java 的 Lambda 表达式
+
+```javascript
+//ES6 允许使用箭头定义函数
+
+// 1. 函数声明
+let fn1 = function () {};
+let fn2 = () => {}; // 箭头函数，此处不需要书写function关键字
+let fn3 = (x) => {}; // 单参数可以省略()，多参数无参数不可以
+let fn4 = (x) => console.log(x); // 只有一行方法体可以省略{}
+let fn5 = (x) => x + 1; // 当函数体只有依据返回值，可以省略花括号和return语句
+
+// 2. 使用特点
+// 在 JavaScript 中，this 关键字通常用来引用函数所在的对象，
+// 或者在函数本身作为构造函数时，来引用新对象的实例。
+// 但是在箭头函数中，this 的含义与常规函数定义中的含义不同，
+// 并且是由箭头函数定义时的上下文来决定的，而不是由函数调用时的上下文来决定的。
+// 箭头函数没有自己的this，this指向的是外层上下文环境的this
+
+let person = {
+  name: "张三",
+  showName: function () {
+    console.log(this); //  这里的this是person
+    console.log(this.name);
+  },
+  viewName: () => {
+    console.log(this); //  这里的this是window，和person同级的作用域
+    console.log(this.name);
+  },
+};
+person.showName();
+person.viewName();
+
+//this应用
+function Counter() {
+  this.count = 0;
+  setInterval(() => {
+    // 这里的 this 是上一层作用域中的 this，即 Counter实例化对象
+    this.count++;
+    console.log(this.count);
+  }, 1000);
+}
+let counter = new Counter();
+```
+
+#### rest 和 spread
+
+> rest 参数，在形参上使用和 Java 中的可变参数几乎一样
+
+```javascript
+// 1. 参数列表中多个普通参数 普通函数和箭头函数中都支持
+let fun1 = function (a, b, c, d = 10) {
+  console.log(a, b, c, d);
+};
+let fun2 = (a, b, c, d = 10) => console.log(a, b, c, d);
+
+fun1(1, 2, 3); // 1 2 3 4
+fun2(1, 2, 3, 4); // 1 2 3 4
+
+// 2. ...作为参数列表，称之为 rest 参数 普通函数和箭头函数中都支持，因为箭头函数中无法使用 arguments 对象
+let fun3 = function (...args) {
+  console.log(args);
+};
+let fun4 = (...args) => console.log(args);
+
+fun3(1, 2, 3); // [1, 2, 3]
+fun4(1, 2, 3); // [1, 2, 3]
+
+// rest参数必须在一个参数列表中的最后一位，并且要求不能有默认值，这也无形要求一个参数列表中只能有一个rest参数
+```
+
+> spread 参数，在实参上使用 rest
+
+```javascript
+let arr = [1, 2, 3];
+// let arrSpread = ...arr; // 错误，...arr 必须在调用方法时作为形参使用
+let fun1 = (a, b, c) => console.log(a, b, c);
+
+// 调用方法时，对arr进行转换，转换为1，2，3
+fun1(...arr); // 1 2 3
+
+// 应用场景1 合并数组
+let arr2 = [4, 5, 6];
+let arr3 = [...arr, ...arr2];
+console.log(arr3); // [1, 2, 3, 4, 5, 6]
+
+// 应用场景2 合并对象属性
+let p1 = { name: "张三" };
+let p2 = { age: 20 };
+let p3 = { ...p1, ...p2 };
+console.log(p3); // {name: "张三", age: 20}
+```
+
+#### ES6 的对象创建和拷贝
+
+##### 对象创建的语法糖
+
+> ES6 中新增了对象创建的语法糖，支持了 class extends constructor 等关键字，让 ES6 的语法和面向对象的语法更加接近
+
+```javascript
+class Person {
+  // 属性，带 # 符号说明该属性私有
+  #name;
+  #age;
+
+  // 构造函数，带 constructor 关键字
+  constructor(name, age) {
+    this.#name = name;
+    this.#age = age;
+  }
+
+  // getter 方法，带 get 关键字
+  get name() {
+    return this.#name;
+  }
+
+  get age() {
+    return this.#age;
+  }
+
+  // setter 方法，带 set 关键字
+  set name(name) {
+    this.#name = name;
+  }
+
+  set age(age) {
+    this.#age = age;
+  }
+
+  // 实例方法，不带关键词
+  eat(food) {
+    console.log(`${this.#age}岁的${this.#name} 正在吃 ${food}`);
+  }
+
+  // 静态方法，带 static 关键字
+  static sum(a, b) {
+    return a + b;
+  }
+}
+
+// 类的继承
+class Student extends Person {
+  #grade;
+  #score;
+
+  constructor(name, age, grade, score) {
+    // 调用父类的构造函数
+    super(name, age);
+    this.#grade = grade;
+    this.#score = score;
+  }
+
+  study(grade, score) {
+    console.log(
+      `${this.#age}岁的${this.#name} 正在学习 ${grade} 年级，成绩为 ${score}`
+    );
+  }
+}
+```
+
+##### 对象的深拷贝和浅拷贝
+
+> 对象的拷贝，快速获得一个和已有对象相同的对象的方式
+
+- 浅拷贝
+
+```javascript
+let arr = ["java", "c", "python"];
+let person = {
+  name: "张三",
+  language: arr,
+};
+
+// 浅拷贝
+let person2 = person;
+person2.name = "李四";
+console.log(person.name); // 李四
+```
+
+- 深拷贝
+
+```javascript
+let arr = ["java", "c", "python"];
+let person = {
+  name: "张三",
+  language: arr,
+};
+
+// 深拷贝
+let person2 = JSON.parse(JSON.stringify(person));
+person2.name = "李四";
+console.log(person.name); // 张三
+console.log(person2.name); // 李四
+```
+
+#### ES6 的模块化处理
+
+> 模块化是一种组织和管理前端代码的方式，将代码拆分成小的模块单元，使得代码更易于维护、拓展和复用。包括了定义、导出、导入以及管理模块的方法和规范。
+
+前端模块化的主要优势如下：
+
+1. 提高代码可维护性：通过将代码拆分丞小的模块单元，使得代码结构更为清晰，可读性更高，便于开发者阅读和维护
+
+2. 提高代码可复用性：通过将重复使用的代码编程可复用的模块，减少代码重复率，降低开发成本
+
+3. 提高代码可拓展性：通过模块化来实现代码的松耦合，便于更改和替换模块，从而方便地拓展功能
+
+> 目前前端模块化有多种规范和实现，包括 CommonJS、AMD 和 ES6 模块化。ES6 木块还是 JavaScript 语言的木块标准，使用 import 和 export 来实现模块的导入和导出
+
+#### ES6 模块化的几种暴露和导入方式
+
+- 分别导出
+
+- 统一导出
+
+- 默认导出
+
+ES6 种无论以何种方式导出，导出的都是一个对象，导出的内容都可以理解为是向这个对象中添加属性或者方法
+
+##### 分别导出
+
+`module.js` 向外分别暴露成员
+
+```javascript
+// 1. 分别暴露
+// 模块想对外导出，添加export关键字即可
+
+export const PI = 3.14;
+
+expeort function sum(x, y){
+  return x + y;
+}
+
+export class Person {
+  constructor(name, age){
+    this.name = name;
+    this.age = age;
+  }
+  sayHello(){
+    console.log(`hello, my name is ${this.name}. I am ${this.age} years old.`);
+  }
+}
+```
+
+`app.js` 导入 `module.js` 的成员
+
+```javascript
+/*
+ * `*` 代表module.js中的所有成员
+ * m1代表所有成员所属的对象
+ */
+import * as m1 from "./module.js";
+// 使用暴露的属性
+console.log(m1.PI); // 3.14
+
+// 使用暴露的函数
+console.log(m1.sum(1, 2)); // 3
+
+// 使用暴露的类
+let p = new m1.Person("张三", 20);
+p.sayHello(); // hello, my name is 张三. I am 20 years old.
+```
+
+`index.html`作为程序启动的入口 导入 `app.js`，需要添加 `type="module"` 属性，否则不支持 ES6 的模块化语法
+
+```html
+<script src="./app.js" type="module"></script>
+```
+
+##### 统一导出
+
+`module.js` 向外统一暴露成员
+
+```javascript
+// 2. 统一暴露
+// 模块想对外导出，export统一暴露想暴露的内容
+
+const PI = 3.14;
+
+function sum(x, y) {
+  return x + y;
+}
+
+class Person {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  sayHello() {
+    console.log(`hello, my name is ${this.name}. I am ${this.age} years old.`);
+  }
+}
+
+// 统一暴露
+export { PI, sum, Person };
+```
+
+`app.js` 导入 `module.js` 的成员
+
+```javascript
+/* 
+  {}中导入要使用的来自于module.js中的成员
+  {}中导入的名称要和module.js中导出的一致,也可以在此处起别名
+  {}中如果定义了别名,那么在当前模块中就只能使用别名
+  {}中导入成员的顺序可以不是暴露的顺序
+  一个模块中可以同时有多个import
+  多个import可以导入多个不同的模块,也可以是同一个模块
+*/
+//import {PI ,Person ,sum }  from './module.js'
+//import {PI as pi,Person as People,sum as add}  from './module.js'
+
+import {
+  PI,
+  Person,
+  sum,
+  PI as pi,
+  Person as People,
+  sum as add,
+} from "./module.js";
+
+// 使用暴露的属性
+console.log(PI); // 3.14
+console.log(pi); // 3.14
+
+// 使用暴露的函数
+let result = add(1, 2);
+console.log(result); // 3
+
+// 使用暴露的类
+let p = new People("张三", 20);
+p.sayHello(); // hello, my name is 张三. I am 20 years old.
+```
+
+##### 默认和混合暴露
+
+`module.js` 混合向外到处
+
+```javascript
+// 3. 默认和混合暴露
+// 默认暴露语法 export default
+// 默认暴露相当于实在暴露的对象中增加了一个名字为default的属性
+// 三种暴露方式可以在一个module中混合使用
+
+export const PI = 3.14;
+
+function sum(x, y) {
+  return x + y;
+}
+
+class Person {
+  constructor(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+  sayHello() {
+    console.log(`hello, my name is ${this.name}. I am ${this.age} years old.`);
+  }
+}
+
+// 导出默认
+export default sum;
+
+// 统一导出
+export { PI, Person };
+```
+
+`app.js` 的 default 和其他导入写法混用
+
+```javascript
+/* 
+  * 代表module.js中的所有成员
+  m1 代表所有成员所属的对象
+ */
+
+import * as m1 from "./module.js";
+import { default as add } from "./module.js";
+import add2 from "./module.js"; // import {default as add2} from './module.js'
+
+// 调用暴露的方法
+let result = m1.default(1, 2);
+console.log(result); // 3
+// 引入其他方式暴露的内容
+import { PI, Person } from "./module.js";
+
+// 使用暴露的属性
+console.log(PI); // 3.14
+```
+
+## 前端工程化
+
+### Nodejs
+
+> Nodejs 是一个基于 Chrome V8 引擎的 JavaScript 运行环境，可以使 JavaScript 运行在服务器端。使用 Node.js 可以方便地开发服务器端应用程序，如 Web 应用、API、后端服务，还可以通过 Node.js 构建命令行工具等。相比于传统的服务器端语言，Node.js 具有以下特点：
+
+- 单线程，但是采用了事件驱动、异步 I/O 模型，可以处理高并发请求
+
+- 轻量级，使用 C++ 编写的 V8 引擎让 Node.js 的运行速度快
+
+- 模块化，Node.js 内置了大量模块，同时也可以通过第三方扩展功能
+
+- 跨平台，可以在 Windows, Linux, Mac 等多种平台运行
+
+### npm 常用命令
+
+> 1. 项目初始化
+
+- `npm init`
+
+- `npm init -y`
+
+> 2. 安装依赖
+
+- `npm install <package><@version>`
+
+  - 安装包或者指定版本的依赖包
+
+- `npm install -g <package>`
+
+  - 安装全局依赖包
+
+- `npm install`
+
+  - 安装 package.json 中的所有记录的依赖
+
+> 3. 升级依赖
+
+- `npm update <package>`
+
+  - 将依赖升级到最新版本
+
+> 4. 卸载依赖
+
+- `npm uninstall <package>`
+
+> 5. 查看依赖
+
+- `npm ls`
+
+  - 查看项目依赖
+
+- `npm ls -g`
+
+  - 查看全局依赖
+
+> 6. 运行命令
+
+- `npm run`
+
+### Vue3
+
+**Vue 的两个核心功能：**
+
+- **声明式渲染**：Vue 基于标准 HTML 拓展了一套模板语法，使得我们可以声明式地描述最终输出的 HTML 和 JavaScript 状态之间的关系。
+
+- **响应性**：Vue 会自动跟踪 JavaScript 状态并在其发生变化时响应式地更新 DOM
+
+### Vite
+
+- 当我们开始构建越来越大型的应用时，需要处理的 JavaScript 代码量也呈指数级增长。
+
+- 包含数千个模块的大型项目相当普遍。基于 JavaScript 开发的工具就会开始遇到性能瓶颈：通常需要很长时间（甚至是几分钟！）才能启动开发服务器，即使使用模块热替换（HMR），文件修改后的效果也需要几秒钟才能在浏览器中反映出来。如此循环往复，迟钝的反馈会极大地影响开发者的开发效率和幸福感。
+
+1.  快速创建项目：使用脚手架可以快速搭建项目基本框架，避免从零开始搭建项目的重复劳动和繁琐操作，从而节省时间和精力。
+
+2.  统一的工程化规范：前端脚手架可以预设项目目录结构、代码规范、git 提交规范等统一的工程化规范，让不同开发者在同一个项目上编写出风格一致的代码，提高协作效率和质量。
+
+3.  代码模板和组件库：前端脚手架可以包含一些常用的代码模板和组件库，使开发者在实现常见功能时不再重复造轮子，避免因为轮子质量不高带来的麻烦，能够更加专注于项目的业务逻辑。
+
+4.  自动化构建和部署：前端脚手架可以自动进行代码打包、压缩、合并、编译等常见的构建工作，可以通过集成自动化部署脚本，自动将代码部署到测试、生产环境等。
+
+#### Vite + Vue3 项目的目录结构
+
+- public/ 目录：用于存放一些公共资源，如 HTML 文件、图像、字体等，这些资源会被直接复制到构建出的目标目录中
+
+- src/ 目录：存放项目的源代码，包括 JavaScript、CSS、Vue 组件、图像和字体等资源。在开发过程中，这些文件会被 Vite 实时编译和处理，并在浏览器中进行实时预览和调试
+
+  - assets/ 目录：用于存放一些项目中用到的静态资源，如图片、字体、样式文件
+
+  - components/ 目录：用于存放组件相关的文件。组件是代码复用的一种方式，用于抽象出一个可复用的 UI 部件，方便在不同的场景中进行重复使用
+
+  - layouts/ 目录：用于存放布局组件的文件。布局组件通常负责整个应用程序的整体布局，如头部、底部、导航菜单等
+
+  - pages/ 目录：用于存放页面级别的组件文件，通常是路由对应的组件文件。在这个目录下，可以创建对应的文件夹，用于存储不同的页面组件
+
+  - plugins/ 目录：用于存放 Vite 插件相关的文件，可以按需加载不同的插件来实现不同的功能，如自动化测试、代码压缩
+
+  - router/ 目录：用于存放 Vue.js 的路由配置文件，负责管理视图和 URL 之间的映射关系，方便实现页面之间的跳转和数据传递
+
+  - store/ 目录：用于存放 Vuex 状态管理相关的文件，负责管理应用程序中的数据和状态，方便统一管理和共享数据，提高开发效率
+
+  - utils/ 目录：用于存放一些通用的工具函数，如日期处理函数、字符串操作函数
+
+- vite.config.js 文件：Vite 的配置文件，可以通过该文件配置项目的参数、插件、打包优化等，该文件可以使用 CommonJs 或 ES6 模块的语法进行配置
+
+- package.json 文件：标准的 Node.js 项目配置文件，包含了项目的基本信息和依赖关系。其中可以通过 scripts 字段定义几个命令，如 dev、build、serve 等，用于启动开发、构建和启动本地服务器等操作
+
+- Vite 项目的入口为 src/main.js 文件，这是 Vue.js 应用程序的启动文件，也是整个前端应用程序的入口文件。在该文件中，通常会引入 Vue.js 及其相关插件和组件，同时会创建 Vue 实例，挂载到 HTML 页面上指定的 DOM 元素中
+
+#### Vite + Vue3 项目组件
+
+- 一个页面作为整体，是由多个部分组成，每个部分在这里就可以理解为一个组件
+
+- 每个.vue 文件就可以理解成一个组件，多个.vue 文件可以构成一个整体方面
+
+- 组件化给我们带来的另一个好处就是组件的复用和维护非常方便
+
+![组件方式](img/Web_51.png)
+
+> .vue 文件
+
+- 传统的页面有 .html 文件 .css 文件 和.js 文件三个文件组成（多文件组件）
+
+- vue 将这文件合并成一个.vue 文件（Single-File Component，SFC，单文件组件）
+
+- .vue 文件对 js/css/html 统一封装，这是 VUE 中的概念，该文件由三个部分组成
+
+  - `<template>`标签：代表组件的 html 部分代码，代替传统的.html 文件
+
+  - `<script>`标签：代表组件的 js 代码，代替传统的.js 文件
+
+  - `<style>`标签：代表组件的 css 代码，代替传统的.css 文件
+
+> vue 项目组织结构
+
+- index.html：项目的入口，其中`<div id="app"></div>`是用于挂载所有组件的元素
+
+- index.html 中的 script 标签引入了一个 main.js 文件,具体的挂载过程在 main.js 中执行
+
+- main.js 是 vue 工程中非常重要的文件,他决定这项目使用哪些依赖,导入的第一个组件
+
+- App.vue 是 vue 中的核心组件,所有的其他组件都要通过该组件进行导入,该组件通过路由可以控制页面的切换
+
+![Vue文件](img/Web_52.png)
+
+#### Vue3 响应式数据入门
+
+`<style scoped>`：用于设置组件样式，含义是将样式局限在当前组件中，不对全局样式造成影响
+
+> 响应式数据
+
+// 非响应式数据：修改后 Vue 不会更新 DOM
+// 响应式数据：修改后 Vue 会更新 DOM
+
+// VUE3 中数据要经过 ref 或者 reactive 处理后才是响应式的
+// ref 是 Vue3 框架中提供的一个函数
+
+// ref 处理的响应式数据在 js 编码修改的时候需要通过.value 进行取值
+// ref 响应式数据在绑定到 html 上时不需要.value
+
+```vue
+<script type="module">
+import { ref } from "vue";
+export default {
+  setup() {
+    let count = ref(0);
+    function increase() {
+      count.value++;
+    }
+    function decrease() {
+      count.value--;
+    }
+    return {
+      count,
+      increase,
+      decrease,
+    };
+  },
+};
+</script>
+```
+
+> setup 函数和语法糖
+
+```vue
+<script type="module" set>
+/* 通过setup关键字可以省略冗余的语法结构 */
+</script>
+```
+
+1. 全局引入 main.js
+
+```javascript
+import "./style/reset.css"; //书写引入的资源的相对路径即可！
+```
+
+2. vue 文件 script 代码引入
+
+```javascript
+import "./style/reset.css";
+```
+
+3. Vue 文件 style 代码引入
+
+```javascript
+@import './style/reset.css'
+```
+
+#### Vue3 视图渲染技术
+
+##### 模版语法
+
+> Vue 使用一种基于 HTML 的模板语法，能够声明式地将其组件实例的数据绑定到呈现的 DOM 上。所有的 Vue 模板都是语法层面合法的 HTML，可以被符合规范的浏览器和 HTML 解析器解析。在底层机制中，Vue 会将模板编译成高度优化的 JavaScript 代码。结合响应式系统，当应用状态变更时，Vue 能够智能地推导出需要重新渲染的组件的最少数量，并应用最少的 DOM 操作。
+
+###### 插值表达式和文本渲染
+
+插值表达式：最基本的数据绑定形式是文本插值，它使用的是"Mustache"语法（双大括号）：
+
+- 插值表达式是将数据渲染到元素的指定位置手段之一
+
+- 插值表达式不绝对依赖标签，其位置相对自由
+
+- 插值表达式中支持 JavaScript 的运算表达式
+
+- 插值表达式中也支持函数的调用
+
+> 为了渲染双标中的文本，也可以使用 v-exte 和 v-html 命令
+
+- `v-***`这种写法的方式使用的是 Vue 命令
+
+- `v-***`的命令必须依赖元素，并且要写在元素的开始标签中
+
+- `v-***`指令支持 ES6 中的字符串模版
+
+- `v-text`可以将数据渲染成双标签中的文本，但是不识别 html 元素结构的文本
+
+- `v-html`可以将数据渲染成双标签中间的文本，识别 html 元素结构的文本
+
+###### Attribute 属性渲染
+
+想要渲染一个元素的 attribute，应该使用 `v-bind` 指令
+
+- 由于插值表达式不能直接放在标签的属性中，所有要渲染元素属性就应该使用`v-bind`
+
+- `v-bind`可以用于渲染任何元素的属性，语法为 `v-bind:属性名='数据名'`
+
+###### 事件的绑定
+
+使用`v-on`来监听 DOM 事件，并在事件触发时执行对应的 Vue 的 JavaScript 代码
+
+- 用法：`v-on:事件名='handler'` 或简写为 `@事件名='handler'`
+
+- vue 中的事件名=原生事件名去掉 `on` 前缀 如：onClick --> click
+
+- handler 的值可以使方法事件处理器，也可以是内联事件处理器
+
+- 绑定事件的时候，可以通过一些绑定的修饰符：
+
+  - `.once`：只触发一次事件
+
+  - `.prevent`：阻止默认事件
+
+  - `.stop`：阻止事件冒泡
+
+  - `.capture`：使用事件捕获模式而不是冒泡模式
+
+  - `.self`：只在事件发送者自身触发时才触发事件
+
+##### 响应式基础
+
+数据模型发生变化时，自动更新 DOM 树内容，页面上显示的内容会进行同步变化，Vue3 的数据模型不是自动响应式的，需要我们进行特殊处理
+
+响应式实现关键字
+
+`ref` 可以将一个基本类型的数据（字符串、数字等）转换为一个响应式对象，`ref`只能包裹单一元素
+
+`reactive()` 函数可以创建一个响应式对象或数组
+
+- 使用 `ref` 适用于以下开发场景：
+
+  - 包装基本类型数据：`ref` 主要用于包装基本类型数据（如字符串、数字等），即只有一个值的数据，如果想监听这个值的变化，用 `ref` 最为方便。在组件中使用时也很常见。
+
+  - 访问方式简单：`ref` 对象在访问时与普通的基本类型值没有太大区别，只需要通过 `.value` 访问其实际值即可。
+
+- 使用 `reactive` 适用于以下开发场景：
+
+  - 包装复杂对象：`reactive` 可以将一个普通对象转化为响应式对象，这样在数据变化时会自动更新界面，特别适用于处理复杂对象或者数据结构。
+
+  - 需要递归监听的属性：使用 `reactive` 可以递归追踪所有响应式对象内部的变化，从而保证界面的自动更新。
+
+综上所述，`ref` 适用与简单情形下的数据双向绑定，对于只有一个字符等基本类型数据或自定义组件等情况，建议可以使用 `ref`；而对于对象、函数等较为复杂的数据结构，以及需要递归监听的属性变化，建议使用 `reactive`。当然，在实际项目中根据需求灵活选择也是十分必要的。
+
+##### 条件渲染
+
+> v-if
+
+- `v-if='表达式'`只会在指令的表达式返回真值时才被渲染
+
+- 可以使用 `v-else-if` 和 `v-else` 来实现条件渲染，必须跟在 `v-if` 后面
+
+> v-show
+
+- `v-show`会在 DOM 渲染中保留该元素，仅切换了 `display` 的 CSS 属性
+
+- `v-show`不支持在`<template>`元素上使用，也不能搭配 `v-else`
+
+##### 列表渲染
+
+> v-for
+
+- `v-for='item in items'` 用于便利源数据数组，而 `item` 是迭代项的**别名**
+
+- 需要提供 key 属性，以便 Vue 能够跟踪每个节点的身份，从而高效的更新 DOM `v-for='item in items':key='item.id'`
+
+- 在`v-for` 块中可以完整地访问父作用域内的属性和变量
+
+##### 双向绑定
+
+> 单向绑定和双向绑定
+
+- 单向绑定：响应式数据的变化会更新 DOM 树，但是 DOM 树上用户操作造成的数据改变不会同步更新到响应式数据
+
+- 双向绑定：响应式数据的变化会更新 DOM 树，但是 DOM 树上用户操作造成的数据改变会同步更新到响应式数据
+
+  - 用户通过表单标签才能输入数据，所以双向绑定都是应用到表单标签上，其他标签不行
+
+  - `v-model` 专门用于双向绑定表单标签的 value 属性，语法为`v-model:value='数据名'`，可以简写为`v-model='数据名'`
+
+  - `v-model` 还可以用于各种不同类型的输入，如`<textarea>`，`<select>`元素
+
+##### 属性计算
+
+> 模版中的表达式虽然方便，但也只能能用来做简单的操作。如果在末班中写太多逻辑，会让模版变得臃肿，难以维护
+
+`computed()`方法期望接收一个 getter 函数，返回值为一个**计算属性 ref**
+
+Vue 的计算属性会自动追踪响应式依赖，检测到该计算属性依赖于某个响应式数据，当该响应式数据发生变化时，会同时更新任何依赖于该计算属性的绑定
+
+##### 数据监听器
+
+> 计算属性允许我们声明性地计算衍生值，然而在有些情况下，需要在状态变化时执行副操作，可以使用 watch 函数在每次响应式状态发生变化时出发回调函数
+
+- watch 主要用于以下场景：
+
+  - 当数据发生变化时需要执行相应的操作
+
+  - 监听数据变化，当满足一定条件时触发相应操作
+
+  - 在异步操作前后需要执行相应的操作
+
+- watchEffect 默认监听所有的响应式数据
+
+##### Vue 生命周期
+
+> 每个 Vue 组件实例在创建时都需要经历一系列的初始化步骤，比如设置数据侦听、编译模版、挂载实例到 DOM，以及在数据改变时更新 DOM。在此过程中，它也会运行被称为 `生命周期钩子的函数`，让开发者有机会再特定阶段运行自己的代码
+
+**周期图解**：
+
+![生命周期](img/Web_53.png)
+
+- 常见钩子函数：
+
+  - `onMounted()` 注册一个回调函数，在组件挂载完成后执行
+
+  - `onUpdated()` 注册一个回调函数，在组件因为响应式状态变更而更新其 DOM 树之后调用
+
+  - `onUnmounted()` 注册一个回调函数，在组件销毁之前调用
+
+  - `onBeforeMount()` 注册一个钩子，在组件被挂载之前被调用
+
+  - `onBeforeUpdate()` 注册一个钩子，在组件即将因为响应式状态变更而更新其 DOM 树之前调用
+
+  - `onBeforeUnmount()` 注册一个钩子，在组件实例被卸载之前调用
+
+##### Vue 组件
+
+###### 组件基础
+
+> 组件允许我们将 UI 划分为独立的、可重用的部分，并且可以对每个部分进行单独的思考。组件就是实现应用中局部功能代码和资源的集合！在市级应用中，组件常常被组织成层层嵌套的树状结构：
+
+![组件](img/Web_54.png)
+
+- 这和我们嵌套 HTML 元素的方式类似，Vue 实现了自己的组件模型，使我们可以在每个组件内封装自定义内容与逻辑
+
+- 组件化：对 html/css/js 统一封装，这是 Vue 中的概念
+
+- 模块化：对 js 的统一封装，这是 ES6 中的概念
+
+- 组件化中，对 js 部分代码的处理使用 ES6 中的模块化
+
+在主 Vue 文件的`<script>`标签中，通过`import`关键字导入组件，然后在`template`标签中使用组件标签，并设置属性值。
+
+```vue
+<script>
+import HelloWorld from "./components/HelloWorld.vue";
+</script>
+
+<template>
+  <div>
+    <HelloWorld class="helloWorld"></HelloWorld>
+  </div>
+</template>
+
+<style scoped>
+.helloWorld {
+  color: red;
+}
+</style>
+```
+
+###### 组件之间传递数据
+
+1. 父传子
+
+> Vue3 中父组件向子组件传值可以通过 props 进行，具体操作如下：
+
+- 首先在父组件中定义需要传递给子组件的值，接着在父组件模版中引入子组件，同时引入子组件的标签中添加 props 属性并为其设置需要传递的值
+
+- 在 Vue3 中，父组件通过 props 传递给子组件的值是响应式的，也就是说，如果在父组件中的传递的值发生了改变，子组件的值也会相应地更新
+
+使用`defindProps()`方法定义 props，并在组件的选项中设置 props 属性
+
+2. 子传父
+
+> Vue3 中子组件向父组件传值可以通过事件进行，具体操作如下：
+
+- 首先在父组件中定义一个方法，在方法中接收子组件传递过来的值，接着在父组件模版中引入子组件，同时在子组件的标签中添加一个事件绑定，并将事件绑定到父组件的方法上
+
+- 在 Vue3 中，子组件通过事件传递给父组件的值是响应式的，也就是说，如果在子组件中的传递的值发生了改变，父组件的方法也会相应地执行
+
+使用`defineEmits()`方法定义事件，并在组件的选项中设置 emits 属性
+
+3. 兄弟组件通信
+
+> Vue3 中兄弟组件通信可以通过事件总线进行，具体操作如下：
+
+子传父 -> 父传子 -> 兄弟组件通信
+
+#### Vue3 路由机制 router
+
+> 路由简介
+
+定义：路由就是根据不同的 URL 地址展示不同的内容或页面
+
+作用：
+
+- 单页应用程序（SPA），路由可以实现不同视图之间的无刷新切换，提升用户体验
+
+- 路由还可以实现页面的认证的权限控制，保护用户的隐私和安全
+
+- 路由还可以利用浏览器的前进后退，帮助用户更好地返回值访问过的页面
+
+##### Vue3 路由的使用
+
+1. 导入路由依赖
+
+```shell
+npm install vue-router@4 --save //安装全局的 vue-router 4版本
+```
+
+2. 创建路由实例
+
+```vue
+<template>
+  <div>
+    // 路由视图，使用name属性进行区分，没有定义name属性的路由由default渲染
+    <router-view></router-view>
+    <router-view name="homeView"></router-view>
+    <router-view name="listView"></router-view>
+    <router-view name="addView"></router-view>
+    <router-view name="updateView"></router-view>
+    // 路由连接导航
+    <router-link to="/">Home</router-link>
+    <router-link to="/list">List</router-link>
+    <router-link to="/add">Add</router-link>
+    <router-link to="/update">Update</router-link>
+  </div>
+</template>
+```
+
+1. 配置路由映射
+
+创建`src/routers/router.js`文件，配置路由映射
+
+```javascript
+// 导入路由创建的相关方法
+import { createRouter, createWebHashHistory } from "vue-router";
+
+// 导入组件
+import Home from '../components/Home.vue'
+import List from '../components/List.vue'
+import Add from '../components/Add.vue'
+import Update from '../components/Update.vue'
+
+// 创建路由对象，声明路由规则
+const routes = createRouter({
+
+  //createWebHashHistory() 方法是 Vue.js 基于 hash 模式创建路由的工厂函数。在使用这种模式下，路由信息将被保存在 URL 和 hash 中
+  //使用 createWebHashHistory() 方法可以创建一个路由历史记录对象，用于管理应用程序的路由记录
+  //通常用该方法来创建路由的历史记录对象
+  //路由中缓存历史记录的对象由vue-router提供
+  history: createWebHashHistory(),
+  routes: [
+    {
+      path: "/",
+      /*
+        component指定组件在默认的路由视图位置展示
+        components:Home
+        components指定组件在name为某个值的路由视图位置展示
+        components:{
+            default:Home,// 默认路由视图位置
+            homeView:Home// name为homeView的路由视图位置
+        }
+      */
+      components:{
+        default: Home
+        homeView: Home
+      }
+    },
+    {
+      path: "/list",
+      components: {
+        listView: List
+      }
+    },
+    {
+      path:'/add',
+      components:{
+        addView:Add
+      }
+    },
+    {
+      path:'/update',
+      components:{
+        updateView:Update
+      }
+    },
+  ]
+});
+
+export default routers;
+```
+
+4. main.js 中引入 router 配置
+
+```javascript
+import { createApp } from "vue";
+import App from "./App.vue";
+//导入router模块
+import router from "./routers/router.js";
+let app = createApp(App);
+//绑定路由对象
+app.use(router);
+//挂载视图
+app.mount("#app");
+```
+
+##### 路由的重定向
+
+`src/routers/router.js`，在路由对象后面添加 redict 属性，并指定重定向的路径
+
+```javascript
+routes: [
+  {
+    path: "/",
+    redirect: "/home",
+  },
+];
+```
+
+##### 编程式路由
+
+> 普通路由
+
+- `<router-link to="/list">List</router-link>` 这种路由，to 中的内容目前是固定的，点击后智能切换/list 对象组件（声明式路由）
+
+> 编程路由
+
+- 通过`useRouter`，动态决定向哪个组件切换的路由
+
+- 在 Vue3 和 Vue Router 4 中，使用 `useRouter` 来实现动态路由
+
+- 这里的 `useRouter` 方法返回的是一个 `router` 对象，可以用来做如导航到新页面、返回上一页面等操作
+
+```vue
+<script setup>
+import { useRouter } from "vue-router";
+const router = useRouter();
+
+function goToList() {
+  router.push("/list");
+  //router.push({ path: "/list" }); // 也可以使用对象形式的路径
+}
+</script>
+```
+
+##### 路由传参
+
+> 路径参数
+
+- 在路径中使用一个动态字段来实现，我们称之为 **路径参数**
+
+  - 路径参数在路径中以冒号开头，后面跟着参数名，如 `/user/:id`
+
+> 键值对参数
+
+- 类似与 get 请求通过 url 传参，数据是键值对形式的
+
+  - 例如：查看数据详情`/showDetail?hid=1`，hid 为键，1 为值
+
+  - 在 Vue3 和 Vue Router4 中，可以使用 `useRoute` 这个函数从 Vue 的组合式 API 中获取路由对象
+
+  - `useRoute` 方法返回的是当前的 route 对象，可以用它来获取关于当前路由的信息
+
+```vue
+<script setup>
+import { useRoute } from "vue-router";
+let route = useRoute();
+let showDetail = (id, language) => {
+  // 尝试使用凭借字符串方式传递参数
+  // router.push({ path: `/showDetail?id=${id}&language=${language}` });
+  // 使用对象形式传递参数，即使用params
+  router.push({ name: "showDetail", params: { id: id, language: language } });
+  // 后续可以使用route.params.id获取参数值
+};
+
+let showDetail2 = (id, language) => {
+  // uri键值对参数，需要使用query
+  router.push({ path: "/showDetail2", query: { id: id, language: language } });
+  // 后续可以使用route.query.id获取参数值，此时参数是键值对形式的
+};
+</script>
+```
+
+同时使用路径参数，需要配置 router.js 文件，增加路径参数占位符
+
+`src/routers/router.js`
+
+```javascript
+router: [
+  {
+    path: "/showDetail2/:id/:language",
+    name: "showDetail2",
+    component: { showDetailView: ShwoDetail },
+  },
+];
+```
+
+##### 路由守卫
+
+> 在 Vue3 中，路由守卫是用于在路由切换期间进行一些特定任务的回调函数。路由守卫可以用于许多任务，例如验证用户是否已经登录、在路由切换前提供确认提示、请求数据等。Vue3 为路由守卫提供了全面的支持
+
+1. **全局前置守卫**：在路由切换前被调用，可以用于验证用户是否已登录、中断导航、请求数据
+
+2. **全局后置守卫**：在路由切换后被调用，可以用于处理数据、操作 DOM、记录日志
+
+**守卫代码的位置**：`router.js`
+
+```javascript
+//全局前置路由守卫
+router.beforeEach((to, from, next) => {
+  //to 是目标地包装对象  .path属性可以获取地址
+  //from 是来源地包装对象 .path属性可以获取地址
+  //next是方法，不调用默认拦截！ next() 放行,直接到达目标组件
+  //next('/地址')可以转发到其他地址,到达目标组件前会再次经过前置路由守卫
+  console.log(to.path, from.path, next);
+
+  //需要判断，注意避免无限重定向
+  if (to.path == "/index") {
+    next();
+  } else {
+    next("/index");
+  }
+});
+
+//全局后置路由守卫
+router.afterEach((to, from) => {
+  console.log(`Navigate from ${from.path} to ${to.path}`);
+});
+```
