@@ -4324,3 +4324,106 @@ Person person = ioc.getBean("zhangsan", Person.class);
 - 多个，返回所有组件的 List 集合
 
 3. 组件唯一存在，正确返回
+
+#### 框架的配置类
+
+组件：框架的底层配置
+
+配置文件：指定位置（已经不常用）
+
+配置类：分类管理组件的配置，配置类也是容器中的一个组件
+
+新建文件`config.PersonConfig.java`
+
+```java
+@Configuration
+public class PersonConfig {
+  @Bean
+  public Person person(){
+    Person person = new Person();
+    person.setName("张三");
+    return person;
+  }
+}
+```
+
+#### MVC 分层模型对应注解
+
+Spring 提供了快速的 MVC 分层注解
+
+1. 控制层注解：`@Controller`
+
+2. 服务层注解：`@Service`
+
+3. 持久层注解：`@Repository` （DAO）
+
+4. 组件层注解：`@Component`，本质上上面三个都是该注解的别名
+
+默认，分层注解能起作用的前提是，组件必须在主程序类所在的包及其子包结构下
+
+如果组件不在该包及其子包结构下，则需要在主程序类上使用`@ComponentScan`注解指定只扫描的包路径（其他包下的组件不会被扫描到），只扫描用 Spring 相关注解注册到容器中的组件
+
+```java
+@ComponentScan(basePackages = "{目标路径}")
+@SpringBootApplication
+```
+
+#### 导入第三方组件
+
+第三方组件导入容器（没法标注分层注解）：
+
+1. `@Bean`，自己 new，注册给容器
+
+2. `@Import`：导入组件，在括号内指定组件类`@Import(Component.class)`
+
+`@Import`注解只用标注一次，推荐在一个专门的配置类`AppConfig.java`上写`@Import`、`@ComponentScan`等注解，主类只保留`@SpringBootApplication`
+
+#### 组件的作用域
+
+使用`@Scope`注解指定作用域
+
+- `Scope("prototype")`，非单实例
+
+- `Scope("singleton")`，单实例（默认）
+
+- `Scope("request")`，同一个请求单实例
+
+- `Scope("session")`，同一个会话单实例
+
+容器创建之前，所有的单实例组件都会被创建，容器销毁之后，所有的单实例组件都会被销毁
+
+多实例组件在启动时不会被创建，什么时候获取什么时候创建
+
+#### 懒加载
+
+使用`@Lazy`，容器启动完成之前不会创建加载组件的对象，直到第一次使用时才创建
+
+#### FactoryBean
+
+`FactoryBean`是一个接口，实现该接口的类可以创建对象，并返回，容器中注册该组件，容器会调用该组件的`getObject()`方法来获取对象
+
+如果制造的对象比较复杂，利用工厂方法进行制造组件，组件的类型是泛型，组件名字是工厂名字
+
+```java
+@Component
+public class BYDFactory implements FactoryBean<Car> {
+  // 调用此方法给容器中制造对象
+  @Override
+  public Car getObject() throws Exception {
+    Car car = new Car();
+    return car;
+  }
+
+  // 说明造的东西的类型
+  @Override
+  public Class<?> getObjectType() {
+    return Car.class;
+  }
+
+  // 组件是否单实例
+  @Override
+  public boolean isSingleton() {
+    return true;
+  }
+}
+```
