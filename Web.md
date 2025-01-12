@@ -4846,3 +4846,478 @@ router.afterEach((to, from) => {
   console.log(`Navigate from ${from.path} to ${to.path}`);
 });
 ```
+
+#### Vue3 数据交互 axios
+
+##### promise
+
+> 普通函数和回调函数
+
+- 普通函数：正常调用的函数，一般函数执行完毕后才会继续执行下一行代码
+
+```javascript
+let fun1 = function () {
+  console.log("fun1");
+};
+```
+
+- 回调函数：一些特殊的函数，表示未来才会执行的一些功能，后续代码不会等待该函数执行完毕就开始执行了
+
+```javascript
+setTimeout(function () {
+  console.log("fun2");
+}, 1000);
+console.log("fun3");
+```
+
+> promise：前端中的异步编程技术，类似 Java 中的多线程+线程结果回调
+
+- promise 是异步编程的一种解决方案，比传统的解决方案-回调函数和事件-更合理和强大，ES6 将其写入了语言标准，统一了用法，原生提供了 Promise 对象。
+
+- 所谓 Promise，简单说就是一个容器里面保存着某个未来才会结束的事件（通常是一个异步操作）的结果。从语法上来说，Promise 是一个对象，从它可以获取异步操作的消息。Promise 提供统一的 API，各种异步操作都可以用同样的方式进行处理
+
+> Promise 对象特点
+
+- Promise 对象代表一个异步操作，有三种状态：pending（进行中）、resolved（已成功）、rejected（已失败）。只有异步操作的结果可以决定当前是哪种状态，任何其他操作都无法改变这个状态
+
+- 一旦状态改变，就不会再变，任何时候都可以得到这个结果。Promise 对象的状态改变，只有两种可能：从 pending 变成 resolved 和从 pending 变成 rejected。只要这两种情况发生，状态就凝固了，不会再变了，会一直保持这个结果
+
+> Promise 基本用法
+
+- ES6 规定，Promise 对象是一个构造函数，用来生成 Promise 实例
+
+```javascript
+/*  
+  1.实例化promise对象,并且执行(类似Java创建线程对象,并且start)
+  参数: resolve,reject随意命名,但是一般这么叫!
+  参数: resolve,reject分别处理成功和失败的两个函数! 成功resolve(结果)  失败reject(结果)
+  参数: 在function中调用这里两个方法,那么promise会处于两个不同的状态
+  状态: promise有三个状态
+    pending   正在运行
+    resolved  内部调用了resolve方法
+    rejected  内部调用了reject方法
+  参数: 在第二步回调函数中就可以获取对应的结果 
+*/
+let promise = new Promise((resolve, reject) => {
+  console.log("promise");
+  // resolve("success");
+  // reject("error");
+});
+
+// 2. 获取回调函数结果 then会在此处等待promise中的运行结果，但是不会阻塞代码继续运行
+
+promise.then(
+  function (value) {
+    console.log(`promise 中执行了resolve: ${value}`);
+  },
+  function (error) {
+    console.log(`promise 中执行了reject: ${error}`);
+  }
+);
+```
+
+> promise catch()
+
+`promise.prototype.catch()` 方法是 `.then(null, onRejected)` 的别名，用于指定发生错误时的回调函数
+
+```javascript
+let promise = new Promise((resolve, reject) => {
+  console.log("promise");
+  throw new Error("error");
+});
+console.log("other");
+
+/* 
+  then中的reject()的对应方法可以在产生异常时执行，接收到的就是异常中的提示信息
+  then中可以只有一个resolve()的对应方法，reject()方法可以用后续的catch替换
+  then中的reject对应的回调函数被后续的catch替换后，catch中接收的数据是一个异常对象
+*/
+
+promise
+  .then(
+    function (value) {
+      console.log(`promise 中执行了resolve: ${value}`);
+    }
+    // function (error) {
+    //   console.log(`promise 中执行了reject: ${error}`);
+    // }
+  )
+  .catch(function (error) {
+    console.log(`promise 中执行了catch: ${error}`);
+  });
+```
+
+> async 的使用
+
+- async 和 await 是 ES6 中用于处理异步操作的新特性。通常，异步操作会涉及到 Promise 对象，而 async/await 则是在 Promise 基础上提供了更加直观和易于使用的语法
+
+- async 用于标识函数，标识函数后，async 函数的返回值会变成一个 promise 对象
+
+- 如果函数内部返回的数据是一个非 promise 对象，async 函数的结果会返回一个成功状态的 promise 对象
+
+- 如果函数内部返回的是一个 promise 对象，则 async 函数返回的状态和结果由该对象决定
+
+- 如果函数内部抛出的是一个异常，则 async 函数返回的是一个失败的 promise 对象
+
+```javascript
+async function fun1() {
+  //return 10
+  //throw new Error('error')
+  let promise = Promise.reject("hello");
+  return promise;
+}
+let promise = fun1();
+
+promise
+  .then(function (value) {
+    console.log("success:" + value);
+  })
+  .catch(function (error) {
+    console.log("error:" + error);
+  });
+```
+
+> await 的使用
+
+- await 右侧的表达式一般为一个 promise 对象，但是也可以是一个其他值
+
+- 如果表达式是 promise 对象，await 返回的是 promise 成功的值
+
+- await 会等右边的 promise 对象执行结束，然后再获取结果，后续代码也会等待 await 的执行
+
+- 如果表达式是其他值，则直接返回该值
+
+- await 必须在 async 函数中使用，但是 async 函数中可以没有 await
+
+- 如果 await 右边的 promise 失败了，就会抛出异常，需要通过 try...catch 捕获异常
+
+```javascript
+async function fun1() {
+  return 10;
+}
+
+async function fun2() {
+  try {
+    let res = await fun1();
+    // let res = await Promise.reject("error");
+  } catch (error) {
+    console.log(error);
+  }
+  console.log("other");
+}
+```
+
+##### Axios
+
+> AJAX
+
+- AJAX = Asynchronous JavaScript and XML，异步 JavaScript 和 XML
+
+- AJAX 不是新的编程语言，而是一种使用现有标准的新方法
+
+- AJAX 最大的优点是在不重新加载整个页面的情况下，可以与服务器交换数据并更新部分网页内容
+
+- AJAX 不需要任何浏览器插件，但需要用户允许 JavaScript 在浏览器上执行
+
+- XMLHttpRequest 只是实现 AJAX 的一种方法
+
+Ajax 工作原理：
+
+![Ajax工作原理](img/Web_55.png)
+
+> Axios
+
+- Axios 是一个基于 promise 网络请求库，作用于 node.js 和浏览器中。它是 isomorphic 的（即同一套代码可以运行在浏览器和 nodejs 环境中）。在服务端使用原生 node.js 的 http 模块，在浏览器中使用 XMLHttpRequest 对象。有着如下特性
+
+  - 从浏览器创建 XMLHttpRequest
+
+  - 从 node.js 创建 http 请求
+
+  - 支持 Promise API
+
+  - 拦截请求和响应
+
+  - 转换请求和响应数据
+
+  - 取消请求
+
+  - 自动转换 JSON 数据
+
+  - 客户端支持防御 XSRF
+
+> Axios 的基本使用方法
+
+导入 Axios 模块依赖
+
+```shell
+npm install axios
+```
+
+```javascript
+import axios from "axios";
+
+// 使用axios发送请求，axios({设置请求的参数}) 请求三要素：1.url：请求的资源路径 2.method：请求的方式 3.data：请求的参数
+
+let promise = axios({
+  url: "http://www.example.com/api",
+  method: "get",
+  data: {
+    // 如果请求方式是get，则data中的数据会以键值对形式放在url后
+    // 如果请求方式是post，则data中的数据会以JSON形式放入请求体
+  },
+});
+
+promise
+  .then(function (response) {
+    // 请求成功，response是服务器返回的数据
+    console.log(response);
+    /* response 响应结果对象
+      data 服务端响应回来的数据
+      status 响应状态码
+      statusText 响应状态描述
+      headers 本次响应的所有响应头
+      config 本次请求的配置信息
+      request 本次请求发送时使用的XMLHttpRequest对象
+    */
+  })
+  .catch(function (error) {
+    // 请求失败，error是错误信息
+    console.log(error);
+  });
+```
+
+> Axios get 和 post 方法
+
+- 添加配置语法
+
+```javascript
+axios.get(url[, config])
+
+axios.get(url,{
+  key:value,
+  key:value
+})
+
+axios.post(url[, data[, config]])
+
+axios.post(url,{
+  key:value
+  key:value
+})
+```
+
+> Axios 的拦截器
+
+```javascript
+import axios from "axios";
+
+// 创建 instance 实例
+const instance = axios.create({
+  baseURL: "https://api.uomg.com",
+  timeout: 10000,
+});
+
+// 添加请求拦截
+instance.interceptors.request.use(
+  // 设置请求头配置信息
+  (config) => {
+    //处理指定的请求头
+    console.log("before request");
+    config.headers.Accept = "application/json, text/plain, text/html,_/_";
+    return config;
+  },
+  // 设置请求错误处理函数
+  (error) => {
+    console.log("request error");
+    return Promise.reject(error);
+  }
+);
+// 添加响应拦截器
+instance.interceptors.response.use(
+  // 设置响应正确时的处理函数
+  (response) => {
+    console.log("after success response");
+    console.log(response);
+    return response;
+  },
+  // 设置响应异常时的处理函数
+  (error) => {
+    console.log("after fail response");
+    console.log(error);
+    return Promise.reject(error);
+  }
+);
+// 默认导出
+export default instance;
+```
+
+### 跨域请求
+
+> 什么是跨域
+
+- 同源策略（Sameoriginpolicy）是浏览器最核心也是最基本的安全功能，如果缺少了同源策略，则浏览器的正常功能可能都会受到影响。可以说 Web 是构建在同源策略基础之上的，浏览器只是针对同源策略的一种具体实现。**同源策略会阻止一个域的 JavaScrip 脚本和另外一个域的内容进行交互。所谓同源（即指在同一个域）就是两个页面具有相同的协议、主机和端口号**
+
+> 为什么会产生跨域
+
+- 前后端分离模式下，客户端请求前端服务器获取视图资源，然后客户端自行向后端服务器获取数据资源，前端服务器的协议、IP 和端口号都与后端服务器很可能是不一样的，这就产生了跨域
+
+![前后端分离模式请求图解](img/Web_56.png)
+
+> 跨域解决方案
+
+- 前端项目代理模式处理
+
+![代理模式处理图解](img/Web_57.png)
+
+- 后端跨域过滤器方式处理
+
+![跨域过滤器处理图解](img/Web_58.png)
+
+### Pinia
+
+> 实现多个组件之间的数据传递
+
+- 组件传参
+
+- 路由传参
+
+- 通过 pinia 状态管理定义共享数据
+
+> 当我们有**多个组件共享一个共同的状态（数据源）**时，多个视图可能都依赖于同一份状态。来自不同视图的交互也可能需要更改同一份状态。虽然手动状态管理（props，组件间通信，模块化）在基础场景够用，在大规模的生产应用中海油很多需要考虑
+
+- 更强的团队协作约定
+
+- 与 Vue DevTools 集成，包括时间轴、组件内部审查和时间旅行调试
+
+- 模块热更新（HMR）
+
+- 服务端渲染支持
+
+Pinia 就是一个实现了上述需求的状态管理库，由 Vue 核心团队维护
+
+#### Pinia 基本用法
+
+> 准备 vite 项目，安装 pinia 依赖
+
+```shell
+npm install pinia
+```
+
+> 定义 pinia store 对象
+
+`src/store/store.js`
+
+```javascript
+import { defineStore } from "pinia";
+
+// 定义数据并对外暴露
+// store就是定义共享状态的包装对象
+// 内部包含四个属性： id 唯一标识
+//                    state 响应式数据，内部键值对格式存储数据，推荐使用箭头函数
+//                    getters 存储获得数据、使用数据计算结果的函数（不要修改数据）
+//                    actions 定义一些修改数据的函数
+export const definedPerson = defineStore({
+  id: "personPinia", //必须唯一
+  state: () => {
+    // state中用于定义数据
+    return {
+      username: "张三",
+      age: 0,
+      hobbies: ["唱歌", "跳舞"],
+    };
+  },
+  getters: {
+    // 用于定义一些通过数据计算而得到结果的一些方法 一般在此处不做对数据的修改操作
+    // getters中的方法可以当做属性值方式使用
+    getHobbiesCount() {
+      return this.hobbies.length;
+    },
+    getAge() {
+      return this.age;
+    },
+  },
+  actions: {
+    // 用于定义一些对数据修改的方法
+    doubleAge() {
+      this.age = this.age * 2;
+    },
+  },
+});
+```
+
+> 使用 pinia store 对象
+
+`src/main.js`开启全局的 pinia 功能
+
+```javascript
+import { createApp } from "vue";
+import App from "./App.vue";
+import router from "./routers/router.js";
+// 导pinia
+import { createPinia } from "pinia";
+// 创建pinia对象
+let pinia = createPinia();
+
+let app = createApp(App);
+app.use(router);
+// app中使用pinia功能
+app.use(pinia);
+app.mount("#app");
+```
+
+> 在组件中使用 pinia store 对象
+
+```javascript
+import {} from "../store/store.js";
+let person = definePerson();
+```
+
+#### Pinia 其它细节
+
+**State（状态）**在大多数情况下，state 都是你的 store 核心。通常会先定义代表他们 APP 的 state。在 Pinia 中，state 被定义为一个返回初始状态的函数
+
+```javascript
+import { defineStore } from "pinia";
+
+export const definedPerson = defineStore(`personPinia`,
+{
+  state: () => {
+    return {
+      username: "张三",
+      age: 0,
+      hobbies: ["唱歌", "跳舞"],
+    };
+  }
+}
+```
+
+**Getter** 完全等同于 store 的 state 的计算值。可以通过 `defineStore()` 中的 getters 属性来定义，推荐使用箭头函数，并且作为第一个参数接收 state。
+
+```javascript
+export const useStore = defineStore("main", {
+  state: () => ({
+    count: 0,
+  }),
+  getters: {
+    doubleCount: (state) => state.count * 2,
+  },
+});
+```
+
+**Action** 相当于组件中的 method，他们可以通过 defineStore() 中的 actions 属性来定义，并且它们也是定义业务逻辑的完美选择。类似 getter、action 可以以通过 this 访问整个 store 实例，并支持\*\*完整的类型标注（以及自动补全）。不同的是 action 可以是异步的
+
+```javascript
+export const useStore = defineStore("main", {
+  state: () => ({
+    count: 0,
+  }),
+  actions: {
+    increment(state) {
+      state.count++;
+    },
+    randomizeCounter() {
+      this.count = Math.round(Math.random() * 100);
+    },
+  },
+});
+```
