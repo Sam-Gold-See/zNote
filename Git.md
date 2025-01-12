@@ -20,7 +20,7 @@ Git 还保存了**提交的历史记录**，大多数提交记录的上面都有
 
 在 Git 2.23 版本之后也可以使用 `git switch <branch-name>` 来切换
 
-使用 `git checkout -b <branch-name>` 可以直接创建新分支后切换到该分支上面进行操作
+使用 `git checkout -M <branch-name>` 可以直接创建新分支后切换到该分支上面进行操作
 
 ## 分支与合并
 
