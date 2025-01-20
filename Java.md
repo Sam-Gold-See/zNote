@@ -3905,3 +3905,7 @@ Spring 是一个**IoC(DI)**和**AOP**框架
   - **依赖**：组件的依赖关系，如 NewsController 依赖 NewsService
 
   - **注入**：通过 Setter 方法、构造器等方式自动的注入（赋值）
+
+#### 容器的注册
+
+新建 Maven 项目，引入 Spring 依赖
