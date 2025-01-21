@@ -130,6 +130,8 @@ Git 工作目录对于文件的**修改** （增加、删除、更新）会存�
 
 6. 使用`.gitignore`文件来忽略不需要提交的文件
 
+7. 使用`git commit --amend --date="YYYY-MM-DDTHH:MM:SS+08:00"`
+
 ### Git 分支管理
 
 1. `git branch`：查看本地分支
