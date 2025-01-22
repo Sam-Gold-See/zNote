@@ -3864,6 +3864,93 @@ contorller 层需要判断请求的类型，然后调用相应的业务逻辑，
 
 未来使用框架，直接使用 `@CrossOrigin` 解决解决跨域问题
 
+## Maven
+
+Maven 的本质是一个项目管理工具，将项目开发和管理过程抽象成一个项目对象模型（POM:Project Object Model）
+
+Maven 结构：
+
+![Maven项目的核心组件及其相互关系](img/Java_20.png)
+
+Maven 的作用：
+
+- 项目构建：提供标准的、跨平台的自动化项目构建方式
+
+- 依赖管理：方便快捷的管理项目依赖的资源（jar 包），避免资源间的版本冲突问题
+
+- 统一开发结构：提供标准的、统一的项目结构
+
+### 仓库
+
+**仓库**：用于存储资源，包含各种 jar 包
+
+**仓库分类**：
+
+- 本地仓库：自己电脑上存储资源的仓库，连接远程仓库获取资源
+
+- 远程仓库：非本机电脑上的仓库，为本地仓库提供资源
+
+  - 中央仓库：Maven 团队维护，存储所有资源的仓库（mvnrepository.com）
+
+  - 私服：部门/公司范围内存储资源的仓库，从中央仓库获取资源
+
+**私服的作用**：
+
+- 保存具有版权的资源，包含购买或自主研发的 jar
+
+  - 中央仓库中的 jar 都是开源的，不能存储具有版权的资源
+
+- 一定范围内共享资源，仅对内部开放，不对外共享
+
+### 坐标
+
+坐标：Maven 中的坐标用于描述仓库中资源的位置
+
+- Maven 坐标主要组成：
+
+  - groupId：定义当前 Mabem 项目隶属组织名称（通常是域名反写，例如：org.mybatis）
+
+  - artifactId：定义当前 Maven 项目名称（通常是模块名称，例如 CRM、SMS）
+
+  - version：定义当前项目版本号
+
+  - packaging：定义该项目的打包方式
+
+- Maven 坐标的作用：
+
+  使用唯一标识，唯一性定位资源位置，通过该标识可以将资源的识别与下载工作交由机器完成
+
+### 配置
+
+#### 本地仓库配置
+
+在 maven 安装路径中的`conf/setting.xml`，使用`<localRepository>`进行定义
+
+#### 远程仓库配置
+
+在 `maven-model-builder-<version>.jar/org/apache/maven/model/pom-4.0.0.xml` 中 `<repositories>` 可以发现初始定位
+
+仍然在 `setting.xml` 中进行配置， `<mirrors>` 标签中添加如下内容
+
+```xml
+<mirror>
+  <!--此镜像的唯一标识符，用来区分不同的mirror元素-->
+  <id>nexus-aliyun</id>
+  <!--对哪种仓库进行镜像，简单来说就是替代哪个仓库-->
+  <mirrorOf>central</mirrorOf>
+  <!--镜像名称-->
+  <name>Nexus aliyun</name>
+  <!--镜像url-->
+  <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+</mirror>
+```
+
+### Maven构建项目
+
+Maven工程目录结构：
+
+![Maven工程目录结构](img/Java_21.png)
+
 ## JavaSSM 框架
 
 ### Spring 框架
