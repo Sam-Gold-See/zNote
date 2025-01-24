@@ -4427,3 +4427,35 @@ public class BYDFactory implements FactoryBean<Car> {
   }
 }
 ```
+
+#### 条件注册
+
+`@Conditional`注解，根据条件判断是否注册组件
+
+可以标在`@Bean`注解的方法上，也可以标在`@Configuration`注解的类上
+
+| @Conditional                       | 用途                                                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- |
+| @ConditionalOnCloudPlatform        | 判定是否指定的云平台，支持：NONE、CLOUD_FOUNDRY、HEROKU、SAP、NOMAD、KUBERNETES、AZURE_APP_SERVICE |
+| @ConditionalOnRepositoryType       | 判定是否指定的 JPA 类型，支持：AUTO、IMPERATIVE、NONE、REACTIVE                                    |
+| @ConditionalOnJava                 | 判定 Java 版本范围，支持：EQUAL_OR_NEWER、OLDER_THAN                                               |
+| **@ConditionalOnMissingBean**      | 容器中没有指定组件，则判定 true                                                                    |
+| @ConditionalOnMissingFilterBean    | 容器中没有指定的 Filter 组件，则判定 true                                                          |
+| @ConditionalOnGraphQlSchema        | 如果 GraphQL 启用，则判定 true                                                                     |
+| @ConditionalOnSingleCandidate      | 如果容器中指定组件只有一个，则判定 true                                                            |
+| **@ConditionalOnClass**            | 如果存在该类，则判定 true                                                                          |
+| @ConditionalOnCheckpointRestore    | 判定是否导入了 org.crac.Resource，导入则判定 true                                                  |
+| @ConditionalOnNotWebApplication    | 如果不是 Web 应用，则判定 true                                                                     |
+| @ConditionalOnEnabledResourceChain | 如果 web-jars 存在或在 resource.chain 开启，则判定 true                                            |
+| **@Profile**                       | 如果是指定 Profile 标识，则判定 true;                                                              |
+| @ConditionalOnMissingClass         | 如果不是在某个类，则判定 true                                                                      |
+| @ConditionalOnWebApplication       | 如果是 Web 应用，则判定 true                                                                       |
+| **@ConditionalOnResource**         | 如果系统中存在某个资源文件，则判定 true                                                            |
+| @ConditionalOnNotWarDeployment     | 如果不是 war 的部署方式，则判定 true                                                               |
+| @ConditionalOnDefaultWebSecurity   | 如果启用了默认的 Security 功能，则判定 true                                                        |
+| @ConditionalOnExpression           | 如果表达式计算结果为 true，则判定 true                                                             |
+| @ConditionalOnWarDeployment        | 如果是 war 的部署方式，则判定 true                                                                 |
+| @ConditionalOnBean                 | 如果容器中有指定组件，则判定 true                                                                  |
+| @ConditionalOnThreading            | 如果指定的 threading 激活，则判定 true                                                             |
+| **@ConditionalOnProperty**         | 如果存在指定属性，则判定 true                                                                      |
+| @ConditionalOnJndi                 | 如果 JNDI 位置存在，则判定 true                                                                    |
