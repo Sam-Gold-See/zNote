@@ -4459,3 +4459,32 @@ public class BYDFactory implements FactoryBean<Car> {
 | @ConditionalOnThreading            | 如果指定的 threading 激活，则判定 true                                                             |
 | **@ConditionalOnProperty**         | 如果存在指定属性，则判定 true                                                                      |
 | @ConditionalOnJndi                 | 如果 JNDI 位置存在，则判定 true                                                                    |
+
+#### 注入组件
+
+`@Autowired` 自动注入注解，，自动装配，原理就是Spring调用容器的`.getBean()`方法来获取对象
+
+自动装配流程（先按照类型，再按照名称）：
+
+1. 按照类型，找到这个组件：
+
+  1. 有且仅有一个，直接注入，名字无所谓
+
+  2. 如果找到多个，再按照名字去找，变量名就是名字，否则报错
+
+    1. 如果找到，直接注入
+    
+    2. 如果找不到，报错
+
+  3. 如果没有找到，报错
+
+```java
+@Autowired
+Person bill;
+
+@Autowired
+List<Person> persons;
+
+@Autowired
+Map<String, Person> personMap;
+```
