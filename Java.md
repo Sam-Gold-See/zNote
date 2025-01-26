@@ -4325,7 +4325,7 @@ Person person = ioc.getBean("zhangsan", Person.class);
 
 3. 组件唯一存在，正确返回
 
-#### 框架的配置类
+##### 框架的配置类
 
 组件：框架的底层配置
 
@@ -4347,7 +4347,7 @@ public class PersonConfig {
 }
 ```
 
-#### MVC 分层模型对应注解
+##### MVC 分层模型对应注解
 
 Spring 提供了快速的 MVC 分层注解
 
@@ -4368,7 +4368,7 @@ Spring 提供了快速的 MVC 分层注解
 @SpringBootApplication
 ```
 
-#### 导入第三方组件
+##### 导入第三方组件
 
 第三方组件导入容器（没法标注分层注解）：
 
@@ -4378,7 +4378,7 @@ Spring 提供了快速的 MVC 分层注解
 
 `@Import`注解只用标注一次，推荐在一个专门的配置类`AppConfig.java`上写`@Import`、`@ComponentScan`等注解，主类只保留`@SpringBootApplication`
 
-#### 组件的作用域
+##### 组件的作用域
 
 使用`@Scope`注解指定作用域
 
@@ -4394,11 +4394,11 @@ Spring 提供了快速的 MVC 分层注解
 
 多实例组件在启动时不会被创建，什么时候获取什么时候创建
 
-#### 懒加载
+##### 懒加载
 
 使用`@Lazy`，容器启动完成之前不会创建加载组件的对象，直到第一次使用时才创建
 
-#### FactoryBean
+##### FactoryBean
 
 `FactoryBean`是一个接口，实现该接口的类可以创建对象，并返回，容器中注册该组件，容器会调用该组件的`getObject()`方法来获取对象
 
@@ -4428,7 +4428,7 @@ public class BYDFactory implements FactoryBean<Car> {
 }
 ```
 
-#### 条件注册
+##### 条件注册
 
 `@Conditional`注解，根据条件判断是否注册组件
 
@@ -4462,21 +4462,21 @@ public class BYDFactory implements FactoryBean<Car> {
 
 #### 注入组件
 
-`@Autowired` 自动注入注解，，自动装配，原理就是Spring调用容器的`.getBean()`方法来获取对象
+`@Autowired` 自动注入注解，，自动装配，原理就是 Spring 调用容器的`.getBean()`方法来获取对象
 
 自动装配流程（先按照类型，再按照名称）：
 
-1. 按照类型，找到这个组件：
+按照类型，找到这个组件：
 
-  1. 有且仅有一个，直接注入，名字无所谓
+1. 有且仅有一个，直接注入，名字无所谓
 
-  2. 如果找到多个，再按照名字去找，变量名就是名字，否则报错
+2. 如果找到多个，再按照名字去找，变量名就是名字，否则报错
 
-    1. 如果找到，直接注入
-    
-    2. 如果找不到，报错
+- 如果找到，直接注入
 
-  3. 如果没有找到，报错
+- 如果找不到，报错
+
+3. 如果没有找到，报错
 
 ```java
 @Autowired
@@ -4488,3 +4488,39 @@ List<Person> persons;
 @Autowired
 Map<String, Person> personMap;
 ```
+
+新版 Spring 可以自行按照名字去找对应的组件（变量名就是组件名）
+
+老版 Spring 需要使用注解`@Qualifier("{component-name}")`来指定组件名（精确指定）
+
+也可以对于同一类型的组件，中选取一个作为默认组件，在该组件上标注`@Primary`注解（若不想使用该组件，则需要使用`@Qualifier`注解指定）
+
+对于后两种注解指定方式，此时组件变量名自定，仅用于本类
+
+##### `@Resource`注解
+
+`@Resource`是 Java 官方规定的接口注解，而`@Autowired`是 Spring 框架提供的特定注解，两者的功能是一样的，适用范围`@Resource`更广，但是`@Autowired`功能更多而且在行业内更常用
+
+##### 构造器注入
+
+在创建的时候有且仅有一个有参构造器，对于该构造器需要的参数组件，Spring 会在容器中查找，并自动注入
+
+##### Setter 注入
+
+将`@Autowired`注解放在 Setter 方法上，Spring 会在容器中查找，并自动注入
+
+##### 感知接口
+
+可以通过感知接口（Aware）来注入容器中的组件，获取相关的组件
+
+##### `@Value`注解
+
+`@Value`注解
+
+- 可以注入配置属性的值，可以标在字段上，也可以标在方法上
+
+- 可以使用`@Value(${key})`语法动态从配置文件中取出某一项的值
+
+- 可以使用`@Value(#{SpEL})`（Spring Expression Language）Spring 表达式语言
+
+  - SpEL 除了静态方法需要使用`T(java.util.UUID).randomUUID().toString()`中`T(类)`该语法之外，其余基本和 Java 表达式语言一致
