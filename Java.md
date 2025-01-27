@@ -4519,8 +4519,52 @@ Map<String, Person> personMap;
 
 - 可以注入配置属性的值，可以标在字段上，也可以标在方法上
 
-- 可以使用`@Value(${key})`语法动态从配置文件中取出某一项的值
+- 可以使用`@Value("${key}")`语法动态从配置文件中取出某一项的值（`${key:defaultValue}`可以作为默认值）
 
-- 可以使用`@Value(#{SpEL})`（Spring Expression Language）Spring 表达式语言
+- 可以使用`@Value("#{SpEL}")`（Spring Expression Language）Spring 表达式语言
 
   - SpEL 除了静态方法需要使用`T(java.util.UUID).randomUUID().toString()`中`T(类)`该语法之外，其余基本和 Java 表达式语言一致
+
+##### `@PropertySource`
+
+在配置类、配置文件上使用`@PropertySource("classpath:{resource-name}")`注解，指定配置文件的位置
+
+- `classpath:`指向的从自己的项目类路径下查找资源文件（需要使用标记）
+
+- `classpath*:`指的是从自己的项目类路径及其子包下查找资源文件（需要使用标记）
+
+虽然任意代码文件指定后全局都可以使用，但推荐什么代码需要使用就在什么代码文件上指定，避免混乱
+
+##### `@Profile`
+
+利用条件注释，环境标识符（如 dev、test、prod）来激活不同环境的配置，如：
+
+```java
+@Configuration
+@Profile({"dev", "default"})
+public class DevConfig {
+  // 开发环境配置
+}
+
+@Configuration
+@Profile("test")
+public class TestConfig {
+  // 测试环境配置
+}
+
+@Configuration
+@Profile("prod")
+public class ProdConfig {
+  // 生产环境配置
+}
+```
+
+无环境标识符，默认激活`default`配置（无`default`则报错）
+
+在配置文件中，可以指定激活的环境标识符（`spring.profiles.active=dev`）
+
+#### 生命周期
+
+使用`@Bean`时，可以使用`@Bean(initMethod = "init", destroyMethod = "destroy")`这两个键俩指定初始化方法和销毁方法
+
+`constructor` -> `@Autowired`属性注入 -> `@PostConstruct`注解的方法 -> `initializingBean` 接口的 `afterPropertiesSet()` 方法 -> `initMethod`（`@Bean`） -> `@PreDestroy`注解的方法 -> `disposableBean` 接口的 `destroy()` 方法 -> `destroyMethod`（`@Bean`）
