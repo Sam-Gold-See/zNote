@@ -4567,4 +4567,28 @@ public class ProdConfig {
 
 使用`@Bean`时，可以使用`@Bean(initMethod = "init", destroyMethod = "destroy")`这两个键俩指定初始化方法和销毁方法
 
-`constructor` -> `@Autowired`属性注入 -> `@PostConstruct`注解的方法 -> `initializingBean` 接口的 `afterPropertiesSet()` 方法 -> `initMethod`（`@Bean`） -> `@PreDestroy`注解的方法 -> `disposableBean` 接口的 `destroy()` 方法 -> `destroyMethod`（`@Bean`）
+`constructor`构造器 -> `@Autowired`属性注入 -> `@PostConstruct`注解的方法 -> `initializingBean` 接口的 `afterPropertiesSet()` 方法 -> `initMethod`（`@Bean`） -> `@PreDestroy`注解的方法 -> `disposableBean` 接口的 `destroy()` 方法 -> `destroyMethod`（`@Bean`）
+
+1. 创建周期
+
+   1. `constructor`构造器
+
+   2. `@Autowired`属性注入
+
+2. 初始化周期：
+
+   1. `@PostConstruct`注解的方法
+
+   2. `initializingBean` 接口的 `afterPropertiesSet()` 方法
+
+   3. `initMethod`（`@Bean`）
+
+3. 运行周期
+
+4. 销毁周期
+
+   1. `@PreDestroy`注解的方法
+
+   2. `disposableBean` 接口的 `destroy()` 方法
+
+   3. `destroyMethod`（`@Bean`）
