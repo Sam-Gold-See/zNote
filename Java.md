@@ -4592,3 +4592,78 @@ public class ProdConfig {
    2. `disposableBean` 接口的 `destroy()` 方法
 
    3. `destroyMethod`（`@Bean`）
+
+#### AOP
+
+AOP：Aspect Oriented Programming（面向切面编程）
+
+OOP：Object Oriented Programming（面向对象编程）
+
+实现日志功能：
+
+1. 硬编码，不推荐，耦合了通用逻辑和专用逻辑
+
+2. 静态代理：编码时介入，编码期间就指定好了互相代理关系
+
+   - 定义：，定义一个代理对象，包装这个组件。以后业务的执行，从代理开始，不直接调用组件。代理对象，是目标对象的接口的子类型，代理对象并不是目标对象，而是将目标对象作为自己的属性。
+
+   - 优点：实现简单
+
+   - 缺点：需要为不同类型编写不同代理类，导致拓展维护性差；范围小
+
+3. 动态代理：运行期间才决定好了代理关系（拦截器，拦截所有）
+
+   - 定义：目标对象在执行期间会被动态拦截，插入指定逻辑
+
+   - 优点：可以代理所有事物
+
+   - 缺点：实现麻烦
+
+原生的 JDK 动态代理
+
+```java
+/*
+ClassLoder loader 类加载器
+Class<?> clazz 目标对象实现的接口
+InvocationHandler 类似于拦截器
+*/
+
+/*
+proxy：代理对象
+method：代理对象准备调用目标对象的这个方法
+args：方法调用传递的参数
+*/
+
+// Object 直接强转为目标对象类型
+Object proxyInstance = Proxy.newProxyInstance(
+  target.getClass().getClassLoader(),
+  target.getClass().getInterfaces(),
+  (proxy, method, args) -> {
+    Object result = method.invoke(target, args);
+    return result;
+  }
+);
+```
+
+静态方法的动态代理调用（代理万物），便于打印输出日志
+
+```java
+public class DynamicProxy{
+  public static Object getProxyInstance(Object target){
+    return Proxy.newProxyInstance(
+      target.getClass().getClassLoader(),
+      target.getClass().getInterfaces(),
+      (proxy, method, args) -> {
+        String methodName = method.getName();
+        String argsStr = Arrays.toString(args);
+        System.out.println("【日志】：【" + methodName + "】开始；参数："+ argsStr);
+        Object result = method.invoke(target, args);
+        System.out.println("【日志】：【" + methodName + "】结束；返回值："+ result);
+        return result;
+      }
+    );
+  }
+}
+```
+
+JDK 自带的动态代理强制要求目标对象必须有接口，代理的也只是接口规定的方法
