@@ -4212,6 +4212,49 @@ Spring 是一个**IoC(DI)**和**AOP**框架
 
   - **注入**：通过 Setter 方法、构造器等方式自动的注入（赋值）
 
+#### Spring 项目构建
+
+新建 Maven 父项目，在 `pom.xml` 中添加打包方式为`<packaging>pom</packaging>`
+
+Spring 项目（项目+Spring 模块）目录
+
+![Spring项目目录](img/Java_22.png)
+
+- `main` 目录下存放了 Spring 项目的主程序代码
+
+  - `java` 目录下存放了 Spring 项目的源代码
+
+    - `Spring01IoCApplication.java` 为主程序入口
+
+  - `resources` 目录下存放了 Spring 项目的资源文件（配置文件、静态资源等）
+
+- `test` 目录下存放了 Spring 项目的测试代码
+
+  - `java` 目录下存放了 Spring 项目的测试源代码
+
+    - `Spring01IoCApplicationTest.java` 为测试类
+
+  - `resources` 目录下存放了 Spring 项目的测试资源文件
+
+- `pom.xml` 为 Spring 项目的 Maven 配置文件
+
+在 Spring 项目自动生成的 `Spring01IoCApplication.java` 该文件为主入口类，也称为主程序类
+
 #### 容器的注册
 
-新建 Maven 项目，引入 Spring 依赖
+`ApplicationContext`：Spring 应用上下文对象，IoC 容器
+
+Spring 容器有自己的默认组件，可以通过`ioc.getBeanDefinitionNames()`获取`String[]`数组，数组中包含了所有注册到容器中的组件名称
+
+容器中每个组件都有自己的名字，可以通过方法名（组件名）修改
+
+使用`@Bean`注解方法来注册容器，方法名为容器名称，返回值类型为组件类型
+
+```java
+@Bean
+public Person zhangsan(){
+  Person person = new Person();
+  person.setName("张三");
+  return person;
+}
+```
