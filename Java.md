@@ -4667,3 +4667,75 @@ public class DynamicProxy{
 ```
 
 JDK 自带的动态代理强制要求目标对象必须有接口，代理的也只是接口规定的方法
+
+```java
+public class LogUtils{
+  public static void logStart(String methodName, Object... args){
+    System.out.println("【日志】：【" + methodName + "】开始；参数："+ Arrays.toString(args));
+  }
+  public static void logEnd(String methodName){
+    System.out.println("【日志】：【" + methodName + "】结束；");
+  }
+  public static void logException(String methodName, Throwable e){
+    System.out.println("【日志】：【" + methodName + "】异常；异常信息："+ e.getCause());
+  }
+  public static void logReturn(String methodName, Object result){
+    System.out.println("【日志】：【" + methodName + "】结束；返回值："+ result);
+  }
+}
+
+public class DymanicProxyTest{
+  public static Object getProxyInstance(Object target){
+    return Proxy.newProxyInstance(
+      target.getClass().getClassLoader(),
+      target.getClass().getInterfaces(),
+      (proxy, method, args) -> {
+        String methodName = method.getName();
+        // 记录开始
+        LogUtils.logStart(methodName, args);
+        Object result = null;
+        try {
+          result = method.invoke(target, args);
+          // 记录返回值
+          LogUtils.logReturn(methodName, result);
+        } catch (Exception e) {
+          // 记录异常
+          LogUtils.logException(methodName, e);
+        } finally {
+          // 记录结束
+          LogUtils.logEnd(methodName);
+        }
+        return result;
+      }
+    );
+  }
+}
+```
+
+##### AOP 专业术语
+
+横切关注点：与业务逻辑无关，专注于方法开始、方法结束、方法异常、方法返回这四个阶段的处理
+
+通知方法：在横切关注点上所执行的动作，如前面例子中的`logStart()`-前置通知、`logEnd()`-返回通知、`logException()`-异常通知、`logReturn()`-后置通知
+
+切面类：包含通知方法的类，如前面例子中的`LogUtils`
+
+连接点：程序执行的某个特定位置，如前面例子中的`method.invoke(target, args)`
+
+切入点：指通知方法所要织入的位置，在连接点中选出感兴趣的点，使用切入点表达式作为切入点，如前面例子中的`method.invoke(target, args)`
+
+代理对象判断是否为切入点，若是则在切面类中提取对应方法织入目标对象
+
+##### AOP 实现
+
+步骤：
+
+1. 导入 AOP 依赖
+
+2. 编写切面 Aspect
+
+3. 编写通知方法
+
+4. 指定切入点表达式
+
+5. 测试 AOP 动态织入
