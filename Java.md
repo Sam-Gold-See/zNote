@@ -4732,10 +4732,90 @@ public class DymanicProxyTest{
 
 1. 导入 AOP 依赖
 
-2. 编写切面 Aspect
+`pom.xml`文件中添加依赖
 
-3. 编写通知方法
+```xml
+<dependency>
+  <groupId>org.springframework.boot</groupId>
+  <artifactId>spring-boot-starter-aop</artifactId>
+</dependency>
+```
 
-4. 指定切入点表达式
+2. 编写切面 Aspect 和通知方法
 
-5. 测试 AOP 动态织入
+在主软件包中创建`aspect/LogAspect.java`
+
+```java
+@Component
+@Aspect
+public class LogAspect {
+  public logStart() {
+    System.out.println("【切面 - 日志】开始...");
+  }
+  public logEnd() {
+    System.out.println("【切面 - 日志】结束...");
+  }
+  public logException() {
+    System.out.println("【切面 - 日志】异常...");
+  }
+  public logReturn() {
+    System.out.println("【切面 - 日志】返回...");
+  }
+}
+```
+
+3. 告诉 Spring 通知方法何时何地运行：
+
+**何时**：
+
+- `@Before`：方法执行之前
+
+- `@AfterReturning`：方法执行正常返回结果运行。
+
+- `@AfterThrowing`：方法抛出异常运行
+
+- `@After`：方法执行之后
+
+**何地**：
+
+在何时中的注解中，使用切入点表达式
+
+**切入点表达式**：
+
+1. `execution(方法的全签名)`
+
+全写法：`[public] int [com.atguigu.spring.aop.calculator.MathCalculator].add(int,int) [throws ArithmeticException]`
+
+省略写法：`int add(int,int)`
+
+通配符：
+
+- `*` 表示任意字符
+
+- `..` 参数位置表示多个参数任意类型 / 类型位置代表多个层级
+
+2. `args(参数类型)`：参数带啥类型，就匹配啥类型
+
+3. `@args(注解类型))`：参数上有没有对应注解，就匹配啥注解
+
+4. `@annotation(注解类型)`：方法上有没有对应注解，就匹配啥注解
+
+##### AOP 细节
+
+只要对象有了切面，容器中注入的是代理对象
+
+增强器链：切面中的所有通知方法其实就是增强器，被组织成一个链路放到集合中。目标方法真正执行前后会去增强器链中执行那些需要提前执行的方法
+
+AOP 的底层原理：
+
+1. Spring 会为每个被切面切入的组件创建代理对象（Spring CGLIB 创建的代理对象，无视接口）
+
+2. 代理对象中保存了切面类里面所有通知方法构成的增强器链
+
+3. 目标方法执行时，会先去执行增强器链中拿到需要提前执行的通知方法去执行
+
+通知方法的执行顺序：
+
+1. 正常链路：前置通知 -> 目标方法 -> 返回通知 -> 后置通知
+
+2. 异常链路：前置通知 -> 目标方法 -> 异常通知 -> 后置通知
