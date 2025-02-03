@@ -4939,3 +4939,57 @@ public class AroundAdvice {
   4. 是：执行目标方法
 
   5. 不是：记录非法请求
+
+#### 操作数据库
+
+1. 导入包：`spring-boot-starter-data-jdbc`、`mysql-connector-java`
+
+2. 配置数据库连接信息：在`application.properties`中配置`spring.datasource.url/username/password/driver-class-name`四项数据
+
+3. 可以直接使用 DataSource 了
+
+`jdbcTemplate` 是个基础的数据库操作类，封装了基本的数据库操作方法，包括增删改查、批处理、事务管理等。
+
+#### 声明式事务
+
+- 声明式：通过注解等方式，告诉框架，我要做什么，框架会帮我做什么
+
+  - 优点：代码量小
+
+  - 缺点：封装太多，排错不容易
+
+`@EnableTransactionManagement` ：开启基于注解的自动化事务管理，在启动类上添加该注解，即可开启事务管理功能。
+
+`@Transactional` ：注解在方法上，声明当前方法是一个事务方法，框架会自动帮助我们管理事务。遇到错误 jpa 会自动回滚事务，不用手动回滚事务。
+
+##### 事务细节
+
+1. `transactionManager`：事务管理器，控制事务的获取、提交、回滚，底层默认使用`JdbcTransactionManager`
+
+2. 底层原理：事务管理器（`TransactionManager`）用于控制提交和回滚；事务拦截器（`TransactionInterceptor`，切面）用于控制何时提交和回滚，`completeTransactionAfterThrowing(txInfo, ex)`方法说明在这个时候回滚，`commitTransactionAfterReturning(txInfo)`方法说明在这个时候提交。
+
+3. `propagation`：传播行为
+
+4. `isolation`：隔离级别
+
+5. `timeout`（同`timeoutString`）：超时时间，事务超时，秒为单位，一旦超过约定时间，事务就会回滚；超时时间是指从方法开始，到最后一次数据库操作结束的时间
+
+6. `readOnly`：只读优化，传入布尔值
+
+7. `rollbackFor`：指明哪些异常需要回滚。不是所有异常都一定会引起事务回滚，传入异常的类名
+
+   - 异常：
+
+     - 运行时异常（`unchecked exception`【非受检异常】）
+
+     - 编译时异常（`checked exception`【受检异常】）
+
+   - 回滚的默认机制：
+
+     - 运行时异常：回滚
+
+     - 编译时异常：不回滚
+
+   可以指定哪些异常需要回滚
+
+   **回滚异常 = 运行时异常 + 指定的回滚异常**
