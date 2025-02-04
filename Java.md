@@ -4966,17 +4966,17 @@ public class AroundAdvice {
 
 1. `transactionManager`：事务管理器，控制事务的获取、提交、回滚，底层默认使用`JdbcTransactionManager`
 
-2. 底层原理：事务管理器（`TransactionManager`）用于控制提交和回滚；事务拦截器（`TransactionInterceptor`，切面）用于控制何时提交和回滚，`completeTransactionAfterThrowing(txInfo, ex)`方法说明在这个时候回滚，`commitTransactionAfterReturning(txInfo)`方法说明在这个时候提交。
+   底层原理：事务管理器（`TransactionManager`）用于控制提交和回滚；事务拦截器（`TransactionInterceptor`，切面）用于控制何时提交和回滚，`completeTransactionAfterThrowing(txInfo, ex)`方法说明在这个时候回滚，`commitTransactionAfterReturning(txInfo)`方法说明在这个时候提交。
 
-3. `propagation`：传播行为
+2. `propagation`：传播行为
 
-4. `isolation`：隔离级别
+3. `isolation`：隔离级别
 
-5. `timeout`（同`timeoutString`）：超时时间，事务超时，秒为单位，一旦超过约定时间，事务就会回滚；超时时间是指从方法开始，到最后一次数据库操作结束的时间
+4. `timeout`（同`timeoutString`）：超时时间，事务超时，秒为单位，一旦超过约定时间，事务就会回滚；超时时间是指从方法开始，到最后一次数据库操作结束的时间
 
-6. `readOnly`：只读优化，传入布尔值
+5. `readOnly`：只读优化，传入布尔值
 
-7. `rollbackFor`：指明哪些异常需要回滚。不是所有异常都一定会引起事务回滚，传入异常的类名
+6. `rollbackFor`：指明哪些异常需要回滚。不是所有异常都一定会引起事务回滚，传入异常的类名
 
    - 异常：
 
@@ -4993,3 +4993,54 @@ public class AroundAdvice {
    可以指定哪些异常需要回滚
 
    **回滚异常 = 运行时异常 + 指定的回滚异常**
+
+7. `noRollbackFor`：指明那些异常不需要回滚。
+
+   **不回滚异常 = 编译时异常 + 指定的不回滚异常**
+
+##### 传播行为
+
+定义：当一个事务方法被另一个事务方法调用时，事务该以何种状态存在？事务属性该如何传播下去？
+
+| 传播行为      | 产生效果                                                       |
+| ------------- | -------------------------------------------------------------- |
+| **REQUIRED**      | 支持当前事务，如果不存在则创建一个新的事务                     |
+| SUPPORTS      | 支持当前事务，如果不存在则非事务性执行                         |
+| MANDATORY     | 支持当前事务，如果不存在则抛出异常                             |
+| **REQUIRES_NEW**  | 创建一个新事务，并在存在当前事务时挂起当前事务                 |
+| NESTED        | 如果当前存在事务，则在嵌套事务中执行，否则像 REQUIRED 一样运行 |
+| NOT_SUPPORTED | 非事务执行，如果存在当前事务则暂停                             |
+| NEVER         | 非事务性地执行，如果存在事务则抛出异常                         |
+
+##### 隔离级别
+
+- 错误：脏读、不可重复读、幻读
+
+  - 脏读：一个事务读取了另一个事务未提交的数据。
+
+  - 不重复读：在同一事务中，多次读取同一数据，结果不一致。
+
+  - 幻读：在同一事务中，多次查询同一范围的数据，结果集不一致。
+
+- 隔离级别，防止多个事务并发访问数据库时发生的并发问题：
+
+  - 设置：`@Transactional(isolation = Isolation.< 隔离级别 >)`
+
+  - 读未提交（`READ_UNCOMMITTED`）：事务可以读取未被提交的数据，易产生脏读、不可重复读和幻读等问题
+
+  - 读已提交（`READ_COMMITTED`）：事务只能读取已经提交的数据，可避免脏读，但可能一发不可重复读和幻读
+
+  - 可重复读（`REPEATABLE_READ`）：同一事务期间多次重复读取的数据相同。避免脏读和不可重复读，但仍有幻读的问题
+
+  - 串行化（`SERIALIZABLE`）：最高隔离级别，完全禁止了并发，只允许一个事务执行完毕之后才能执行另一个事务
+
+| 隔离级别 | 脏读 | 不重复读 | 幻读 |
+| -------- | ---- | -------- | ---- |
+| 读未提交 | √    | √        | √    |
+| 读已提交 | ×    | √        | √    |
+| 可重复读 | ×    | ×        | √    |
+| 串行化   | ×    | ×        | ×    |
+
+- MySQL 默认隔离级别是可重复读
+
+- Oracle 默认隔离级别是读已提交
