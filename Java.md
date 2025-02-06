@@ -5052,3 +5052,75 @@ public class AroundAdvice {
 - MySQL 默认隔离级别是可重复读
 
 - Oracle 默认隔离级别是读已提交
+
+### SpringMVC
+
+- SpringMVC 是 Spring 的 Web 模块，用来开发 Web 应用
+
+- SpringMVC 应用最终作为 B/S 、 C/S 模式下的 Server 端
+
+- Web 应用的核心就是 **处理 HTTP 请求响应**
+
+`@ResponseBody`：将方法的返回值放到响应体中，每次请求进来执行目标方法
+
+`@RestController`：相当于 `@ResponseBody` + `@Controller`，直接标注在 Controller 类上，前后分离开发的标准注解
+
+1. tomcat 不用整合
+
+2. Servlet 开发过程简易，不用实现任何接口
+
+3. 自动解决了乱码问题
+
+#### 路径映射
+
+- `@RequestMapping`
+
+  - 路径映射
+
+    - 精确路径必须**全局唯一**
+
+    - 路径位置通配符：多个都能匹配上，则精确优先
+
+      - `*`：匹配任意多个字符（0~N），不能匹配多个路径，可写在中间
+
+      - `**`：匹配任意多层路径，只能写在末尾
+
+      - `?`：匹配任意单个字符（1），可写在中间
+
+      - 精确程度：完全匹配 > `?` > `*` > `**`
+
+    - 路径变量：`@PathVariable`
+
+  - 请求限定注解参数
+
+    - 请求方式：`method = RequestMethod.< 请求方式 >`
+
+    - 请求参数：params
+
+      - `params = {"username", "age"}`表示请求必须包含`username`和`age`参数，否则请求会被拦截
+
+      - `params = {"username=admin"}`表示请求必须包含`username`参数且值为`admin`，否则请求会被拦截
+
+      - `params = {"username!=admin"}`表示请求必须包含`username`参数且值不为`admin`，否则请求会被拦截
+
+    - 请求头：headers
+
+      - `headers = {"haha"}` 表示请求中必须包含`haha`请求头，否则请求会被拦截
+
+      - `headers = {"haha=hehe"}`表示请求中必须包含`haha`请求头且值为`hehe`，否则请求会被拦截
+
+      - `headers = {"haha!=hehe"}`表示请求中必须包含`haha`请求头且值不为`hehe`，否则请求会被拦截
+
+    - 请求内容类型：consumes
+
+      - `Media Type`：媒体类型
+
+      - `consumes = {"application/json"}`表示浏览器必须携带 json 格式的数据
+
+    - 响应内容类型：produces
+
+#### 请求方式
+
+类型：
+
+`GET`、`POST`、`PUT`、`DELETE`、`PATCH`、`HEAD`、`OPTIONS`、`TRACE`
