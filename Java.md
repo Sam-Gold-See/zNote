@@ -5119,8 +5119,54 @@ public class AroundAdvice {
 
     - 响应内容类型：produces
 
+      - `produces = {"text/html;charset=UTF-8"}`表示响应的数据类型为 html，编码为 UTF-8
+
 #### 请求方式
 
-类型：
+- 类型：
 
-`GET`、`POST`、`PUT`、`DELETE`、`PATCH`、`HEAD`、`OPTIONS`、`TRACE`
+  `GET`、`POST`、`PUT`、`DELETE`、`PATCH`、`HEAD`、`OPTIONS`、`TRACE`
+
+- HTTP 请求会带来各种数据：
+
+  - 请求首行：（请求方式、请求路径、请求协议）
+
+  - 请求头
+
+  - 请求体
+
+- URL 携带大量数据，特别是 GET 请求，会把参数放在 URL 上，POST 请求会把参数放在请求体中
+
+![URL各个部分的含义](img/Java_23.png)
+
+- JSON 数据格式
+
+  - JavaScript Object Notation（JavaScript 对象表示法）
+
+  - JSON 用于将结构化数据表示为 JavaScript 对象的标准格式，通常用于在网站上表示和传输数据
+
+  - JSON 可以作为一个**对象**或者**字符串**存在
+
+    - 前者用于解读 JSON 中的数据，后者用于通过网络传输 JSON 数据
+
+    - JavaScript 提供一个全局的可访问的 JSOn 对象来对这两种数据进行转换
+
+  - JSON 是一种纯数据格式，它只包含属性，没有方法
+
+  - 将字符串转换为原生对象称为**反序列化**，将原生对象转换为字符串称为**序列化**
+
+#### 请求处理
+
+- 获取请求参数：
+
+  - 在`@RequestMapping`注解下的方法中，通过对方法的传入参数进行**同名的属性**赋值，即可获取请求参数
+
+    - 没有携带的参数，包装类型自动封装为 null，基本类型封装为默认值
+
+    - 携带的参数，自动封装
+
+  - 对传入参数使用注解`@RequestParam("<参数名>")`标注，可以获取请求参数，同时该参数的变量名任意设置（别名）
+
+    - 用该注解取出某个参数的值，默认一定要携带
+
+    - `@RequestParam(value = "<参数名>", required = false)`通过设置`required`属性的值决定是否默认携带该参数
