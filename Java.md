@@ -4746,8 +4746,8 @@ public class DymanicProxyTest{
 在主软件包中创建`aspect/LogAspect.java`
 
 ```java
-@Component
 @Aspect
+@Component
 public class LogAspect {
   public logStart() {
     System.out.println("【切面 - 日志】开始...");
@@ -4764,7 +4764,7 @@ public class LogAspect {
 }
 ```
 
-3. 告诉 Spring 通知方法何时何地运行：
+1. 告诉 Spring 通知方法何时何地运行：
 
 **何时**：
 
@@ -4819,3 +4819,123 @@ AOP 的底层原理：
 1. 正常链路：前置通知 -> 目标方法 -> 返回通知 -> 后置通知
 
 2. 异常链路：前置通知 -> 目标方法 -> 异常通知 -> 后置通知
+
+JoinPoint：连接点获取当前方法的详细信息
+
+```java
+//获取全签名
+MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+
+//方法名
+String methodName = signature.getName();
+
+//目标方法传来的参数值
+Object[] args = joinPoint.getArgs();
+
+//使用result变量接收目标方法的返回值
+@AfterReturning(value = "execution(* com.atguigu.spring.aop.service.*.*(..))", returning = "result")
+public void logReturn(JoinPoint joinPoint, Object result){}
+
+//获取异常
+@AfterThrowing(value = "execution(* com.atguigu.spring.aop.service.*.*(..))", throwing = "e")
+public void logException(JoinPoint joinPoint, Throwable e){}
+```
+
+`@Pointcut()`注解可以定义切入点表达式
+
+**多切面执行顺序**：
+
+多个切面之间的关系是层层嵌套
+
+决定切面的内外顺序：
+
+- 默认顺序：首字母排序越靠前，切面顺序越靠前（外层）
+
+- `@Order()`：数字越小，优先级越高（外），数字越大，优先级越低（内）
+
+##### 环绕通知
+
+`@Around`：环绕通知，可以控制目标方法是否执行，修改目标方法参数、执行结果等
+
+```java
+/*
+Object：返回值
+ProceedingJoinPoint：可以继续推进的切点
+*/
+@Aspect
+@Component
+public class AroundAdvice {
+  @Pointcut("")
+  public void pointcut() {}
+
+  @Around("pointcut()")
+  public Object aroundAdvice(ProceedingJoinPoint pjp) throws Throwable {
+    // 获取目标方法的参数
+    Object[] args = pjp.getArgs();
+
+    System.out.println("【环绕】-前置通知");// 前置通知
+
+    Object proceed = null;
+
+    try{
+      // 接收传入参数的调用目标方法，同反射的method.invoke()
+      proceed = pjp.proceed(args);
+      System.out.println("【环绕】-返回通知" + proceed);// 返回通知
+    }catch(Exception e){
+      System.out.println("【环绕】-异常通知" + e.getMessage());// 异常通知
+      throw e;// 抛出异常，让别的AOP继续感知
+    }finally{
+      System.out.println("【环绕】-后置通知");// 后置通知
+    }
+
+    // 修改返回值
+    return proceed;
+  }
+}
+```
+
+- AOP 的应用场景
+
+  1. 日志记录
+
+  2. 事务管理
+
+  3. 权限检查
+
+  4. 缓存管理
+
+  5. 性能监控
+
+  6. 异常处理
+
+  7. 安全审计
+
+  8. 自动化测试
+
+- 模板化的业务逻辑（事务）
+
+  1.  获取数据库链接
+
+  2.  设置非自动提交
+
+  3.  执行 SQL
+
+  4.  封装返回值
+
+  5.  正常提交
+
+  6.  异常回滚
+
+  7.  关闭链接
+
+- 模板化的业务逻辑（权限），假设 `@Role("admin")` 注解
+
+  1. 拿到用户身份
+
+  2. 拿到目标方法标准的所有注解
+
+  3. 判定是否注解指定的身份用户
+
+  4. 是：执行目标方法
+
+  5. 不是：记录非法请求
