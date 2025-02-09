@@ -5157,7 +5157,7 @@ public class AroundAdvice {
 
 #### 请求处理
 
-- 获取请求参数：
+- 获取请求参数（无论在请求体中还是 URL 后，都是请求参数，都是使用相同方法获得）：
 
   - 在`@RequestMapping`注解下的方法中，通过对方法的传入参数进行**同名的属性**赋值，即可获取请求参数
 
@@ -5170,3 +5170,45 @@ public class AroundAdvice {
     - 用该注解取出某个参数的值，默认一定要携带
 
     - `@RequestParam(value = "<参数名>", required = false)`通过设置`required`属性的值决定是否默认携带该参数
+
+    - `@RequestParam(defaultValue = "<默认值>")`可以设置默认值，当请求参数没有该参数时，使用默认值
+
+  - 如果目标方法参数是一个 POJO 对象，SpringMVC 会自动吧请求参数和 POJO 属性进行匹配封装（要求参数名和 POJO 属性名一致），可以在 POJO 对象类中直接使用`=`来赋默认值
+
+    1. POJO 的所有属性值都是来自于请求参数
+
+    2. 如果请求参数没带，则封装为 null
+
+    - POJO 级联封装复杂属性：
+
+      - 父级 POJO 类中有子 POJO 类属性，子 POJO 类也有属性，SpringMVC 会自动匹配封装
+
+- 获取请求头
+
+  - 在`@RequestMapping`注解下的方法中，通过在方法参数中的变量前添加`@RequestHeader("<请求头名>")`注解来获取请求头中对应的值（请求头中不区分大小写）
+
+    - 其他参数设置基本同上
+
+- 获取 Cookie
+
+  - 在`@RequestMapping`注解下的方法中，通过在方法参数中的变量前添加`@CookieValue("<Cookie名>")`注解来获取 Cookie 中对应的值
+
+- 接收请求体中的 JSON 对象数据
+
+  - 在`@RequestMapping`注解下的方法中，通过`@RequestBody`注解来接收请求体中的 JSON 数据，并自动转换为 Java 对象
+
+    - `@RequestBody`：实现拿到请求体中的 JSON 字符串，然后把 JSON 字符串转为 Java 对象
+
+- 接收文件（SpringMVC 默认限制文件上传的大小不能超出 1MB，需要在`application.properties`中配置`spring.servlet.multipart.max-file-size`来设置单文件最大大小、`spring.servlet.multipart.max-request-size`来设置当次请求最大大小）
+
+  - 单文件上传，使用`@RequestParam("<headerImg，参数名>")`和`MultipartFile`类来接收文件
+  
+  - 多文件则使用`@RequestParam("<lifeImg，参数名>")`和`MultipartFile[]`类来接收多个文件
+
+    - 获取原始文件名：`String originalFilename = file.getOriginalFilename()`
+
+    - 获取文件大小：`long size = file.getSize()`
+
+    - 获取文件流：`InputStream inputStream = file.getInputStream()`
+
+    - 文件保存：`file.transferTo(new File(pathname + originalFilename)`
