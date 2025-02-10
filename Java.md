@@ -5202,7 +5202,7 @@ public class AroundAdvice {
 - 接收文件（SpringMVC 默认限制文件上传的大小不能超出 1MB，需要在`application.properties`中配置`spring.servlet.multipart.max-file-size`来设置单文件最大大小、`spring.servlet.multipart.max-request-size`来设置当次请求最大大小）
 
   - 单文件上传，使用`@RequestParam("<headerImg，参数名>")`和`MultipartFile`类来接收文件
-  
+
   - 多文件则使用`@RequestParam("<lifeImg，参数名>")`和`MultipartFile[]`类来接收多个文件
 
     - 获取原始文件名：`String originalFilename = file.getOriginalFilename()`
@@ -5212,3 +5212,49 @@ public class AroundAdvice {
     - 获取文件流：`InputStream inputStream = file.getInputStream()`
 
     - 文件保存：`file.transferTo(new File(pathname + originalFilename)`
+
+- 封装请求原始数据
+
+  - 在`@RequestMapping`注解下的方法中，通过`HttpEntity<>`类来封装请求原始数据，包括请求头、请求参数、请求体等
+
+    - 泛型：用于说明请求体类型，也会自动封装转换为 Java 对象
+
+    - 拿到所有请求头：`HttpHeaders headers = requestEntity.getHeaders()`
+
+    - 拿到请求体：`Object body = requestEntity.getBody()`
+
+- 使用原生 Servlet API
+
+  - 在`@RequestMapping`注解下的方法中，通过`HttpServletRequest`和`HttpServletResponse`来获取请求和响应对象，并使用原生 Servlet API 来处理请求和响应
+
+| 参数类型                  | 作用                                |
+| ------------------------- | ----------------------------------- |
+| @MatrixVariable           | 矩阵变量                            |
+| **@RequestParam**         | 请求参数                            |
+| WebRequest                | 非 ServletAPI 下使用的              |
+| @RequestHeader            | 请求头                              |
+| NativeWebRequest          | request                             |
+| @CookieValue              | Cookie 值                           |
+| **ServletRequest**        | ServletAPI 下使用的                 |
+| ServerResponse            | request, response                   |
+| **@RequestBody**          | 请求体                              |
+| HttpSession               | session 对象                        |
+| HttpEntity<B>             | 请求头+请求体                       |
+| PushBuilder               | HTTP/2 数据推送组件                 |
+| @RequestPart              | 文件项                              |
+| Principal                 | 当前认证的用户                      |
+| Map、Model、ModelMap      | 服务端渲染共享数据                  |
+| HttpMethod                | 请求方式                            |
+| @ModelAttribute（MA）     | 前置数据绑定                        |
+| Locale                    | 区域信息                            |
+| **Errors, BindingResult** | 数据校验结果                        |
+| TimeZone, Zoneld          | 区域信息                            |
+| @SessionAttributes        | session 数据                        |
+| InputStream, Reader       | 请求体数据流                        |
+| UrlComponentsBuilder      | 封装请求 URL                        |
+| OutputStream, Writer      | 响应体数据流                        |
+| @RequestAttribute         | 请求域中属性                        |
+| **@PathVariable**         | URL 路径变量                        |
+| 其他任何参数              | 当做@RequestParam 或@ModelAttribute |
+
+#### 响应处理
