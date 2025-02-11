@@ -5258,3 +5258,51 @@ public class AroundAdvice {
 | 其他任何参数              | 当做@RequestParam 或@ModelAttribute |
 
 #### 响应处理
+
+- 返回 JSON 对象
+
+  SpringMVC 中，`@ResponseBody`注解会自动的把返回对象转换为 JSON 对象并且写在响应体中
+
+- 文件下载
+
+  流程：响应头告诉浏览器将要传输一个下载文件，响应体中携带该文件的内容，浏览器会自动保存该文件。`HttpEntity`是用于拿到整个请求数据，`ResponseEntity`是用于拿到整个相应数据（响应头、响应体、状态码）
+
+  ```java
+  @RequestMapping("/download")
+  public ResponseEntity<byte[]> download() throws IOException {
+
+    byte[] bytes = Files.readAllBytes(Paths.get(new File("<file path>").toURI()));
+
+    return ResponseEntity
+     .ok()
+     .header("Content-Disposition","attachment;filename=<filename>")
+     .contentType(MediaType.APPLICATION_OCTET_STREAM)
+     .contentLength(bytes.length)
+     .body(bytes);
+  }
+  ```
+
+  - `Content-Disposition`：响应头，指定文件名信息，文件名中如果有中文还需要用 URLEncoder 进行编码（`String encode = URLEncoder.encode("中文名.txt", "UTF-8")`）
+
+  - `ContentType`：响应头，指定响应内容类型，是一个 `OCTET_STREAM`（8 位字节流）
+
+  - `ContentLength`：响应头，指定内容大小
+
+  - body 制定具体响应内容（文件字节流），也可以使用`InputStreamResource`代替`byte[]`，防止**Out Of Memory**问题
+
+  ```java
+  @RequestMapping("/download")
+  public ResponseEntity<InputStreamResource> download() throws IOException {
+    FileInputStream inputStream = new FileInputStream(new File("<file path>"));
+
+    String encode = URLEncoder.encode("<文件名>","UTF-8");
+
+    InputStreamResource resource = new InputStreamResource(inputStream);
+
+    return ResponseEntity.ok()
+      .contentType(MediaType.APPLICATION_OCTET_STREAM)
+      .contentLength(inputStream.available())
+      .header("Content-Disposition","attachment;filename=" + encode)
+      .body(resource);
+  }
+  ```
