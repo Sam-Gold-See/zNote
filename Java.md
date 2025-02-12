@@ -5306,3 +5306,30 @@ public class AroundAdvice {
       .body(resource);
   }
   ```
+
+#### RESTful
+
+- **RESTful**（Representational State Transfer 表现层状态转移）是一种**软件架构风格**
+
+  - **Resource Representational State Fransfer**
+
+    - Resource：资源
+
+    - Representational：表现形式，比如用 JSON、XML、JPEG 等
+
+    - State Transfer：状态变化，通过 HTTP 的动词（GET、POST、PUT、DELETE）实现
+
+  - 使用资源名作为 URI，用 HTTP 的请求方式表示对资源的操作
+
+- 满足 REST 风格的系统，称为是 RESTful 系统
+
+以员工的 CRUD 为例，设计的 RESTful API 入戏
+
+| URI             | 请求方式 | 请求体        | 作用         | 返回数据            |
+| --------------- | -------- | ------------- | ------------ | ------------------- |
+| /employee/{id}  | GET      | 无            | 查询某个员工 | Employee JSON       |
+| /employee       | POST     | employee json | 新增某个员工 | 成功或失败状态      |
+| /employee       | PUT      | employee json | 修改某个员工 | 成功或失败状态      |
+| /employee/{id}  | DELETE   | 无            | 删除某个员工 | 成功或失败状态      |
+| /employees      | GET      | 无/查询条件   | 查询所有员工 | List<Employee> JSON |
+| /employees/page | GET      | 无/分页条件   | 查询所有员工 | 分页数据 JSON       |
