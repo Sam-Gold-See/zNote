@@ -5333,3 +5333,71 @@ public class AroundAdvice {
 | /employee/{id}  | DELETE   | 无            | 删除某个员工 | 成功或失败状态      |
 | /employees      | GET      | 无/查询条件   | 查询所有员工 | List<Employee> JSON |
 | /employees/page | GET      | 无/分页条件   | 查询所有员工 | 分页数据 JSON       |
+
+- `@PathVariable`注解，用于获取路径参数中的动态部分
+
+  - 路径参数：`/employee/{id}`
+
+  - 路径参数的类型（填入方法获取的参数）：`@PathVariable("id") Long id`
+
+  - `@RequestMappping`可以根据请求的方法类型来细分为`@GetMapping`、`@PostMapping`、等，称为**Request 映射**
+
+- 后端行业规定统一返回一个 JSON 对象，包含状态码和数据，状态码用于表示请求是否成功，数据用于返回具体的业务数据
+
+  - JSON 格式：
+
+  ```json
+  {
+    "code": 200, // 业务的状态码，200表示成功，其余都是失败；前后端将来会一起商定不同的业务状态码，根据状态码前端显示不同效果
+    "msg": "success", // 服务端返回给前端的提示消息
+    "data": {} // 服务器返回给前端的数据
+  }
+  ```
+
+  - `common.Result.class`
+
+  ```java
+  @Data
+  public class Result<T>{
+    private Integer code;
+    private String msg;
+    private T data;
+
+    public static <T> Result<T> ok(T data){
+      Result<T> result = new Result<>();
+      result.setCode(200);
+      result.setMsg("success");
+      result.setData(data);
+      return result;
+    }
+
+    public static Result ok(){
+      Result result = new Result<>();
+      result.setCode(200);
+      result.setMsg("success");
+      return result;
+    }
+
+    public static Result error(){
+      Result result = new Result<>();
+      result.setCode(500);
+      result.setMsg("error");
+      return result;
+    }
+
+    public static Result error(Integer code, String msg){
+      Result result = new Result<>();
+      result.setCode(code);
+      result.setMsg(msg);
+      return result;
+    }
+
+    public static Result error(Integer code, String msg, Object data){
+      Result result = new Result<>();
+      result.setMsg(msg);
+      result.setMsg(msg);
+      result.setData(data);
+      return result;
+    }
+  }
+  ```
