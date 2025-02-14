@@ -5340,7 +5340,15 @@ public class AroundAdvice {
 
   - 路径参数的类型（填入方法获取的参数）：`@PathVariable("id") Long id`
 
-  - `@RequestMappping`可以根据请求的方法类型来细分为`@GetMapping`、`@PostMapping`、等，称为**Request 映射**
+  - 使用：
+
+    - `/resources/{name}`：将`{}`中的值封装到 name 变量中
+
+    - `/resources/{*path}`：将`{}`中的值封装到 path 变量中，path 变量可以匹配任意路径，如`/resources/image.png`（`path="image.png"`）、`/resources/css/spring.css`（`path="css/spring.css"`）
+
+    - `/resources/{filename:\\w+}.dat`：将`{}`中的值封装到 filename 变量中，filename 满足正则表达式`\\w+`的要求
+
+- `@RequestMappping`可以根据请求的方法类型来细分为`@GetMapping`、`@PostMapping`、等，称为**Request 映射**
 
 - 后端行业规定统一返回一个 JSON 对象，包含状态码和数据，状态码用于表示请求是否成功，数据用于返回具体的业务数据
 
@@ -5401,3 +5409,11 @@ public class AroundAdvice {
     }
   }
   ```
+
+- 跨域问题
+
+  - 跨域（Cross-Origin Resource Sharing，简称 CORS）是一种 HTTP 协议，通过设置 HTTP 响应头来允许跨域请求，浏览器为了安全，会默认遵循同源策略（请求要去的服务器和当前项目所在的服务器必须是同一个源/服务器），如果不是，请求就会被拦截
+
+  - 避免跨域问题的原理：服务器给浏览器的响应头中添加`Access-Control-Allow-Origin`字段
+
+  - 使用`@CrossOrigin`注解标注在`RestController`类上或者`RequestMapping`方法上，即可解决跨域问题
