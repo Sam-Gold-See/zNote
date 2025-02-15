@@ -5417,3 +5417,88 @@ public class AroundAdvice {
   - 避免跨域问题的原理：服务器给浏览器的响应头中添加`Access-Control-Allow-Origin`字段
 
   - 使用`@CrossOrigin`注解标注在`RestController`类上或者`RequestMapping`方法上，即可解决跨域问题
+
+#### 拦截器
+
+- SpringMVC 内置了**拦截器机制**，允许在请求被目标方法处理的前后进行拦截，执行一些额外操作；比如：**权限验证**、**日志记录**、**数据共享**等
+
+- 使用步骤：
+
+  - 实现 `HandlerInterceptor` 接口的组件即可成为拦截器
+
+  - 创建 `WebMvcConfigurer` 组件，并配置拦截器的拦截路径
+
+    - 写法一，使用`@Bean`放一个 `WebMvcConfigurer`
+
+    ```java
+    @Configuration // 对SpringMVC底层进行配置
+    public class WebSpringMVCConfig{
+            @Bean
+      public WebMvcConfigurer webMvcConfigurer(){
+        return new WebMvcConfigurer(){
+
+        };
+      }
+    }
+    ```
+
+    - 写法二，配置类实现`WebMvcCOnfigurer`接口
+
+    ```java
+    @Configuration
+    public class MySpringMVCConfig implements WebMvcConfigurer{
+
+      @Autowired
+      MyHandlerInterceptor myHandlerInterceptor;
+
+      @Override
+      public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(myHandlerInterceptor)
+         .addPathPatterns("/**");// 拦截所有请求
+      }
+    }
+    ```
+
+  - 查看执行顺序效果：顺序`preHandle`（返回 true 表示继续执行） => **目标方法** => 倒序`postHandle` => 渲染 => 倒序`afterCompletion`（页面渲染完之后触发）
+
+    - 只有执行成功的`preHandle`会倒序执行`afterCompletion`
+
+    - `postHandle` 、 `afterCompletion` 从哪里炸，倒序链路从哪里结束
+
+    - `postHandle` 失败不会影响 `afterCompletion` 执行
+
+- 多拦截器执行顺序：
+
+![多拦截器执行顺序](img/Java_24.png)
+
+- 拦截器和过滤器：
+
+![拦截器和过滤器](img/Java_25.png)
+
+#### 异常处理
+
+- **编程式**异常处理：
+
+  - `try-catch`、`throw`
+
+- **声明式**异常处理：
+
+  - SpringMVC 提供了 `@ExceptionHandler` 、 `@ControllerAdvice` 等便捷的声明式注解来进行快速的异常处理
+
+  - `@ExceptionHandler`：可以处理指定类型异常
+
+    - 如果 Controller 本类出现异常，会自动在本类中找有没有`@ExceptionHandler`标注的方法，如果有，执行这个方法，它的返回值就是客户端收到的结果
+
+    - 如果发生异常，多个都能处理，则精确优先
+
+  - `@ControllerAdvice`：可以集中处理所有 Controller 的异常
+
+  - `@ExceptionHandler` + `@ControllerAdvice`：可以完成全局统一异常处理
+
+  ```java
+  @ResponstBody
+  @ExceptionHandler(Exception.class)
+  public Result handleExcepiton(Exception e){//可以设置传入参数来获取异常信息
+    return Result.error();
+  }
+  ```
