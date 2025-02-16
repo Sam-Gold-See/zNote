@@ -5493,6 +5493,8 @@ public class AroundAdvice {
 
   - `@ControllerAdvice`：可以集中处理所有 Controller 的异常
 
+  - `@RestControllerAdvice`：相当于`@ControllerAdvice` + `@ResponseBody`
+
   - `@ExceptionHandler` + `@ControllerAdvice`：可以完成全局统一异常处理
 
   ```java
@@ -5502,3 +5504,165 @@ public class AroundAdvice {
     return Result.error();
   }
   ```
+
+- 异常处理优先级：
+
+  - 本类 > 全局
+
+  - 精确 > 模糊
+
+- SpringBoot 底层异常处理默认行为：本类和全局都不能处理该异常
+
+  - **自适应的异常处理**：
+
+    - 浏览器发送的请求，出现异常返回默认错误页面
+
+    - 移动端发的请求，出现异常返回默认 JSON 错误数据；项目开发的时候错误模型需要按照项目的标准走
+
+    - 最佳实践：编写全局异常处理器处理所有异常
+
+- 在项目开发中，前端关心异常状态，后端关注正确的业务流程
+
+  - 后端只编写正确的业务逻辑，如果出现业务问题，后端通过抛异常的方式提前中断业务逻辑，并让前端感知异常。
+
+  - 中断业务时候，必须让上层及以上的链路知道中断原因，所以推荐抛出业务异常
+
+  ```java
+  public class BizException extends RuntimeException{
+    private Integer code;// 业务异常码
+    private String msg;// 业务异常信息
+    public BizException(Integer code, String msg){
+      super(msg);
+      this.code = code;
+      this.msg = msg;
+    }
+
+    public BizException(BizExceptionEnum bizExceptionEnum){
+      super(bizExceptionEnum.getMsg());
+      this.code = bizExceptionEnum.getCode();
+      this.msg = bizExceptionEnum.getMsg();
+    }
+  }
+
+  @Data
+  public enum BizExceptionEnum{
+    private Integer code;
+    private String msg;
+
+    // ORDER_xxx订单模块相关异常
+    ORDER_CLOSED(10001,"订单已关闭"),
+    ORDER_NOT_EXIST(10002,"订单不存在"),
+    ORDER_TIMEOUT(10003,"订单超时"),
+    // PRODUCT_xxx商品模块相关异常
+    PRODUCT_HAS_CLOSED(20001,"商品已下架"),
+    PRODUCT_HAS_SOLD(20002,"商品已售完"),
+    PRODUCT_STOCK_NOT_ENOUGH(20003,"商品库存不足")
+    //...
+
+    private BizExceptionEnum(Integer code, String msg){
+      this.code = code;
+      this.msg = msg;
+    }
+
+  }
+  ```
+
+  - 异常处理的最终方式：
+
+    1. 必须有业务异常类：BizException
+
+    2. 必须有异常枚举类：BizExceptionEnum 列举项目中每个模块将会出现的所有异常情况
+
+    3. 编写业务代码的时候，只需要编写正确逻辑，如果出现预期问题，则以抛异常的方式终端逻辑并通知上层
+
+    4. 全局异常处理器：GlobalExceptionHandler 处理所有异常，返回给前端约定的 JSON 数据与错误码
+
+#### 数据校验
+
+- **JSR 303**是 Java 为**Bean 数据合法性校验**提供的标准框架，已经包含在 JavaEE6.0 标准中。JSR 303 通过在**Bean 属性上标注**类似于`@NotNull`、`@Max`等标准的注解指定校验规则，并通过标准的验证接口对 Bean 进行验证
+
+- 数据校验使用流程：
+
+  1. 引入校验以来：`spring-boot-starter-validation`
+
+  2. 定义封装数据的 Bean
+
+  3. 给 Bean 的字段标注校验注解，并指定校验错误消息提示
+
+  4. 使用`@Valid`、`@Validated`开启校验
+
+  5. 使用`BindingResult`封装检验结果
+
+  6. 使用**自定义校验注解**+**校验器**（implements **ConstraintValidator**）完成字段的自定义校验规则
+
+  7. 结合校验注解 message 属性和 i18n 文件，实现错误消息国际化
+
+  8. 结合全局异常处理，统一处理数据校验错误（`MethodArgumentNotValidException`）
+
+| 校验注解                    | 作用                                                                    |
+| --------------------------- | ----------------------------------------------------------------------- |
+| @AssertFalse                | 验证 Boolean 类型字段是否为 false                                       |
+| @AssertTrue                 | 验证 Boolean 类型字段是否为 true                                        |
+| @DecimalMax                 | 验证字符串表示的数字是否小于等于指定的最大值                            |
+| @DecimalMin                 | 验证字符串表示的数字是否大于等于指定的最小值                            |
+| @Digits(integer, fraction)  | 验证数值是否符合指定的格式，integer 指定整数精度，fraction 指定小数精度 |
+| @Email                      | 验证字符串是否为邮箱地址格式                                            |
+| @Future                     | 验证日期是否在当前时间之后                                              |
+| @Past                       | 验证日期是否在当前时间之前                                              |
+| **@Min(value)**             | 验证数字是否大于等于指定的最小值                                        |
+| **@Max(value)**             | 验证数字是否小于等于指定的最大值                                        |
+| @Null                       | 验证对象是否为 null                                                     |
+| **@NotNull**                | 验证对象是否不为 null，与 @Null 相反（a!=null）                         |
+| **@NotEmpty**               | 验证字符串是否非空（a!=null && a!=""）                                  |
+| **@NotBlank**               | 验证字符串是否非空白字符（a!=null && a.trim().length > 0）              |
+| **@Size(max=, min=)**       | 验证字符串、集合、Map、数组的大小是否在指定范围内                       |
+| **@Pattern(regex=, flag=)** | 验证字符串是否符合指定的正则表达式                                      |
+
+#### JavaBean 分层模型
+
+- POJO：Plain Old Java Object，简单的 Java 对象
+
+- DAO：Database Access Object，专门用来访问数据库的对象
+
+- DTO：Data Transfer Object，专门用来传输数据的对象
+
+- TO：Transfer Object，专门用来传输数据的对象
+
+- BO：Business Object，业务对象（Service），专门用来封装业务逻辑的对象
+
+- VO：View/Value Object，值对象，视图对象（专门用来封装前端数据的对象）
+
+#### 接口文档
+
+- Swagger 可以快速生成实时接口文档，方便前后开发人员进行协调沟通。遵循 OpenAPI 规范
+
+- Knife4j 是基于 Swagger 之上的增强套件，参考[使用文档](https://doc.xiaominfo.com/docs/quick-start)
+
+| 注释         | 标注位置            | 作用                   |
+| ------------ | ------------------- | ---------------------- |
+| @Tag         | controller 类       | 描述 controller 作用   |
+| @Parameter   | 参数                | 标识参数作用           |
+| @Parameters  | 参数                | 参数多重说明           |
+| @Schema      | model 层的 JavaBean | 描述模型作用及每个属性 |
+| @Operation   | 方法                | 描述方法作用           |
+| @ApiResponse | 方法                | 描述响应状态码等       |
+
+#### 数据转换
+
+- 日期处理：`@JsonFormat`
+
+  - 默认的日期格式：`YYYY-MM-DDTHH:mm:ss.SSS+08:00`（UTC+8）
+
+  - 反序列化：前端提交日期字符串 => 日期对象
+
+  - 序列化：日期对象 => 日期字符串
+
+  - `@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")`
+
+### MyBatis
+
+MyBatis 是一款优秀的持久层半自动（自行撰写 SQL 语句）框架，支持自定义 SQL、存储过程以及高级映射
+
+MyBatis 不像 Hibernete 等这些全自动框架，它把关键的 SQL 部分交给程序员自己编写，而非自动生成
+
+[![MyBatis](img/Java_26.png)](https://mybatis.org/)
