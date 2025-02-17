@@ -5666,3 +5666,129 @@ MyBatis 是一款优秀的持久层半自动（自行撰写 SQL 语句）框架�
 MyBatis 不像 Hibernete 等这些全自动框架，它把关键的 SQL 部分交给程序员自己编写，而非自动生成
 
 [![MyBatis](img/Java_26.png)](https://mybatis.org/)
+
+#### 基本使用
+
+1. 创建项目模块，引入依赖（MyBatis、MySQL Driver），配置数据库连接信息
+
+2. 准备数据库环境和 JavaBean 对象
+
+3. 编写 DAO 接口，定义方法，方法参数和返回值类型
+
+   - `com.example.dao.EmpMapper.java`
+
+   ```java
+   @Mapper // 告诉Spring，这是MyBatis操作数据库用的接口
+   public interface EmpMapper {
+     Emp getEmpById(Integer id);
+   }
+   ```
+
+4. 编写 DAO 实现的 xml 文件
+
+   - `resources.EmpMapper.xml`
+
+   ```xml
+   <?xml version="1.0" encoding="UTF-8"?>
+   <DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+   <mapper namespace="com.example.dao.EmpMapper">
+
+   <select id="getEmpById" resultType="com.example.domain.Emp">
+     select * from emp where id = #{id}
+   </select>
+
+   </mapper>
+   ```
+
+   - `namespace`：编写 mapper 接口的全类名，代表这个 xml 文件和这个 mapper 接口进行绑定
+
+   - `select`：标签代表一次查询
+
+     - `id`：绑定方法名
+
+     - `resultType`：返回值类型（全类名）
+
+     - `#{}`：占位符，用于接收方法参数值，动态取值
+
+     - 自动封装需要字段名和属性名一致的 JavaBean 对象（别名）
+
+5. 配置 MyBatis 的配置文件（xml 扫描位置）
+
+   - `resources.application.properties`
+
+   ```xml
+   mybatis.mapper-locations=classpath:mapper/** */.xml
+   ```
+
+6. 单元测试
+
+7. 打开 SQL 日志
+
+   - `resources.application.properties`
+
+   ```xml
+   logging.level.com.example.mybatis.mapper=debug
+   ```
+
+##### 获取自增 ID
+
+- 数据库表中有自增 ID 字段，需要在 MyBatis 中获取该 ID 值
+
+```xml
+<insert id="addEmp" useGeneratedKeys="true" keyProperty="id">
+  insert into t_emp (emp_name, age, emp_salary) values (#{empName}, #{age}, #{empSalary})
+</insert>
+```
+
+- `useGeneratedKeys`：使用自动生成的 id
+
+- `keyProperty`：指定自动生成 id 对应的实行，把自动生成的 id 属性封装到 emp 对象的 id 属性中
+
+实现了自增 id 回填的效果
+
+##### 查询所有
+
+```java
+public List<Emp> getAllEmps()
+```
+
+```xml
+<select id="getAllEmps" resultType="com.example.domain.Emp">
+  select * from t_emp
+</select>
+```
+
+返回的是集合，不用管集合对象，在 `resultType` 属性中仍然填对象类型（集合中的元素类型）
+
+##### 驼峰命名自动映射封装
+
+`resources.application.properties`
+
+```xml
+mybatis.configuration.map-underscore-to-camel-case=true
+```
+
+#### 参数传递
+
+`#{}`：底层使用`PreparedStatement`方式，SQL **预编译**后设置参数，无 SQL 注入攻击风险
+
+`${}`：底层使用`Statement`方式，SQL **无预编译**，直接 **拼接参数**， 有 SQL 注入攻击风险
+
+- 所有参数位置，都应该使用`#{}`
+
+- 需要动态表名等才用`${}`
+
+- 凡是使用了`${}`的业务，一定要 **自己编写防 SQL 注入攻击代码**
+
+| 传参形式             | 示例                                                                                                                    | 取值方式                                                                     |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 单个参数 - 普通类型  | `getEmploy(Long id)`                                                                                                    | `#(变量名)`                                                                  |
+| 单个参数 - List 类型 | `getEmploy(List<Long> id)`                                                                                              | `#(变量名[0])`                                                               |
+| 单个参数 - 对象类型  | `addEmploy(Employee)`                                                                                                   | `#(对象中属性名)`                                                            |
+| 单个参数 - Map 类型  | `addEmploy(Map<String,Object> m)`                                                                                       | `#(map中属性名)`                                                             |
+| 多个参数 - 无@Param  | `getEmploy(Long id,String name)`                                                                                        | `#(变量名)` //新版兼容                                                       |
+| 多个参数 - 有@Param  | `getEmploy(@Param(“id”)Long id, @Param(“name”)String name)`                                                             | `#(param指定的名)`                                                           |
+| 扩展：               | `getEmploy(@Param(“id”)Long id, @Param(“ext”)Map<String,Object> m, @Param(“ids”)List<Long> ids, @Param(“emp”)Employ e)` | `#(id), #(ext.name), #(ext.age), #(ids[0]), #(ids[1]), #(e.email), #(e.age)` |
+
+**推荐**：即使只有一个参数，也使用`@Param`指定参数名
