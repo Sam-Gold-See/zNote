@@ -5792,3 +5792,92 @@ mybatis.configuration.map-underscore-to-camel-case=true
 | 扩展：               | `getEmploy(@Param(“id”)Long id, @Param(“ext”)Map<String,Object> m, @Param(“ids”)List<Long> ids, @Param(“emp”)Employ e)` | `#(id), #(ext.name), #(ext.age), #(ids[0]), #(ids[1]), #(e.email), #(e.age)` |
 
 **推荐**：即使只有一个参数，也使用`@Param`指定参数名
+
+#### 结果封装
+
+- 返回**基本类型**、**普通对象**都只需要在`resultType`中声明返回值类型全类名即可（MyBatis 为`java.lang`下的很多数据类型都起了别名，只需要使用 Long、String、Double 等表示即可，无需写全类名）
+
+  - 对象封装建议全局开启驼峰命名自动映射`mybatis.configuration.map-underscore-to-camel-case=true`
+
+- 返回**集合类型**（List、Set、Map），在`resultType`中声明集合中的元素类型
+
+- 自定义结果集`ResultMap`
+
+  - 数据库的字段如果和 JavaBean 的属性不能一一对应：
+
+    - 如果符合驼峰命名，则开启驼峰命名自动映射
+
+    - 编写自定义结果集（`ResultMap`）
+
+  ```xml
+  <resultMap id="EmpResultMap" type="com.example.domain.Emp">
+    <id column="id" property="empId"/>
+    <result column="emp_name" property="empName"/>
+    <result column="age" property="empAge"/>
+    <result column="emp_salary" property="empSalary"/>
+  </resultMap>
+  ```
+
+  - `id`：声明主键映射规则
+
+  - `result`：声明普通列映射规则
+
+  - `collection`：指定自定义集合封装规则，一般用户联合查询一对一关系的封装
+
+    - `javaType`：指定关联的 Bean 的类型
+
+    - `select`：指定分布查询调用的方法
+
+    - `column`：指定分布查询传递的参数列
+
+  - `association`：指定自定义对象封装规则，一般用户联合查询一对多关系的封装
+
+    - `javaType`：指定关联的 Bean 的类型
+
+    - `select`：指定分布查询调用的方法
+
+    - `column`：指定分布查询传递的参数列
+
+- 使用：优先打开驼峰命名自动映射，再额外编写自定义结果集
+
+别名：
+
+| 别名                       | Java 类型    |
+| -------------------------- | ------------ |
+| \_byte                     | byte         |
+| \_char (since 3.5.10)      | char         |
+| \_character (since 3.5.10) | char         |
+| \_long                     | long         |
+| \_short                    | short        |
+| \_int                      | int          |
+| \_integer                  | int          |
+| \_double                   | double       |
+| \_float                    | float        |
+| \_boolean                  | boolean      |
+| \_string                   | String       |
+| byte                       | Byte         |
+| char (since 3.5.10)        | Character    |
+| character (since 3.5.10)   | Character    |
+| long                       | Long         |
+| short                      | Short        |
+| int                        | Integer      |
+| integer                    | Integer      |
+| double                     | Double       |
+| float                      | Float        |
+| boolean                    | Boolean      |
+| date                       | Date         |
+| decimal                    | BigDecimal   |
+| bigdecimal                 | BigDecimal   |
+| biginteger                 | BigInteger   |
+| object                     | Object       |
+| date[]                     | Date[]       |
+| decimal[]                  | BigDecimal[] |
+| bigdecimal[]               | BigDecimal[] |
+| biginteger[]               | BigInteger[] |
+| object[]                   | Object[]     |
+| map                        | Map          |
+| hashmap                    | HashMap      |
+| list                       | List         |
+| arraylist                  | ArrayList    |
+| collection                 | Collection   |
+| iterator                   | Iterator     |
