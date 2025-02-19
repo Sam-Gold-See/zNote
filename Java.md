@@ -5822,7 +5822,7 @@ mybatis.configuration.map-underscore-to-camel-case=true
 
   - `result`：声明普通列映射规则
 
-  - `collection`：指定自定义集合封装规则，一般用户联合查询一对一关系的封装
+  - `association`：指定自定义对象封装规则，一般用户联合查询一对一关系的封装
 
     - `javaType`：指定关联的 Bean 的类型
 
@@ -5830,9 +5830,9 @@ mybatis.configuration.map-underscore-to-camel-case=true
 
     - `column`：指定分布查询传递的参数列
 
-  - `association`：指定自定义对象封装规则，一般用户联合查询一对多关系的封装
+  - `collection`：指定自定义集合封装规则，一般用户联合查询一对多关系的封装
 
-    - `javaType`：指定关联的 Bean 的类型
+    - `ofType`：指定关联的 Bean 的类型
 
     - `select`：指定分布查询调用的方法
 
@@ -5881,3 +5881,58 @@ mybatis.configuration.map-underscore-to-camel-case=true
 | arraylist                  | ArrayList    |
 | collection                 | Collection   |
 | iterator                   | Iterator     |
+
+#### 动态 SQL
+
+- **动态 SQL**是 MyBatis 的强大特性，可以摆脱**根据不同条件拼接 SQL 语句**的束缚，灵活地编写灵活的 SQL 语句
+
+- `<if>`标签
+
+  - `<if test="condition">...</if>`：判断条件，如果`test`中语句的结果为`true`，则执行`if`标签体内的语句，否则不执行
+
+    - `test`：判断条件
+
+- `<where>`标签
+
+  - `<where>`标签解决 where 后面的语法错误（多`and`或`or`，无任何条件多`where`）
+
+- `<set>`标签
+
+  - 同`<where>`标签，解决 set 后面的语法错误
+
+- `<trim>`标签
+
+  - 可以实现 `set` 去除多余逗号、`where` 去除多余 `and` 和 `or`
+
+  - `prefix`：如果标签体中有东西，就拼接该前缀
+
+  - `suffix`：如果标签体中有东西，就拼接该后缀
+
+  - `prefixOverrides`：标签体中最终生成的字符串，如果以指定前缀开始，就覆盖成空串
+
+  - `suffixOverrides`：标签体中最终生成的字符串，如果以指定后缀结束，就覆盖成空串
+
+- `<choose>`、`<when>`、`<otherwise>`标签
+
+  - 在多个分支条件中，根据条件结果选择执行哪个分支
+
+  ```xml
+  <select>
+    select * from emp
+    <where>
+      <choose>
+        <when test="name != null">
+          emp_name = #{name}
+        </when>
+        <when test="salary > 3000">
+          emp_salary = #{salary}
+        </when>
+        <otherwise>
+          id = 1
+          </otherwise>
+      </choose>
+    </where>
+  </select>
+  ```
+
+- `<foreach>`标签
