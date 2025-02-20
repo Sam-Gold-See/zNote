@@ -5936,3 +5936,234 @@ mybatis.configuration.map-underscore-to-camel-case=true
   ```
 
 - `<foreach>`标签
+
+  - 遍历 List，Set，Map，数组
+
+  - `collection`：制定要遍历的集合名
+
+  - `item`：将当前遍历出的元素赋值给指定的变量
+
+  - `separator`：指定在每次遍历时，元素之间拼接的分隔符
+
+  - `open`：遍历开始前缀，不开始遍历就不会有该前缀
+
+  - `close`：遍历结束后缀
+
+  - 批量操作默认支持事务回滚
+
+  ```xml
+  <select id="getEmpsByNames">
+    select * from emp
+    <where>
+      <if test="names != null">
+        <foreach collection="names" item="name" separator="or", open = "name IN (", close = ")">
+          #{name}
+        </foreach>
+      </if>
+    </where>
+  </select>
+  ```
+
+- sql 片段
+
+  - `<sql>`标签：抽取可复用的 sql 片段
+
+    - `id`：指定 sql 片段的 id
+
+  - `<include>`标签：用于引用 sql 片段
+
+    - `refid`：引用的 sql 片段的 id
+
+  ```xml
+  <sql id="empColumns">
+    emp_name, emp_salary, emp_age
+  </sql>
+
+  <select id="getEmpById">
+    select <include refid="empColumns"/> from emp where id = #{id}
+  </select>
+  ```
+
+#### 转义字符
+
+| 原始字符 | 转义字符 |
+| -------- | -------- |
+| &        | &amp;    |
+| <        | &lt;     |
+| >        | &gt;     |
+| '        | &apos;   |
+| "        | &quot;   |
+
+#### 缓存机制
+
+- MyBatis 拥有两级缓存机制：
+
+  - 一级缓存默认开启，事务级别：**当前事务共享**
+
+  - 二级缓存需要手动配置开启：**所有事务共享**
+
+  - 缓存中有就不用查询数据库，如果没有就要去数据库查询原始数据，然后放到缓存中
+
+  - L1~LN：N 级缓存
+
+    - 数字越小离我越近，查的越快。存储越小，造价越高。
+
+    - 数字越大离我越远，查的越慢。存储越大，造价越低。
+
+  - 缓存失效情况（缓存不命中）
+
+    - 查询的东西不一样
+
+    - 两次查询之间，进行一次增删改（由于增删改会引起数据库变化，MyBatis 认为数据有可能就变了，需要再进行一次查询）
+
+#### 插件机制
+
+- MyBatis 底层使用拦截器机制提供插件功能，方便用户在 SQL 执行前后进行拦截增强
+
+- 拦截器：`Interceptor`
+
+- 拦截器可以拦截 **四大对象** 的执行：
+
+  - **ParameterHandler**：处理 SQL 的参数对象
+
+  - **ResultSetHandler**：处理 SQL 的返回结果集
+
+  - **StatementHandler**：数据库的处理对象，用于执行 SQL 语句
+
+  - **Executor**：MyBatis 的执行器，用于执行 SQL 语句
+
+### SpringBoot
+
+- SpringBoot 帮我们简单、快速地创建一个独立的、生产级别的 Spring 应用
+
+- 大多数 SpringBoot 应用只需要编写少量配置即可快速整合 Spring 平台以及第三方技术
+
+- 特性：
+
+  - 快速创建独立 Spring 应用
+
+  - 直接嵌入 Tomcat、Jetty、Undertow
+
+  - 提供可选的**starter**，简化应用整合
+
+  - **按需自动配置**Spring 以及第三方库
+
+  - **提供生产级别特性**：如 监控指标、健康检查、**外部化配置**等
+
+  - 无代码生成、无 xml；基于自动配置
+
+- 总结：
+
+  - 简化开发、简化配置、简化整合、简化部署、简化监控、简化运维
+
+- 场景启动器：导入相关的场景，拥有相关的功能
+
+  - [默认支持的所有场景](https://docs.spring.io/spring-boot/docs/current/reference/html/using.html#using.build-systems.starters)
+
+  - 官方：`spring-boot-starter-xxx`
+
+  - 三方：`xxx-spring-boot-starter`
+
+  - 把当前场景用的 jar 包都导入进来，每个场景启动器哦度有个基础依赖`spring-boot-starter`
+
+- 依赖管理：
+
+  - maven 父子继承，父项目可以**锁定版本**
+
+  - 父项目无法管理的需要写版本
+
+  - 修改版本：
+
+    - 就近优先原则直接在文件中设置`version`
+
+    - 覆盖属性设置，在`properties`中设置`<xxx.version>1.0.0</xxx.version>`
+
+- 自动配置：
+
+  - 导入场景，容器中就会自动配置好这个场景的核心组件，如 Tomcat、SpringMVC、DataSource 等，也可以自行配置进行替换
+
+  - 默认的包扫描规则：SpringBoot 只会扫描主程序所在的包及其下面的子包
+
+  - 配置默认值：配置文件的所有配置项是和某个类的对象值进行一一绑定的，很多配置即使不写都有默认值（端口号、字符编码），[默认能写的所有配置项](https://docs.spring.io/spring-boot/appendix/application-properties/index.html)
+
+  - 按需加载自动配置：导入的场景会导入全量自动配置包，但并不是都生效的
+
+  - 核心流程总结：
+
+    - 导入**starter**，就会导入**autoconfigure**包
+
+    - **autoconfigure** 中有一个文件 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`，里面制定的所有启动要加载的自动配置类
+
+    - `@EnableAutoConfiguration`会自动的把上面文件里面写的所有自动配置类都导入，`xxxAutoConfiguration`是有条件注解进行按需加载
+
+    - `xxxAutoConfiguration`给容器中导入一堆组件，组件都是从`xxxProperties`中提取属性值
+
+    - `xxxProperties` 又是和配置文件进行了绑定，使得导入 starter、修改配置文件就能修改底层行为
+
+  ![自动配置完整流程](img/Java_27.png)
+
+#### 基础功能
+
+- 属性绑定
+
+  - 将容器中任意组件的属性值和配置文件的配置项的值进行绑定
+
+    - 给容器中注册组件（`@Component`，`@Bean`）
+
+    - 使用 `@ConfigurationProperties` 声明组件和配置文件的哪些配置项进行绑定
+
+- YAML 文件
+
+  - SpringBoot 集中化管理配置（`application.properties`）配置多厚难以阅读和修改，**层级结构辨识度不高**
+
+  - YAML 语言，设计目标就是方便人类读写，层次分明更适合作为配置文件，使用`.yaml`或`.yml`作为文件后缀
+
+  - 基本语法：
+
+    - **大小写敏感**
+
+    - 键值对写法：`key: value`，使用空格分割
+
+    - 使用**缩进表示层级关系**
+
+      - 缩进时不允许使用 Tab 键，只允许空格、换行
+
+      - 缩进的空格数目不重要，只要相同层级的元素左侧对齐即可
+
+    - `#` 表示注释，从这个字符一直到行尾，都会被解析器忽略
+
+    - Value 支持的写法
+
+      - 对象：键值对的集合，如：映射、哈希、字典
+
+      - 数组：一组按次序排列的值，如：序列、列表
+
+      - 字面量：单个的、不可再分的值，如：字符串、数字、布尔、日期
+
+- SpringApplication
+
+  - 自定义 banner：类路径添加`banner.txt`文件或设置`spring.banner.location`就可以定制 banner
+
+  - 自定义 SpringApplication
+
+#### 日志系统
+
+规范：项目开发不要写`System.out.println()`，用日志记录信息
+
+- SpringBoot 默认使用 `slf4j + logback` 日志系统
+
+- 日志格式
+
+  - 默认输出格式：
+
+    - 时间和日期：毫秒级精度
+
+    - 日志级别：ERROR（FATAL）、WARN、INFO、DEBUG、TRACE
+
+    - 进程 ID
+
+    - ---：消息分隔符
+
+    - 线程名：使用`[]`包含
+
+    - 消息：日志记录的内容
