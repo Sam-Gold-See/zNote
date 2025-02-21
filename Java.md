@@ -6158,7 +6158,7 @@ mybatis.configuration.map-underscore-to-camel-case=true
 
     - 时间和日期：毫秒级精度
 
-    - 日志级别：ERROR（FATAL）、WARN、INFO、DEBUG、TRACE
+    - 日志级别：OFF、ERROR（FATAL）、WARN、INFO（SpringBoot 默认）、DEBUG、TRACE、ALL
 
     - 进程 ID
 
@@ -6167,3 +6167,104 @@ mybatis.configuration.map-underscore-to-camel-case=true
     - 线程名：使用`[]`包含
 
     - 消息：日志记录的内容
+
+  - 设置日志级别，在`application.properties`中设置`logging.level.root`等级
+
+  - 日志分组：
+
+    - 将相关的 logger 分组在一起，统一配置。SpringBoot 支持统一配置`logging.group.<groupName>`，使用时直接`logging.level.<groupName>`设置即可
+
+  - 日志文件输出
+
+    - SpringBoot 默认只把日志写在控制台，如果想额外记录到文件，可以在`application.properties`中添加`logging.file.name`或`logging.file.path`配置项
+
+    | logging.file.name | logging.file.path | 效果                              |
+    | ----------------- | ----------------- | --------------------------------- |
+    | 未指定            | 未指定            | 仅控制台输出                      |
+    | 指定              | 未指定            | 写入指定文件，可以添加路径        |
+    | 未指定            | 指定              | 写入指定目录，文件名为 spring.log |
+    | 指定              | 指定              | 写入指定文件，路径为指定目录      |
+
+  - 文件归档与滚动切割
+
+    - **归档**：每天的日志单独存到一个文档中
+
+    - **切割**：每个文件 10MB，超过大小切割成另外一个文件
+
+    | 配置项                                                 | 描述                                                                                                         |
+    | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+    | `logging.logback.rollingpolicy.file-name-pattern`      | 日志存档的文件名格式                                                                                         |
+    | `logging.logback.rollingpolicy.clean-history-on-start` | 应用启动时是否清除以前存档；默认值：`false`                                                                  |
+    | `logging.logback.rollingpolicy.max-file-size`          | 每个日志文件的最大大小；默认值：`10MB`                                                                       |
+    | `logging.logback.rollingpolicy.total-size-cap`         | 日志文件被删除之前，可以容纳的最大大小（默认值：`0B`）。设置`16B`则磁盘存储超过`16B`日志后就会删除旧日志文件 |
+    | `logging.logback.rollingpolicy.max-history`            | 日志文件保存的最大天数；默认值：`7`                                                                          |
+
+#### 环境隔离
+
+- 环境隔离：快速切换开发、测试、生产环境
+
+  - 步骤：
+
+    1. 标识环境：制定哪些组件、配置在哪个环境生效
+
+    - `@Profile`标记组件生效环境
+
+    1. 切换环境：这个环境对应的所有组件和配置就应该生效
+
+  - 激活环境：
+
+    - 配置文件：`spring.profiles.active=`
+
+    - 命令行：`java -jar demo.jar --spring.profiles.active=`
+
+  - 生效的配置 = 默认环境配置 + 激活的环境 + 包含的环境配置
+
+  - 环境隔离配置文件：
+
+    - `application-{profile}.properties`可以作为指定环境的配置文件
+
+    - 激活这个环境，配置就会生效，最终生效的配置是：`application.properties` + `application-{profile}.properties`
+
+    - 优先级：`application-{profile}.properties` > `application.properties`
+
+#### 外部化配置
+
+![外部化配置](img/Java_28.png)
+
+- 外部化配置
+
+  - 外部配置优先于内部配置，激活优先、外部优先
+
+#### 单元测试
+
+- 测试注解：
+
+  - `@Test`：表示方法是测试方法
+
+  - `@DisplayName`：为测试类或者测试方法设置展示名称
+
+  - `@BeforeEach`：表示在每个单元测试之前执行
+
+  - `@AfterEach`：表示在每个单元测试之后执行
+
+  - `@BeforeAll`：表示在所有单元测试之前执行
+
+  - `@AfterAll`：表示在所有单元测试之后执行
+
+- 断言机制：
+
+| 方法              | 说明                                 |
+| ----------------- | ------------------------------------ |
+| assertEquals      | 判断两个对象或两个原始类型是否相等   |
+| assertNotEquals   | 判断两个对象或两个原始类型是否不相等 |
+| assertSame        | 判断两个对象引用是否指向同一个对象   |
+| assertNotSame     | 判断两个对象引用是否指向不同的对象   |
+| assertTrue        | 判断给定的布尔值是否为 true          |
+| assertFalse       | 判断给定的布尔值是否为 false         |
+| assertNull        | 判断给定的对象引用是否为 null        |
+| assertNotNull     | 判断给定的对象引用是否不为 null      |
+| assertArrayEquals | 数组断言                             |
+| assertAll         | 组合断言                             |
+| assertThrows      | 异常断言                             |
+| assertTimeout     | 超时断言                             |
+| fail              | 快速失败                             |
