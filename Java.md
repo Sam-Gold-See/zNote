@@ -6298,12 +6298,12 @@ mybatis.configuration.map-underscore-to-camel-case=true
   - pagehelper 是 MyBatis 的分页插件，可以很方便的实现 MyBatis 的分页功能
 
   - 引入依赖：`pom.xml`中添加依赖
-  
+
 - 日期展示
 
   - 属性上加入注解，对日期进行格式化`@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")`
-  
-  - 在 WebMvcConfiguration 中拓展Spring MVC的消息转换器，同一对日期类型进行格式化处理
+
+  - 在 WebMvcConfiguration 中拓展 Spring MVC 的消息转换器，同一对日期类型进行格式化处理
 
   ```java
   package com.sky.config;
@@ -6327,5 +6327,84 @@ mybatis.configuration.map-underscore-to-camel-case=true
         //将自己的消息转化器加入容器中
         converters.add(0, converter);
     }
+  }
+  ```
+
+- 公共字段自动填充
+
+  - 技术点：枚举、注解、AOP、反射
+
+  - 自定义注解 `AutoFill` ，用于标识需要进行公共字段自动填充的方法
+
+  - 自定义切面类 `AutoFillAspect` ，统一拦截加入了 `AutoFill` 注解的方法，通过反射为公共字段赋值
+
+  - 在 `Mapper` 的方法上加上 `AutoFill` 注解，即可实现公共字段自动填充
+
+  ```java
+  /**
+   * 自定义切面，实现公共字段自动填充处理
+   */
+  @Aspect
+  @Component
+  @Slf4j
+  public class AutoFillAspect {
+      /**
+       * 切入点
+       */
+      @Pointcut("execution(* com.sky.mapper.*.*(..)) &&   @annotation(com.sky.annotation.AutoFill)")
+      public void autoFillPointCut() {
+
+      }
+
+      @Before("autoFillPointCut()")
+      public void autoFill(JoinPoint joinPoint) {
+          //获取当前被拦截的方法上的数据库操作类型
+          MethodSignature signature = (MethodSignature)   joinPoint.getSignature();//方法签名对象
+          AutoFill autoFill =   signature.getMethod().getAnnotation(AutoFill.class);  //获得方法上的注释对象
+          OperationType operationType = autoFill.value();//获 得数据库操作类型
+
+          //获取到当前被拦截的方法的参数实体对象
+          Object[] args = joinPoint.getArgs();//约定所有参数，  将实体对象作为第一个参数
+          if (args == null || args.length == 0) {
+              return;
+          }
+          Object entity = args[0];
+
+          //准备赋值的数据
+          LocalDateTime now = LocalDateTime.now();
+          Long currentId = BaseContext.getCurrentId();
+
+          //根据当前不同的操作类型，为对应的属性通过反射来赋值
+          if (operationType == OperationType.INSERT) {
+              //为四个公共字段赋值
+              try {
+                  Method setCreateTime =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_CREATE_TIME,  LocalDateTime.class);
+                  Method setCreateUser =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_CREATE_USER, Long.class);
+                  Method setUpdateTime =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_UPDATE_TIME,  LocalDateTime.class);
+                  Method setUpdateUser =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_UPDATE_USER, Long.class);
+
+                  //通过反射为对象属性赋值
+                  setCreateTime.invoke(entity, now);
+                  setCreateUser.invoke(entity, currentId);
+                  setUpdateTime.invoke(entity, now);
+                  setUpdateUser.invoke(entity, currentId);
+              } catch (Exception e) {
+                  throw new RuntimeException(e);
+              }
+          } else if (operationType == OperationType.UPDATE) {
+              //为两个公共字段赋值
+              try {
+                  Method setUpdateTime =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_UPDATE_TIME,  LocalDateTime.class);
+                  Method setUpdateUser =  entity.getClass().getDeclaredMethod(AutoFill Constant.SET_UPDATE_USER, Long.class);
+
+                  //通过反射为对象属性赋值
+                  setUpdateTime.invoke(entity, now);
+                  setUpdateUser.invoke(entity, currentId);
+              } catch (Exception e) {
+                  throw new RuntimeException(e);
+              }
+          }
+
+      }
   }
   ```
