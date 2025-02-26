@@ -6408,3 +6408,5 @@ mybatis.configuration.map-underscore-to-camel-case=true
       }
   }
   ```
+
+- 敲业务代码之前，理清业务逻辑、涉及的表查询等等准备，培养业务思维，提升开发效率
