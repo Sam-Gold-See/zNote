@@ -6269,6 +6269,222 @@ mybatis.configuration.map-underscore-to-camel-case=true
 | assertTimeout     | 超时断言                             |
 | fail              | 快速失败                             |
 
+### Java 操作 Redis
+
+#### Redis 的 Java 客户端
+
+Redis 的 Java 客户端很多，常用的几种：
+
+- Jedis
+
+- Lettuce
+
+- Spring Data Redis
+
+Spring Data Redis 是 Spring 的一部分，对 Redis 底层开发包进行了高度封装，在 Spring 项目中，可以使用 Spring Data Redis 来简化操作
+
+#### Spring Data Redis 使用方式
+
+1. 导入 Spring Data Redis 的 maven 坐标
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-data-redis</artifactId>
+```
+
+2. 配置 Redis 数据源
+
+```yaml
+spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 123456
+    datebase: 0
+```
+
+3. 编写配置类，创建 RedisTemplate 对象
+
+```java
+@Configuration
+@Slf4j
+public class RedisConfiguration {
+
+    @Bean
+    public RedisTemplate redisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        log.info("开始创建Redis模版对象...");
+        RedisTemplate redisTemplate = new RedisTemplate();
+        //设置Redis的连接工厂对象
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+        //设置Redis Key的序列化器
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+}
+```
+
+4. 通过 RedisTemplate 对象操作 Redis
+
+```java
+ValueOperations valueOperations = redisTemplate.opsForValue();
+ValueOperations hashOperations = redisTemplate.opsForHash();
+ListOperations listOperations = redisTemplate.opsForList();
+SetOperations setOperations = redisTemplate.opsForSet();
+ZSetOperations zSetOperations = redisTemplate.opsForZSet();
+```
+
+#### RedisTemplate 操作
+
+- 字符串类型数据
+
+  - `opsForValue()` 操作字符串类型数据
+
+    - `set(Object key, Object value)` 设置键值对（传入 Object 是因为 RedisTemplate 会自动将对象序列化存入 Redis）
+
+    - `get(Object key)` 获取键值对的值
+
+    - `set(Object key, Object value, long timeout, TimeUnit unit)`：设置键值对并设置过期时间，`TimeUnit`是枚举类型作为时间单位
+
+    - `setIfAbsent(Object key, Object value)`：设置键值对，如果键不存在则设置，返回布尔值
+
+- 哈希类型数据
+
+  - `opsForHash()` 操作哈希类型数据
+
+    - `put(Object key, Object hashKey, Object value)`：设置 key、filed、value
+
+    - `get(Object key, Object hashKey)`：获取 key-filed 对应的值
+
+    - `delete(Object key, Object... hashKeys)`：删除 key-filed 对应的值
+
+    - `keys(Object key)`：获取 key 下所有的 filed
+
+    - `values(Object key)`：获取 key 下所有的 value
+
+- 列表类型数据
+
+  - `opsForList()` 操作列表类型数据
+
+    - `leftPush(Object key, Object value)`：从左边插入元素
+
+    - `leftPushAll(Object key, Object... values)`：从左边插入多个元素
+
+    - `range(Object key, long start, long end)`：获取列表指定范围的元素
+
+    - `rightPop(Object key)`：从右边弹出元素
+
+    - `size(Object key)`：获取列表长度
+
+- 集合类型数据
+
+  - `opsForSet()` 操作集合类型数据
+
+    - `add(Object key, Object... values)`：向集合中添加元素
+
+    - `members(Object key)`：获取集合中的所有元素
+
+    - `size`：获取集合长度
+
+    - `intersect(Object key, Object otherKey)`：求两个集合的交集
+
+    - `union(Object key, Object otherKey)`：求两个集合的并集
+
+    - `remove(Object key, Object... values)`：从集合中删除元素·
+
+- 有序集合类型数据
+
+  - `opsForZSet()` 操作有序集合类型数据
+
+    - `add(Object key, Object value, double score)`：向有序集合中添加元素
+
+    - `range(Object key, long start, long end)`：获取有序集合指定范围的元素
+
+    - `incrementScore(Object key, Object value, double delta)`：对有序集合中元素的分数进行加减
+
+    - `remove(Object key, Object... values)`：从有序集合中删除元素
+
+- 通用命令操作（直接操作 RedisTemplate）
+
+  - `keys(String pattern)`：获取所有符合给定模式的 key
+
+  - `hasKey(String key)`：判断某个 key 是否存在
+
+  - `type(String key)`：获取某个 key 的类型
+
+  - `delete(String... keys)`：删除多个 key
+
+### HttpClient
+
+HttpClient 是 Apache Jakarta Common 下的子项目，可以同来提供高效的、最新的、功能丰富的支持 HTTP 协议的客户端编程工具包，并且支持 HTTP 协议最新的版本和建议
+
+核心 API：
+
+- HttpClient
+
+- HttpClients
+
+- CloseableHttpClient
+
+- HttpGet
+
+- HttpPost
+
+发送 GET 方式请求
+
+```java
+public void testGet() throws Exception {
+  //创建HttpClient对象
+  CloseableHttpClient httpClient = HttpClients.createDefault();
+  //创建请求对象
+  HttpGet httpGet = new HttpGet(url);
+  //发送请求，接收响应结果
+  CloseableHttpResponse response = httpClient.execute(httpGet);
+  //获取服务端返回的状态码
+  int statusCode = response.getStatusLine().getStatusCode();
+  //获取服务端返回的数据
+  HttpEntity entity = response.getEntity();
+  String body = EntityUtils.toString(entity);
+  //关闭资源
+  response.close();
+  httpClient.close();
+}
+```
+
+发送 POST 方式请求
+
+```java
+public void testPost() throws Exception {
+  //创建HttpClient对象
+  CloseableHttpClient httpClient = HttpClients.createDefault();
+  //创建请求对象
+  HttpPost httpPost = new HttpPost(url);
+
+  JSONObject jsonObject = new JSONObject();
+  jsonObject.put("key","value")
+
+  StringEntity entity = new StringEntity(jsonObject.toString());
+  //指定请求编码方式
+  entity.setContentEncoding("UTF-8");
+  //指定请求数据格式
+  entity.setContentType("application/json");
+  httpPost.setEntity(entity);
+
+  //发送请求，接收响应结果
+  CloseableHttpResponse response = httpClient.execute(httpPost);
+
+  //解析返回结果
+  int statusCode = response.getStatusLine().getStatusCode();
+
+  HttpEntity entity = response.getEntity();
+  String body = EntityUtils.toString(entity);
+
+  //关闭资源
+  response.close();
+  httpClient.close();
+}
+```
+
 #### Sky-Take-Out 项目笔记
 
 当前端提交的数据和实体类中对应的属性差别比较大时，建议使用**DTO**来封装数据
@@ -6410,3 +6626,5 @@ mybatis.configuration.map-underscore-to-camel-case=true
   ```
 
 - 敲业务代码之前，理清业务逻辑、涉及的表查询等等准备，培养业务思维，提升开发效率
+
+- 组件默认的 Bean 注册名字为小驼峰类名，所以在一个项目中不能同时存在两个同名组件，可以直接在`@Bean`及其子集的注解中传入组件名
