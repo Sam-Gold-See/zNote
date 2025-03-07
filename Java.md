@@ -6534,13 +6534,71 @@ cron 表达式其实是一个字符串，通过 cron 表达式可以**定义任�
 
 WebSocket 是基于 TCP 的一种新的**网络协议**，它实现了浏览器和服务器全双工通信——浏览器和服务器只需要完成一次握手，两者之间就可以创建**持久性**的链接，并进行**双向**数据传输
 
-HTTP协议和WebSocket协议对比：
+HTTP 协议和 WebSocket 协议对比：
 
-- HTTP是短连接，WebSocket是长连接
+- HTTP 是短连接，WebSocket 是长连接
 
-- HTTP通信室单向的，基于请求响应模式；WebSocket支持双向通信
+- HTTP 通信室单向的，基于请求响应模式；WebSocket 支持双向通信
 
-- HTTP和WebSocket底层都是TCP连接
+- HTTP 和 WebSocket 底层都是 TCP 连接
+
+### Apache POI
+
+Apache POI 是一个处理 Miscrosoft Office 各种文件格式的开源项目。可以使用 POI 在 Java 程序中对 Miscrosoft Office 各种文件进行读写操作
+
+一般情况下，POI 都是用于操作 Excel 文件
+
+```java
+public static void write(){
+  //在内存中创建一个Excel文件
+  XSSWorkbook excel = new XSSWorkbook();
+  //在Excel中创建一个Sheet页
+  XSSFSheet sheet = excel.createSheet("info");
+  //在Sheet中创建行对象，rownum编号从0开始
+  XSSFRow row = sheet.createRow(1);
+  //创建单元格并且写入内容
+  row.createCell(1).setCellValue("姓名");
+  row.createCell(2).setCellValue("城市");
+
+  row = sheet.createRow(2);
+  row.createCell(1).setCellValue("张三");
+  row.createCell(2).setCellValue("北京");
+
+  row = sheet.createRow(3);
+  row.createCell(1).setCellValue("李四");
+  row.createCell(2).setCellValue("上海");
+
+  FileOutputStream outputStream = new FileOutPutStream(new File("D:\\info.xlsx"));
+  excel.write(outputStream);
+
+  outputStream.close();
+  excel.close();
+}
+```
+
+```java
+public static void read(){
+  InputStream in = new FileInputStream(new File("D:\\info.xlsx"));
+  //读取Excel文件
+  XSSFWorkbook excel = new XSSFWorkbook(in);
+  //读取Excel文件中的第一个Sheet页
+  XSSFSheet sheet = excel.getSheetAt(0);
+  //读取Sheet页中的最后一行的行号数据
+  int lastRowNum = sheet.getLastRowNum();
+
+  for(int i=1;i<=lastRowNum;i++){
+    //获取某一行
+    XSSFRow row = sheet.getRow(i);
+    //获取单元格对象
+    String cellValue1 = row.getCell(1).getStringCellValue();
+    String cellValue2 = row.getCell(2).getStringCellValue();
+    System.out.println(cellValue1 + " " + cellValue2);
+  }
+  //关闭资源
+  excel.close();
+  in.close();
+}
+```
 
 #### Sky-Take-Out 项目笔记
 
@@ -6602,6 +6660,8 @@ HTTP协议和WebSocket协议对比：
     }
   }
   ```
+
+````
 
 - 公共字段自动填充
 
@@ -6685,3 +6745,4 @@ HTTP协议和WebSocket协议对比：
 - 敲业务代码之前，理清业务逻辑、涉及的表查询等等准备，培养业务思维，提升开发效率
 
 - 组件默认的 Bean 注册名字为小驼峰类名，所以在一个项目中不能同时存在两个同名组件，可以直接在`@Bean`及其子集的注解中传入组件名
+````
