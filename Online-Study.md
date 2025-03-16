@@ -4,8 +4,6 @@
 
 技术关键词：**JWT**、**常量解析密钥**、
 
-### 引入依赖（`0.12.6`）
-
 ```xml
 <dependency>
     <groupId>io.jsonwebtoken</groupId>
@@ -603,8 +601,6 @@ public class GlobalExceptionHandler {
 
 ## 邮箱发送验证码
 
-### 引入依赖
-
 ```xml pom.xml
 <dependency>
     <groupId>org.apache.commons</groupId>
@@ -699,6 +695,40 @@ public class EmailUtils {
         } catch (Exception e) {
             throw new EmailException(MessageConstant.SEND_EMAIL_FAIL);
         }
+    }
+}
+```
+
+## 分页查询
+
+```xml pom.xml
+<dependency>
+    <groupId>com.github.pagehelper</groupId>
+    <artifactId>pagehelper-spring-boot-starter</artifactId>
+    <version>2.1.0</version>
+</dependency>
+```
+
+```java ClientUserServiceImpl.java
+@Service
+public class ClientUserServiceImpl implements ClientUserService {
+
+    @Autowired
+    private ClientUserMapper clientUserMapper;
+
+        /**
+     * C端用户分页查询
+     *
+     * @param clientUserPageQueryDTO C端用户分页查询DTO对象
+     * @return PageResult<AdminUser> ClientUser类的分页查询对象
+     */
+    @Override
+    public PageResult<ClientUser> getClientListPage(ClientUserPageQueryDTO clientUserPageQueryDTO) {
+        PageHelper.startPage(clientUserPageQueryDTO.getPage(), clientUserPageQueryDTO.getPageSize());
+
+        Page<ClientUser> page = clientUserMapper.getListPage(clientUserPageQueryDTO);
+
+        return new PageResult<>(page.getTotal(), page.getResult());
     }
 }
 ```
