@@ -732,3 +732,15 @@ public class ClientUserServiceImpl implements ClientUserService {
     }
 }
 ```
+
+```xml ClientUserMapper.xml
+<select id="getListPage" resultType="com.study.entity.ClientUser">
+    SELECT * FROM client_user
+    <where>
+        <if test="name != null and name != ''">
+            AND name like concat('%', #{name}, '%')
+        </if>
+    </where>
+    ORDER BY create_time DESC
+</select>
+```
