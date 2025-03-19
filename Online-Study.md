@@ -287,6 +287,136 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
 }
 ```
 
+### 扩增 jwt 令牌黑名单功能（即时下线）
+
+```java JwtConstant.java
+/**
+ * jwt常量类
+ */
+public class JwtConstant {
+
+    // 管理端jwt（token）载荷常量的键值
+    public static final String ADMIN_ID = "adminId";
+
+    // Redis中jwt黑名单键值
+    public static final String BLACKLIST_KEY = "jwt:blacklist:";
+}
+```
+
+```java JwtTokenAdminInterceptor.java
+/**
+ * B端jwt令牌校验拦截器
+ */
+
+@Component
+@Slf4j
+public class JwtTokenAdminInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private JwtProperties jwtProperties; // 注入配置类，获取 JWT 配置（如令牌名称和秘钥）
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 校验 JWT 令牌
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @param handler  当前处理的 handler（通常是 Controller 方法）
+     * @return 返回 true 表示请求通过，false 表示请求被拦截
+     */
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        //判断当前拦截到的是Controller的方法还是其他资源
+        if (!(handler instanceof HandlerMethod)) {
+            //当前拦截到的不是动态方法，直接放行
+            return true;
+        }
+
+        //1. 从请求头中获取令牌
+        String token = request.getHeader(jwtProperties.getAdminTokenName());
+
+        //2. 校验令牌
+        try {
+            log.info("jwt校验：{}", token);
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
+
+            // 检查 Redis 黑名单
+            boolean isBlack = stringRedisTemplate.opsForValue().get(JwtConstant.BLACKLIST_KEY + token) != null;
+            if(isBlack){
+                log.warn("jwt令牌已被加入黑名单：{}", token);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return false;
+            }
+
+            // 解析用户id
+            Long adminUserId = Long.valueOf(claims.get(JwtConstant.ADMIN_ID).toString());
+            log.info("当前B端用户id：{}", adminUserId);
+
+            // 设置当前用户id
+            BaseContext.setCurrentId(adminUserId);
+            return true;
+        } catch (Exception ex) {
+            //4. 不通过，响应401状态码（未经授权）
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+    }
+
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+        // 清除当前线程中的用户 ID
+        BaseContext.removeCurrentId();
+    }
+}
+```
+
+```java AdminController.java
+@RestController
+@RequestMapping("/admin/user")
+@Slf4j
+public class AdminController {
+
+    @Autowired
+    private AdminUserService adminUserService;
+
+    @GetMapping("/logout")
+    public Result<String> logout(@RequestHeader("token") String token) {
+        adminUserService.logout(token);
+        return Result.success();
+    }
+}
+```
+
+```java AdminUserService.java
+@Service
+public class AdminUserServiceImpl implements AdminUserService {
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 新增B端用户
+     *
+     * @param adminUserDTO B端用户DTO
+     */
+    @Override
+    public void logout(String token) {
+        try {
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getClientSecretKey(), token);
+            Date expiration = claims.getExpiration();
+            long expireTime = (expiration.getTime() - System.currentTimeMillis()) / 1000;
+
+            if (expireTime > 0)
+                stringRedisTemplate.opsForValue().set(JwtConstant.BLACKLIST_KEY + token, "", expireTime, TimeUnit.SECONDS);
+            
+            return Long.parseLong(claims.get(JwtConstant.CLIENT_ID).toString());
+        } catch (Exception ex) {
+            throw new AccountException(MessageConstant.JWT_ERROR);
+        }
+    }
+}
+```
+
 ## 序列化和反序列化
 
 ### 自定义对象映射器
