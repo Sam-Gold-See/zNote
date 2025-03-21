@@ -417,6 +417,169 @@ public class AdminUserServiceImpl implements AdminUserService {
 }
 ```
 
+### 改善黑名单机制（保证同一时间有且仅有一台设备登陆成功）
+
+```java JwtConstant.java
+/**
+ * jwt常量类
+ */
+public class JwtConstant {
+
+    // 客户端jwt （authentication）载荷常量的id键值
+    public static final String CLIENT_ID = "clientId";
+
+    // 客户端jwt （authentication）载荷常量的账号键值
+    public static final String CLIENT_EMAIL = "clientEmail";
+
+    // Redis中客户端jwt键值
+    public static final String AUTHENTICATION_LIST = "jwt:authenticationList:";
+}
+```
+
+```java ClientUserServiceImpl.java
+@Service
+public class ClientUserServiceImpl implements ClientUserService {
+
+    @Autowired
+    private ClientUserMapper clientUserMapper;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private JwtProperties jwtProperties;
+
+    /**
+     * C端用户登录
+     *
+     * @param clientUserDTO C端用户DTO
+     */
+    @Override
+    public ClientUserLoginVO login(ClientUserDTO clientUserDTO) {
+        String email = clientUserDTO.getEmail();
+
+        // 根据用户邮箱号/登录账号查询用户库数据
+        ClientUser clientUserDB = clientUserMapper.getByEmail(email);
+        if (clientUserDB == null) {
+            // 账号不存在
+            throw new AccountException(MessageConstant.ACCOUNT_NOT_FOUND);
+        }
+
+        if (!Objects.equals(clientUserDB.getStatus(), AccountConstant.ENABLED)) {
+            // 账号被封禁无法登陆
+            throw new AccountException(MessageConstant.ACCOUNT_LOCKED);
+        }
+
+        // 密码加密
+        String password = DigestUtils.md5DigestAsHex(clientUserDTO.getPassword().getBytes());
+
+        if (!password.equals(clientUserDB.getPassword())) {
+            throw new AccountException(MessageConstant.PASSWORD_ERROR);
+        }
+
+        // 生成Jwt令牌
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(JwtConstant.CLIENT_ID, clientUserDB.getId());
+        claims.put(JwtConstant.CLIENT_EMAIL, email);
+        String authentication = JwtUtil.createJWT(
+                jwtProperties.getClientSecretKey(),
+                jwtProperties.getClientTtl(),
+                claims
+        );
+
+        stringRedisTemplate.opsForValue().set(JwtConstant.AUTHENTICATION_LIST + email, authentication, jwtProperties.getClientTtl(), TimeUnit.SECONDS);
+
+        return ClientUserLoginVO.builder()
+                .id(clientUserDB.getId())
+                .name(clientUserDB.getName())
+                .email(email)
+                .avatar(clientUserDB.getAvatar())
+                .authentication(authentication)
+                .build();
+    }
+
+    /**
+     * C端用户退出
+     *
+     * @param authentication jwt令牌
+     */
+    @Override
+    public void logout(String authentication) {
+        try {
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getClientSecretKey(), authentication);
+            String email = claims.get(JwtConstant.CLIENT_EMAIL).toString();
+
+            stringRedisTemplate.delete(JwtConstant.AUTHENTICATION_LIST + email);
+        } catch (Exception ex) {
+            throw new AccountException(MessageConstant.JWT_ERROR);
+        }
+    }
+}
+```
+
+```java JwtTokenClientInterceptor.java
+/**
+ * C端jwt令牌校验拦截器
+ */
+
+@Component
+@Slf4j
+public class JwtTokenClientInterceptor implements HandlerInterceptor {
+
+    @Autowired
+    private JwtProperties jwtProperties; // 注入配置类，获取 JWT 配置（如令牌名称和秘钥）
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    /**
+     * 校验 JWT 令牌
+     *
+     * @param request  当前请求
+     * @param response 当前响应
+     * @param handler  当前处理的 handler（通常是 Controller 方法）
+     * @return 返回 true 表示请求通过，false 表示请求被拦截
+     */
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        //判断当前拦截到的是Controller的方法还是其他资源
+        if (!(handler instanceof HandlerMethod)) {
+            //当前拦截到的不是动态方法，直接放行
+            return true;
+        }
+
+        //1. 从请求头中获取令牌
+        String token = request.getHeader(jwtProperties.getClientTokenName());
+
+        //2. 校验令牌
+        try {
+            Claims claims = JwtUtil.parseJWT(jwtProperties.getClientSecretKey(), token);
+            String email = claims.get(JwtConstant.CLIENT_EMAIL).toString();
+
+            log.info("jwt校验：{}", token);
+            if (!Objects.equals(stringRedisTemplate.opsForValue().get(JwtConstant.AUTHENTICATION_LIST + email), token)) {
+                log.warn("jwt令牌已失效：{}", token);
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return false;
+            }
+
+            // 解析用户id
+            Long clientUserId = Long.valueOf(claims.get(JwtConstant.CLIENT_ID).toString());
+            log.info("当前C端用户id：{}", clientUserId);
+
+            // 设置当前用户id
+            BaseContext.setCurrentId(clientUserId);
+            return true;
+        } catch (Exception ex) {
+            //4. 不通过，响应401状态码（未经授权）
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return false;
+        }
+    }
+}
+```
+
+同时将`stringRedisTemplate.delete(JwtConstant.AUTHENTICATION_LIST + clientUserDTO.getEmail());`语句插入多种和登录安全相关的业务中
+
 ## 序列化和反序列化
 
 ### 自定义对象映射器
