@@ -892,6 +892,53 @@ public class GlobalExceptionHandler {
 }
 ```
 
+```java GlobalExceptionHandler.java
+/**
+ * 全局异常处理器，处理项目中抛出的业务异常
+ */
+@RestControllerAdvice
+@Slf4j
+public class GlobalExceptionHandler {
+
+    /**
+     * 处理 SQL 违反约束异常 (`SQLIntegrityConstraintViolationException`)
+     *
+     * @param ex SQLIntegrityConstraintViolationException SQL 唯一约束或外键约束异常
+     * @return Result<String> 返回封装的错误信息
+     */
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public Result<String> exceptionHandler(SQLIntegrityConstraintViolationException ex) {
+        // 获取异常信息
+        String message = ex.getMessage();
+
+        // 记录日志，方便调试和排查问题
+        log.error("SQL 约束异常:{}", message);
+
+        // 处理唯一约束冲突问题
+        // 'Duplicate entry 'admin' for key 'admin_user.username'
+        if (message.contains("Duplicate entry")) {
+            // 使用正则表达式提取冲突值，如 `admin`
+            Pattern pattern = Pattern.compile("Duplicate entry '(.*?)' for key '(.*?)'");
+            Matcher matcher = pattern.matcher(message);
+            if (matcher.find()) {
+                String conflictValue = matcher.group(1); // 获取冲突字段的值
+                String conflictKey = matcher.group(2); // 获取冲突的唯一索引名称
+                if (conflictValue.contains("admin_user.username"))
+                    return Result.error("账号 '" + conflictValue + "' 已存在！");
+                else if (conflictKey.contains("admin_user.phone"))
+                    return Result.error("手机号 '" + conflictValue + "' 已被注册！");
+                else if (conflictKey.contains("client_user.email"))
+                    return Result.error("邮箱 '" + conflictValue + "' 已被注册！");
+                else if (conflictKey.contains("unique_favourite"))
+                    return Result.error("已收藏，无法重复收藏");
+            }
+        }
+        // 其他未知 SQL 约束异常，返回通用错误信息
+        return Result.error(MessageConstant.UNKNOWN_ERROR);
+    }
+}
+```
+
 ## 邮箱发送验证码
 
 ```xml pom.xml
