@@ -923,7 +923,7 @@ public class GlobalExceptionHandler {
             if (matcher.find()) {
                 String conflictValue = matcher.group(1); // 获取冲突字段的值
                 String conflictKey = matcher.group(2); // 获取冲突的唯一索引名称
-                if (conflictValue.contains("admin_user.username"))
+                if (conflictKey.contains("admin_user.username"))
                     return Result.error("账号 '" + conflictValue + "' 已存在！");
                 else if (conflictKey.contains("admin_user.phone"))
                     return Result.error("手机号 '" + conflictValue + "' 已被注册！");
