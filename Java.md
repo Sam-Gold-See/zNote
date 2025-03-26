@@ -6730,7 +6730,7 @@ userMapper.updateBalanceByIds(wrapper, amount);
 void updateBalanceByIds(@Param(Constants.WRAPPER) Wrapper<User> wrapper, @Param("amount") int amount);
 ```
 
-3. 自定义 SQL，并使用 Wrapper 条件，对于Wrapper中的条件，使用 `${ew.customSQLSegment}` 来引用
+3. 自定义 SQL，并使用 Wrapper 条件，对于 Wrapper 中的条件，使用 `${ew.customSQLSegment}` 来引用
 
 ```xml UserMapper.xml
 <update id="updateBalanceByIds">
@@ -6756,5 +6756,38 @@ public interface UserService extends IService<User> {
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
+}
+```
+
+#### 分页插件
+
+```java MyBatisConfig.java
+@Configuration
+public class MyBatisConfig {
+
+  @Bean
+  public MyBatisPlusInterceptor mybatisPlusInterceptor() {
+    // 1.初始化核心插件
+    MyBatisPlusInterceptor interceptor = new MyBatisPlusInterceptor();
+    // 2.添加分页插件
+    PaginationInnerInterceptor pageInterceptor = new PaginationInnerInterceptor(DbType.MYSQL);
+    pageInterceptor.setMaxLimit(1000L);
+    inteceptor.addInnerInterceptor(pageInterceptor);
+    return interceptor;
+  }
+}
+```
+
+```java testPageQuery.java
+@Test
+void testPageQuery() {
+  int pageNo = 1, pageSize = 5;
+  Page<User> page = Page.of(pageNo, pageSize);
+  page.addOrder(new OrderItem("balance",false));
+  Page<User> userPage = userService.page(page);
+  System.out.println(userPage.getTotal());
+  System.out.println(userPage.getRecords());
+  List<User> records = userPage.getRecords();
+  records.forEach(System.out::println);
 }
 ```
