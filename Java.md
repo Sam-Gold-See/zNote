@@ -6791,3 +6791,5 @@ void testPageQuery() {
   records.forEach(System.out::println);
 }
 ```
+
+### MQ(RabbitMQ)
