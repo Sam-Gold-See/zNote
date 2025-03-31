@@ -6853,3 +6853,19 @@ void testPageQuery() {
 #### RabbitMQ
 
 RabbitMQ 是基于 Erlang 语言开发的开元消息通信中间件，官网地址：[Messaging that just works — RabbitMQ](https://www.rabbitmq.com/)
+
+RabbitMQ 对应的架构如图：
+
+![RabbitMQ 对应架构](img/Java_30.png)
+
+- **publisher**：生产者，也就是发送消息的一方
+
+- **consumer**：消费者，也就是消费消息的一方
+
+- **queue**：队列，存储消息。生产者投递的消息会暂存在消息队列中，等待消费者处理
+
+- **exchange**：交换机，负责消息路由。生产者发送的消息由交换机决定投递到哪个队列。
+
+- **virtual host**：虚拟主机，起到数据隔离的作用。每个虚拟主机相互独立，有各自的 exchange、queue
+
+上述这些东西都可以在 RabbitMQ 的管理控制台来管理
