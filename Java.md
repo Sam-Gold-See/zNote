@@ -6869,3 +6869,127 @@ RabbitMQ 对应的架构如图：
 - **virtual host**：虚拟主机，起到数据隔离的作用。每个虚拟主机相互独立，有各自的 exchange、queue
 
 上述这些东西都可以在 RabbitMQ 的管理控制台来管理
+
+- 先在`Queues`栏中添加消息队列
+
+- 然后在`Exchanges`栏中选定/添加交换机，绑定消息队列
+
+- 最后在交换机工作台添加消息负载发布消息给消息队列中，消费者就可以从消息队列中获取消息进行消费（若没有绑定消息队列会导致消息消失-交换机没有存储消息的能力）
+
+#### SpringAMQP
+
+RabbitMQ 采用了 AMQP 协议，因此它具备跨语言的特性，任何语言只要遵循 AMQP 收发消息，都可以与 RabbitMQ 交互
+
+Spring 官方基于 RabbitMQ 提供了一套消息收发的模板工具：**SpringAMQP**，并且还基于 SpringBoot 对齐实现了自动装配，使用便捷。
+
+[SpringAMQP](https://spring.io/projects/spring-amqp)
+
+SpringAMQP 提供了三个功能：
+
+- 自动声明队列、交换机及其绑定关系
+
+- 基于注解的监听器模式，异步接收消息
+
+- 封装了 RabbitTemplate 工具，用于发送消息
+
+##### 快速上手
+
+- 引入依赖
+
+```xml pom.xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+</dependency>
+```
+
+为了测试方便，可以直接向队列发送消息，跳过交换机（一般用于测试，生产、实际环境多用交换机）
+
+**消息发送**
+
+- 在 publisher 服务的 application.yml 中配置 RabbitMQ 的连接信息
+
+```yml application.yml
+spring:
+  rabbitmq:
+    host:
+    port: 5672 # 端口
+    virtual-host: /hmall # 虚拟主机
+    username: sgs
+    password: 326628
+```
+
+- 使用 RabbitTemplate 发送消息
+
+```java SpringAmqpTest.java
+@SpringBootTest
+public class SpringAmqpTest {
+
+  @Autowired
+  private RabbitTemplate rabbitTemplate;
+
+  @Test
+  public void testSimpleQueue() {
+    // 队列名称
+    String queueName = "simple.queue";
+
+    // 消息
+    String message = "Hello RabbitMQ!";
+
+    // 发送消息
+    rabbitTemplate.convertAndSend(queueName, message);
+  }
+```
+
+**接收消息**
+
+- 在 consumer 服务的 application.yml 中配置 RabbitMQ 的连接信息
+
+```yml application.yml
+spring:
+  rabbitmq:
+    host:
+    port: 5672 # 端口
+    virtual-host: /hmall # 虚拟主机
+    username: sgs
+    password: 326628
+```
+
+- 在 consumer 服务的 com.example.consumer.listener 包中新建一个类 SpringRabbitListener
+
+```java SpringRabbitListener.java
+@Component
+public class SpringRabbitListener {
+  // 利用RabbitListener来声明监听的队列消息
+  // 将来一旦监听的队列有了消息，就会推送给当前服务，调用当前方法，处理消息
+  // 可以看到方法体中接收的就是消息体的内容
+  @RabbitListener(queues = "simple.queue")
+  public void listenSimpleQueueMessage(String msg) throws InterruptedException {
+    System.out.println("Received message: " + msg);
+  }
+}
+```
+
+#### WorkQueues 模型
+
+**Work queues**，任务模型。简单来说就是让**多个消费者绑定到一个队列**，共同消费队列中的消息
+
+当消息处理比较耗时的时候，可能生产消息的速度会远远大于消息的消费速度。长此以往，消息就会堆积越来越多，无法及时处理。
+
+此时就可以使用 work 模型，**多个消费者共同处理消息，消息处理的速度就大幅度提升**
+
+- 消息发送
+
+在 publisher 服务中的循环发送，模拟大量消息堆积
+
+```java SpringAmqpWorkQueuesTest.java
+@Test
+public void testWorkQueue() throws InterruptedException {
+  // 队列名称
+  String queueName = "simple.queue";
+
+  // 消息
+  String message = "hellow message_";
+
+  for(int i = 0; )
+```
