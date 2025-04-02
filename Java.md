@@ -6916,7 +6916,7 @@ spring:
     port: 5672 # 端口
     virtual-host: /hmall # 虚拟主机
     username: sgs
-    password: 326628
+    password:
 ```
 
 - 使用 RabbitTemplate 发送消息
@@ -6952,7 +6952,7 @@ spring:
     port: 5672 # 端口
     virtual-host: /hmall # 虚拟主机
     username: sgs
-    password: 326628
+    password:
 ```
 
 - 在 consumer 服务的 com.example.consumer.listener 包中新建一个类 SpringRabbitListener
@@ -7180,3 +7180,117 @@ BindingKey 一般都是由一个或多个单词组成，之间以`.`分割
 - `#`：代表 0 个或多个词
 
 - `*`：代表 1 个词
+
+#### 声明队列和交换机
+
+防止运维和后端开发人员手工创建队列和交换机，可以利用 Spring Boot 的自动配置来自动创建队列和交换机。
+
+由程序启动时检查队列和交换机是否存在，如果不存在自动创建。
+
+- 基本 API
+
+SpringAMQP 提供了一个 Queue 类，用来创建队列；和一个 Exchange 接口，用于表示不同类型的交换机
+
+![Exchange接口](img/Java_35.png)
+
+可以使用 SpringAMQP 提供的 `ExchangeBuilder` 来简化交换机、队列的创建过程，然后使用 `BindingBuilder` 创建 Binding 对象来绑定队列和交换机
+
+- fanout 实例
+
+```java FanoutConfig.java
+@Configuration
+public class FanoutConfig {
+  /**
+   * 声明交换机
+   *
+   * @return Fanout类型交换机
+   */
+  @Bean
+  public FanoutExchange fanoutExchange() {
+    return new FanoutExchange("test.fanout");
+  }
+
+  /**
+   * 声明队列
+   */
+  @Bean
+  public Queue fanoutQueue1() {
+    return new Queue("fanout.queue1");
+  }
+
+  /**
+   * 绑定队列和交换机
+   */
+  @Bean
+  public Binding bindingQueue1(Queue fanoutQueue1, FanoutExchange fanoutExchange) {
+    return BindingBuilder.bind(fanoutQueue1).to(fanoutExchange);
+  }
+```
+
+- direct 示例
+
+direct 模式由于要绑定多个 Key，每个 Key 都需要编写一个 Binding
+
+```java DirectConfig.java
+@Configuration
+public class DirectConfig {
+
+  /**
+   * 声明交换机
+   *
+   * @return Direct类型交换机
+   */
+  @Bean
+  public DirectExchange directExchange() {
+    return ExchangeBuilder.directExchange("test.direct").build();
+  }
+
+  /**
+   * 声明队列
+   */
+  @Bean
+  public Queue directQueue1() {
+    return new Queue("direct.queue1");
+  }
+
+  /**
+   * 绑定队列和交换机
+   */
+  @Bean
+  public Binding bindingQueue1(Queue directQueue1, DirectExchange directExchange) {
+    return BindingBuilder.bind(directQueue1).to(directExchange).with("info");
+  }
+
+    /**
+   * 绑定队列和交换机
+   */
+  @Bean
+  public Binding bindingQueue1(Queue directQueue1, DirectExchange directExchange) {
+    return BindingBuilder.bind(directQueue1).to(directExchange).with("debug");
+  }
+}
+```
+
+- 基于注解声明
+
+基于@Bean 的方式声明队列和交换机比较麻烦，Spring 还提供了基于注解方式来声明。
+
+```java
+@RabbitListener(bindings = @QueueBinding(
+  value = @Queue(name = "test.queue1"),
+  exchange = @Exchange(name = "test.exchange", type = ExchangeTypes.DIRECT),
+  key = {"red", "blue"}
+))
+public void listenDirectQueue1(String msg){
+  System.out.println("Received message: " + msg + " by listener1");
+}
+
+@RabbitListener(bindings = @QueueBinding(
+    value = @Queue(name = "direct.queue2"),
+    exchange = @Exchange(name = "hmall.direct", type = ExchangeTypes.DIRECT),
+    key = {"red", "yellow"}
+))
+public void listenDirectQueue2(String msg){
+  System.out.println("Received message: " + msg + " by listener2");
+}
+```
