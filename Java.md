@@ -6991,5 +6991,51 @@ public void testWorkQueue() throws InterruptedException {
   // 消息
   String message = "hellow message_";
 
-  for(int i = 0; )
+  for(int i = 0; i < 50; i++){
+    rabbitTemplate.convertAndSend(queueName, message + i);
+    Thread.sleep(20);
+  }
+}
 ```
+
+- 消息接收
+
+模拟多个消费者绑定同一个队列，我们在 consumer 服务的 SpringRabbitListener 中增加 2 个方法
+
+```
+@RabbitListener(queues = "word.queue")
+public void listenWorkQueue1(String msg) throws InterruptedException {
+  System.out.println("Received message: " + msg + " by listener1");
+  Thread.sleep(20);
+}
+
+@RabbitListener(queues = "word.queue")
+public void listenWorkQueue2(String msg) throws InterruptedException {
+  System.out.println("Received message: " + msg + " by listener2");
+  Thread.sleep(200);
+}
+```
+
+两者的线程睡眠时间模拟任务耗时
+
+- 运行结果
+
+1. 生产者发送 50 条消息，消息堆积在队列中
+
+2. 两个消费者监听同一个队列，平均分配消息，但是消费者 1 快速完成了信息处理，有多余空余时间（消费者 2 仍在处理消息）
+
+3. 能者多劳：可以通过配置实现两个消费者实现两者共同处理消息，提升消费速度
+
+```yml application.yml
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        prefetch: 1 # 预取消息数量，每次只能获取一条消息，处理完成才能获取下一个消息
+```
+
+Work 模型的使用：
+
+- 多个消费者绑定到一个队列，同一条消息只会被一个消费者处理
+
+- 通过设置`prefetch`来控制消费者预取的消息数量
