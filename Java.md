@@ -7294,3 +7294,229 @@ public void listenDirectQueue2(String msg){
   System.out.println("Received message: " + msg + " by listener2");
 }
 ```
+
+#### 消息转换器
+
+Spring AMQP 接收的消息体是一个 Object，默认使用 JDK 序列化，但是 JDK 序列化存在数据体积过大、有安全漏洞、可读性差等问题，所以可以选择 Json 序列化自定义消息转换器，来实现消息的序列化和反序列化。
+
+#### 消息丢失
+
+消息从生产者到消费者的每一步都可能导致消息丢失：
+
+- 发送消息时丢失：
+
+  - 生产者发送消息时连接 MQ 失败
+
+  - 生产者发送消息到达 MQ 后未找到`Exchange`
+
+  - 生产者发送消息到达 MQ 的`Exchange`后，未找到合适的`Queue`
+
+  - 消息到达 MQ 后，处理消息的进程发生异常
+
+- MQ 导致消息丢失：
+
+  - 消息到达 MQ，保存到队列后，尚未消费就突然宕机
+
+- 消费者处理消息时：
+
+  - 消息接收后尚未处理突然宕机
+
+  - 消息接收后处理过程中抛出异常
+
+综上，我们要解决消息丢失问题，保证 MQ 的可靠性，就必须从 3 个方面入手：
+
+- 确保生产者一定把消息发送到 MQ
+
+- 确保 MQ 不会将消息弄丢
+
+- 确保消费者一定要处理消息
+
+##### 生产者重试机制
+
+当生产者发送消息时，出现了网络故障，导致与 MQ 的连接中断
+
+SpringAMQP 提供的消息发送时的重试机制：当`RabbitTemplate`与 MQ 连接超时后，多次重试。
+
+```yml application.yml
+spring:
+  rabbitmq:
+    connection-timeout: 1s # 设置MQ的连接超时时间
+    template:
+      retry:
+        enabled: true # 开启超时重试机制
+        initial-interval: 1000ms # 失败后的初始等待时间
+        multiplier: 1 # 失败后下次的等待时长倍数，下次等待时长 = initial-interval * multiplier
+        max-attempts: 3 # 最大重试次数
+```
+
+**注意**：当网络不稳定的时候，利用重试机制可以有效提高消息发送的成功率。不过 SpringAMQP 提供的重试机制是**阻塞式**的重试，也就是说多次重试等待的过程中，当前线程是被阻塞的。
+
+如果对于业务性能有要求，建议禁用重试机制。如果一定要使用，请合理配置等待时长和重试次数，当然也可以考虑使用异步线程来执行发送消息的代码。
+
+##### 生产者确认机制
+
+一般情况下，只要生产者与 MQ 之间的网路连接顺畅，基本不会出现发送消息丢失的情况，因此大多数情况下无需考虑这种问题。
+
+不过，在少数情况下，也会出现消息发送到 MQ 之后丢失的现象，比如：
+
+- MQ 内部处理消息的进程发生了异常
+
+- 生产者发送消息到达 MQ 后未找到`Exchange`
+
+- 生产者发送消息到达 MQ 的`Exchange`后，未找到合适的`Queue`，因此无法路由
+
+针对上述情况，RabbitMQ 提供了生产者消息确认机制，包括`Publisher Confirm`和`Publisher Return`两种。在开启确认机制的情况下，当生产者发送消息给 MQ 后，MQ 会根据消息处理的情况返回不同的**回执**。
+
+- 当消息投递到 MQ，但是路由失败时，通过**Publisher Return**返回异常信息，同时返回 ack 的确认信息，代表投递成功
+
+- 临时消息投递到了 MQ，并且入队成功，返回 ACK，告知投递成功
+
+- 持久消息投递到了 MQ，并且入队完成持久化，返回 ACK ，告知投递成功
+
+- 其它情况都会返回 NACK，告知投递失败
+
+其中`ack`和`nack`属于**Publisher Confirm**机制，`ack`是投递成功；`nack`是投递失败。而`return`则属于**Publisher Return**机制。
+
+默认两种机制都是关闭状态，需要通过配置文件来开启
+
+**实现生产者确认**：
+
+```yml application.yml
+spring:
+  rabbitmq:
+    publisher-confirm-type: correlated # 开启publisher confirm机制，并设置confirm类型
+    publisher-returns: true # 开启publisher return机制
+```
+
+`publisher-confirm-type`有三种模式可选：
+
+- `none`：关闭 confirm 机制
+- `simple`：同步阻塞等待 MQ 的回执
+- `correlated`：MQ 异步回调返回回执
+
+一般推荐使用`correlated`，回调机制。
+
+##### 数据持久化
+
+为了提升性能，默认情况下 MQ 的数据都是在内存存储的临时数据，重启后就会消失。为了保证数据的可靠性，必须配置数据持久化，包括：
+
+- 交换机持久化
+
+- 队列持久化
+
+- 消息持久化
+
+设置`Durability`参数可以实现交换机和队列持久化，`Durable`就是持久化模式，`Transient`是临时模式
+
+消息持久化需要配置一个 Properties，说明在开启持久化机制之后，如果同时还开启生产者确认，那么 MQ 会在消息持久化以后才发送 ACK 回执，进一步确保消息的可靠性
+
+##### LazyQueue
+
+在默认情况下，RabbitMQ 会将接收到的信息保存在内存中以降低消息收发的延迟。但在某些特殊情况下，会导致消息积压：
+
+- 消费者宕机或出现网络故障
+
+- 消息发送量激增，超过了消费者处理速度
+
+- 消费者处理业务发生阻塞
+
+一旦出现消息堆积问题，RabbitMQ 的内存占用就会越来越高，直到触发内存预警上限。此时 RabbitMQ 会将内存消息刷到磁盘上，这个行为成为`PageOut.PageOut`会耗费一段时间，并且会阻塞队列进程。因此在这个过程中 RabbitMQ 不会再处理新的消息，生产者的所有请求都会被阻塞。
+
+LazyQueue 的特征如下：
+
+- 接收到消息后直接存入磁盘而非内存
+
+- 消费者哟啊消费消息时才会从磁盘中读取并加载到内存（懒加载）
+
+- 支持数百万条的消息存储
+
+在 3.12 版本之后，LazyQueue 已经成为所有队列的默认格式
+
+在利用 SpringAMQP 声明队列的时候，添加`x-queue-mode=lazy`参数也可以设置为 lazy 模式
+
+```java
+@Bean
+public Queue lazyQueue() {
+  return QueueBuilder
+    .durable("lazy.queue")
+    .lazy()
+    .build();
+}
+```
+
+##### 消费者确认机制
+
+为了确认消费者是否成功处理消息，RabbitMQ 提供了消费者确认机制（**Consumer Acknowledgement**）。即：当消费者处理消息结束后，应该向 RabbitMQ 发送一个回执，告知 RabbitMQ 自己消息处理状态。回执有三种可选值：
+
+- ack：成功处理消息，RabbitMQ 从队列中删除该消息
+
+- nack：消息处理失败，RabbitMQ 需要再次投递消息
+
+- reject：消息处理失败并拒绝该消息，RabbitMQ 从队列中删除该消息
+
+一般 reject 方式用的较少，除非是消息格式有问题，那就是开发问题了。因此大多数情况下需要将消息处理的代码通过`try catch`机制捕获，消息处理成功时返回 ack，处理失败时返回 nack.
+
+由于消息回执的处理代码比较统一，因此 SpringAMQP 帮我们实现了消息确认。并允许通过配置文件设置 ACK 处理方式，有三种模式：
+
+- **none**：不处理。即消息投递给消费者后立刻 ack，消息会立刻从 MQ 删除。非常不安全，不建议使用
+
+- **manual**：手动模式。需要自己在业务代码中调用 api，发送`ack`或`reject`，存在业务入侵，但更灵活
+
+- **auto**：自动模式。SpringAMQP 利用 AOP 对我们的消息处理逻辑做了环绕增强，当业务正常执行时则自动返回`ack`. 当业务出现异常时，根据异常判断返回不同结果：
+
+  - 如果是**业务异常**，会自动返回`nack`；
+
+  - 如果是**消息处理或校验异常**，自动返回`reject`;
+
+通过下面的配置可以修改 SpringAMQP 的 ACK 处理方式：
+
+```yml application.yml
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        acknowledge-mode: none # 不做处理
+```
+
+##### 失败重试机制
+
+当消费者出现异常后，消息会不断 requeue（重入队）到队列，再重新发送给消费者。如果消费者再次执行依然出错，消息会再次 requeue 到队列，再次投递，知道消息处理成功为止。
+
+消费者失败重试机制：在消费者出现异常时利用本地重试，而不是无限制的 requeue 到 mq 队列
+
+```yml application.yml
+spring:
+  rabbitmq:
+    listener:
+      simple:
+        retry:
+          enabled: true # 开启消费者失败重试
+          initial-interval: 1000ms # 失败后的初始等待时间
+          multiplier: 1 # 是白的等待时长倍数，下次等待时长 = multiplier * initial-interval
+          max-attempts: 3 # 最大重试次数
+          stateless: true # true无状态；false有状态。如果业务中包含事务，这里改为false
+```
+
+##### 失败处理策略
+
+Spring 允许我们自定义重试次数耗尽后的消息处理策略，这个策略是由`MessageRecovery`接口来定义的，它有 3 个不同实现：
+
+- `RejectAndDontRequeueRecoverer`：重试耗尽后，直接`reject`，丢弃消息。默认就是这种方式
+
+- `ImmediateRequeueMessageRecoverer`：重试耗尽后，返回`nack`，消息重新入队
+
+- `RepublishMessageRecoverer`：重试耗尽后，将失败消息投递到指定的交换机
+
+比较优雅的一种处理方案是`RepublishMessageRecoverer`，失败后将消息投递到一个指定的，专门存放异常消息的队列，后续由人工集中处理。
+
+##### 业务幂等性
+
+**幂等**在程序开发中，则指的是同一个业务，执行一次或多次对业务状态的影响是一致的。
+
+但是数据的更新往往不是幂等的，如果重复执行可能造成不一样的后果
+
+为了保证消息处理的幂等性，有两种方案解决：
+
+- 唯一消息 ID
+
+- 业务状态判断
