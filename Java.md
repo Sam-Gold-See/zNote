@@ -6948,7 +6948,7 @@ public class SpringAmqpTest {
 ```yml application.yml
 spring:
   rabbitmq:
-    host:
+    host: # 虚拟机IP
     port: 5672 # 端口
     virtual-host: /hmall # 虚拟主机
     username: sgs
@@ -6973,6 +6973,8 @@ public class SpringRabbitListener {
 #### WorkQueues 模型
 
 **Work queues**，任务模型。简单来说就是让**多个消费者绑定到一个队列**，共同消费队列中的消息
+
+![WorkQueues 模型](img/Java_31.jpeg)
 
 当消息处理比较耗时的时候，可能生产消息的速度会远远大于消息的消费速度。长此以往，消息就会堆积越来越多，无法及时处理。
 
@@ -7039,3 +7041,142 @@ Work 模型的使用：
 - 多个消费者绑定到一个队列，同一条消息只会被一个消费者处理
 
 - 通过设置`prefetch`来控制消费者预取的消息数量
+
+#### 交换机
+
+引入交换机后，消息发送模式就会发生很大变化：
+
+![交换机模式](img/Java_32.jpeg)
+
+- **Publisher**：生产者，不再发送消息到队列中，而是发送给交换机
+
+- **Exchange**：交换机，一方面，接收生产者发送的消息。另一方面，知道如何处理消息，例如递交给某个特别队列、递交给所有队列、或是将消息丢弃。到底如何操作，取决于 Exchange 的类型。
+
+- **Queue**：消息队列也与以前一样，接收消息、缓存消息。不过队列一定要与交换机绑定。
+
+- **Consumer**：消费者，与以前一样，订阅队列，没有变化
+
+**Exchange（交换机）只负责转发消息，不具备存储消息的能力**，因此如果没有任何队列与 Exchange 绑定，或者没有符合路由规则的队列，那么消息会丢失！
+
+交换机类型：
+
+- **Fanout**：广播，将消息交给所有绑定到交换机的队列
+
+- **Direct**：订阅，基于 RoutingKey（路由 Key）发送给订阅了消息的队列
+
+- **Topic**：通配符订阅，和`Direct`类似，不过 RoutingKey 可以使用通配符
+
+- **Headers**：头匹配，基于 MQ 的消息头匹配（使用频率小）
+
+#### Fanout 交换机
+
+在广播模式下，消息发送流程是：
+
+![Fanout模式](img/Java_33.png)
+
+1. 可以有多个队列
+
+2. 每个队列都要绑定到 Exchange（交换机）
+
+3. 生产者发送的消息，只能发送到交换机
+
+4. 交换机把消息发送给绑定过的所有队列
+
+5. 订阅队列的消费者都能拿到消息
+
+在控制台新建`test.fanout`交换机和`fanout.queue1`、`fanout.queue2`队列，并绑定
+
+- publisher 服务发送消息
+
+```java SpringAmqpTest.java
+@Test
+public void testFanoutExchange() {
+  // 交换机名称
+  String exchangeName = "test.fanout";
+
+  // 消息
+  String message = "Hello Fanout Exchange!";
+  rabbitTemplate.convertAndSend(exchangeName, "", message);
+}
+```
+
+- consumer 服务消息接收
+
+```java SrpingRabbitListener.java
+@RabbitListener(queues = "fanout.queue1")
+public void listenFanoutExchange1(String msg) {
+  System.out.println("Received message: " + msg + " by listener1");
+}
+
+@RabbitListener(queues = "fanout.queue2")
+public void listenFanoutExchange2(String msg) {
+  System.out.println("Received message: " + msg + " by listener2");
+}
+```
+
+- 接收 publisher 发送的消息
+
+- 将消息按照规则路由到与之绑定的队列
+
+- 不能缓存消息，路由失败，消息丢失
+
+- FanoutExchange 的会将消息路由到每个绑定的队列
+
+#### Direct 交换机
+
+在 Fanout 模式中，一条消息，会被所有订阅的队列都消费。但是，在某些场景下，我们希望不同的消息被不同的队列消费。这时就要用到 Direct 类型的 Exchange。
+
+![Direct模式](img/Java_34.png)
+
+在 Direct 模型下：
+
+- 队列与交换机的绑定，不能是任意绑定了，而是要指定一个 RoutingKey（路由 Key）
+
+- 消息的发送方向在向 Exchange 发送消息时，也必须制定消息的 RoutingKey
+
+- Exchange 不再把消息交给每个绑定的队列，而是根据消息的 RoutingKey 进行判断，只有队列的 RoutingKey 和消息的 RoutingKey 完全一致的时候，才会接收到信息
+
+在配置完交换机和队列后，我们可以发送消息到交换机，并指定 RoutingKey
+
+除此之外，只需要在发送消息的方法中指定 RoutingKey 即可
+
+```java SpringAmqpTest.java
+@Test
+public void testSendDirectExchange() {
+  // 交换机名称
+  String exchangeName = "test.direct";
+
+  // 消息
+  String message = "Hello Direct Exchange!";
+
+  // 路由键
+  String routingKey = "info";
+
+  // 发送消息
+  rabbitTemplate.convertAndSend(exchangeName, routingKey, message);
+}
+```
+
+#### Topic 交换机
+
+Topic 类型的 Exchange 与 Direct 相比，都是可以根据 RoutingKey 把消息路由到不同的队列。
+
+Topic 类型 Exchange 可以让队列在绑定 BindingKey 的时候使用通配符
+
+BindingKey 一般都是由一个或多个单词组成，之间以`.`分割
+
+**通配符规则**：
+
+- `#`：匹配一个或多个词
+
+- `*`：匹配不多不少一个词
+
+**总结 Topic 交换机**
+
+- Topic 交换机接收的消息 RoutingKey 必须是多个单词，以 `**.**` 分割
+
+- Topic 交换机与队列绑定时的 bindingKey 可以指定通配符
+
+- `#`：代表 0 个或多个词
+
+- `*`：代表 1 个词
