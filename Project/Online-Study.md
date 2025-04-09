@@ -408,7 +408,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
             if (expireTime > 0)
                 stringRedisTemplate.opsForValue().set(JwtConstant.BLACKLIST_KEY + token, "", expireTime, TimeUnit.SECONDS);
-            
+
             return Long.parseLong(claims.get(JwtConstant.CLIENT_ID).toString());
         } catch (Exception ex) {
             throw new AccountException(MessageConstant.JWT_ERROR);
@@ -1083,4 +1083,162 @@ public class ClientUserServiceImpl implements ClientUserService {
     </where>
     ORDER BY create_time DESC
 </select>
+```
+
+## RabbitMQ
+
+```xml pom.xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-amqp</artifactId>
+    <version>3.4.3</version>
+</dependency>
+```
+
+```yml application.yml
+spring:
+  rabbitmq:
+    host:
+    port:
+    username:
+    password:
+    virtual-host: /
+```
+
+```java RabbitMQConstant.java
+/**
+ * RabbitMQ消息队列常量类
+ */
+public class RabbitMQConstant {
+
+    // 通知交换机名
+    public static final String NOTIFICATION_EXCHANGE = "notification.exchange";
+
+    // 通知队列名
+    public static final String NOTIFICATION_QUEUE = "notification.queue";
+
+    // 通知路由键
+    public static final String NOTIFICATION_ROUTING_KEY = "notification.route";
+}
+```
+
+```java RabbitMQConfig.java
+@Configuration
+public class RabbitMQConfig {
+
+    /**
+     * 注册一个Direct类交换机，负责notification相关业务
+     */
+    @Bean
+    public DirectExchange notificationExchange() {
+        return new DirectExchange(RabbitMQConstant.NOTIFICATION_EXCHANGE);
+    }
+
+    /**
+     * 注册一个持久化队列，负责notification相关业务
+     */
+    @Bean
+    public Queue notificationQueue() {
+        return new Queue(RabbitMQConstant.NOTIFICATION_QUEUE, true);
+    }
+
+    /**
+     * 绑定队列到交换机，并且指定 RoutingKey
+     *
+     * @param notificationQueue    要绑定的队列
+     * @param notificationExchange 要绑定的交换机
+     */
+    @Bean
+    public Binding bindingNotification(Queue notificationQueue, DirectExchange notificationExchange) {
+        return BindingBuilder
+                .bind(notificationQueue)
+                .to(notificationExchange)
+                .with(RabbitMQConstant.NOTIFICATION_ROUTING_KEY);
+    }
+}
+```
+
+```java NotificationProducer.java
+@Component
+@Slf4j
+public class NotificationProducer {
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    /**
+     * 发送消息到指定队列
+     *
+     * @param exchange   交换机
+     * @param routingKey 路由键
+     * @param message    消息内容
+     */
+    public void sendMessage(String exchange, String routingKey, Object message) {
+        rabbitTemplate.convertAndSend(exchange, routingKey, message);
+    }
+}
+```
+
+```java NotificationConsumer.java
+@Component
+@Slf4j
+public class NotificationConsumer {
+
+    @RabbitListener(queues = RabbitMQConstant.NOTIFICATION_QUEUE)
+    public void receiveNotification(String message) {
+        log.info("receive consumer : {}", message);
+    }
+}
+```
+
+### 配置发送 JSON 对象
+
+```xml pom.xml
+<dependency>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.13.1</version>
+</dependency>
+```
+
+```java RabbitMQConfig.java
+public class RabbitMQConfig {
+    /**
+     * 配置一个Jackson2JsonMessageConverter，用于将消息转换为JSON格式
+     */
+    @Bean
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    /**
+     * 将转换器设置入RabbitTemplate
+     */
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                         Jackson2JsonMessageConverter converter) {
+        // 创建RabbitTemplate并设置连接工厂
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+
+        // 设置消息转换器，确保消息发送和接收时使用JSON格式
+        rabbitTemplate.setMessageConverter(converter);
+
+        return rabbitTemplate;
+    }
+}
+```
+
+对于 Consumer，需要在方法上添加 `@RabbitHandler` 注解，并指定消息类型，例如：
+
+```java NotificationConsumer.java
+@Component
+@Slf4j
+@RabbitListener(queues = RabbitMQConstant.NOTIFICATION_QUEUE)
+public class NotificationConsumer {
+
+    @RabbitHandler
+    public void receiveNotification(Notification notification) {
+		log.info("receive consumer : {}", notification);
+    }
+}
 ```
