@@ -127,6 +127,12 @@ public abstract class AbstractList<E> extends AbstractCollection<E> implements L
 
 不是。多个线程同时读写会造成数据不一致。可使用 `Collections.synchronizedList()` 或 `CopyOnWriteArrayList` 替代。
 
+### `transient` 关键字的作用是什么？
+
+主要作用就是让某些 **被 transient 关键字修饰的成员属性变量不被序列化/持久化** ，即使被序列化，也不会被序列化该成员属性。
+
+可以用于一些敏感信息不希望被序列化的场景，如密码、密钥等。
+
 ### ArrayList 源码分析
 
 ```java
@@ -375,6 +381,27 @@ final void setArray(Object[] a) {
 
 写入过程加锁，确保线程安全，然后拷贝原数组，扩容后添加元素，最后替换原数组。
 
+#### 修改元素
+
+```java
+public E set(int index, E element) {
+    synchronized (lock) {
+        Object[] es = getArray();
+        E oldValue = elementAt(es, index);
+
+        if (oldValue != element) {
+            es = es.clone();
+            es[index] = element;
+        }
+        // Ensure volatile write semantics even when oldvalue == element
+        setArray(es);
+        return oldValue;
+    }
+}
+```
+
+修改过程加锁，拷贝原数组，修改指定位置的元素，最后替换原数组。
+
 #### 移除元素
 
 ```java
@@ -407,11 +434,43 @@ static <E> E elementAt(Object[] a, int index) {
 
 ### HashMap 的添加元素流程
 
+- 步骤：
+
+计算键的 `hashCode()`，通过扰动函数得到 `hash`
+
+定位桶 `index = hash & (length - 1)`
+
+若桶为空，直接插入；若冲突，链表或红黑树处理
+
+若达到扩容阈值（容量 × 负载因子），则进行扩容（2 倍）
+
 ### HashMap 扩容加载因子为什么是 0.75
+
+0.75 是效率与空间的平衡点。在低冲突率下保持查询性能，又避免频繁扩容带来的开销。
 
 ### HashMap 扩容为什么扩容为数组长度的 2 倍
 
+便于 hash 的重新定位。新桶位置要么是原位置，要么是原位置 + oldCapacity，简化计算逻辑，提高效率。
+
+### HashMap 源码分析
+
+```java
+public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneable, Serializable
+```
+
+#### 核心字段
+
+```java
+transient Node<K,V>[] table;        // 哈希表数组（桶）
+transient int size;                // 实际键值对数量
+transient int modCount;           // 修改次数（fail-fast 支持）
+int threshold;                     // 扩容阈值
+final float loadFactor;           // 负载因子（默认 0.75）
+```
+
 ### HashMap 是线程的安全吗
+
+不是。多线程环境下可能出现死循环、数据丢失。并发场景建议用 `ConcurrentHashMap`。
 
 ### ConcurrentHashMap 的实现原理
 
