@@ -432,6 +432,33 @@ static <E> E elementAt(Object[] a, int index) {
 
 删除元素时，加锁，拷贝原数组，删除指定位置的元素（判断是否是最后一位），移动后续元素，最后替换原数组
 
+### `instanceof` 的作用
+
+`instanceof` 是 Java 中的一个 **关键字**，用于判断一个对象是否是某个类或其子类、实现类的实例
+
+- 语法格式
+
+```java
+@return boolean
+对象 instanceof 类名
+```
+
+若对象是该类或其子类、接口的实现类的实例，则返回 `true`，否则返回 `false`
+
+- 注意
+
+`instanceof` 的右侧类型必须是 **编译器能确定的父类/接口**，否则会直接编译失败
+
+`null instanceof 类` 永远是 `false`
+
+- 与 `getClass()` 的区别
+
+| 比较项       | `instanceof`                          | `getClass().equals()`          |
+| ------------ | ------------------------------------- | ------------------------------ |
+| 判断范围     | 当前类、父类、接口实现类都返回 `true` | 仅当前类返回 `true`            |
+| 用于多态判断 | 推荐使用                              | 不适合多态场景                 |
+| 实例         | `a instanceof Animal`                 | `a.getClass() == Animal.class` |
+
 ### HashMap 的添加元素流程
 
 - 步骤：
@@ -468,11 +495,57 @@ int threshold;                     // 扩容阈值
 final float loadFactor;           // 负载因子（默认 0.75）
 ```
 
+#### Node 节点架构
+
+```java
+    static class Node<K,V> implements Map.Entry<K,V> {
+        final int hash;
+        final K key;
+        V value;
+        Node<K,V> next;
+
+        Node(int hash, K key, V value, Node<K,V> next) {
+            this.hash = hash;
+            this.key = key;
+            this.value = value;
+            this.next = next;
+        }
+
+        public final K getKey()        { return key; }
+        public final V getValue()      { return value; }
+        public final String toString() { return key + "=" + value; }
+
+        public final int hashCode() {
+            return Objects.hashCode(key) ^ Objects.hashCode(value);
+        }
+
+        public final V setValue(V newValue) {
+            V oldValue = value;
+            value = newValue;
+            return oldValue;
+        }
+
+        public final boolean equals(Object o) {
+            if (o == this)
+                return true;
+
+            return o instanceof Map.Entry<?, ?> e
+                    && Objects.equals(key, e.getKey())
+                    && Objects.equals(value, e.getValue());
+        }
+    }
+
+    // Objects.hashCode() 实现
+    public static int hashCode(Object o) {
+        return o != null ? o.hashCode() : 0;
+    }
+```
+
 ### HashMap 是线程的安全吗
 
 不是。多线程环境下可能出现死循环、数据丢失。并发场景建议用 `ConcurrentHashMap`。
 
-### ConcurrentHashMap 的实现原理
+### ConcurrentHashMap 的实现原理 & 源码分析
 
 ### 泛型是什么？泛型的好处？类型擦除是什么？
 
