@@ -447,7 +447,7 @@ static <E> E elementAt(Object[] a, int index) {
 
 - 注意
 
-`instanceof` 的右侧类型必须是 **编译器能确定的父类/接口**，否则会直接编译失败
+`instanceof` 的右侧类型必须是 **编译期能确定的父类/接口**，否则会直接编译失败
 
 `null instanceof 类` 永远是 `false`
 
@@ -538,6 +538,94 @@ final float loadFactor;           // 负载因子（默认 0.75）
     // Objects.hashCode() 实现
     public static int hashCode(Object o) {
         return o != null ? o.hashCode() : 0;
+    }
+```
+
+#### 构造器
+
+```java
+    private static final float DEFAULT_LOAD_FACTOR = 0.75f;
+
+    public HashMap(int initialCapacity, float loadFactor) {
+        if (initialCapacity < 0)
+            throw new IllegalArgumentException("Illegal initial capacity: " +
+                                               initialCapacity);
+        if (initialCapacity > MAXIMUM_CAPACITY)
+            initialCapacity = MAXIMUM_CAPACITY;
+        if (loadFactor <= 0 || Float.isNaN(loadFactor))
+            throw new IllegalArgumentException("Illegal load factor: " +
+                                               loadFactor);
+        this.loadFactor = loadFactor;
+        this.threshold = tableSizeFor(initialCapacity);
+    }
+
+    static final int tableSizeFor(int cap) {
+        int n =  -1 >>> Integer.numberOfLeadingZeros(cap - 1);
+        return (n < 0) ? 1 : (n >= MAXIMUM_CAPACITY) ? MAXIMUM_CAPACITY : n + 1;
+    }
+
+    public HashMap(int initialCapacity) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR);
+    }
+
+    public HashMap() {
+        this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
+    }
+```
+
+#### 新增元素
+
+```java
+    public V put(K key, V value) {
+        return putVal(hash(key), key, value, false, true);
+    }
+
+    // onlyIfAbsent 是否只在不存在 key 时才插入（ putIfAbsent() 方法会用到）
+    // evict 是否支持淘汰（ LinkedHashMap 中使用）
+    final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+        Node<K,V>[] tab; Node<K,V> p; int n, i;
+        // 如果当前table为空，则进行初始化
+        if ((tab = table) == null || (n = tab.length) == 0)
+            // 调用 resize() 进行初始化（实际为初始化容量为 16 的数组）
+            n = (tab = resize()).length;
+        // (n - 1) & hash 使用哈希值和数组长度-1做与运算，快速计算通索引，如果值为null，说明无冲突，直接创建新节点
+        if ((p = tab[i = (n - 1) & hash]) == null)
+            tab[i] = newNode(hash, key, value, null);
+        else {
+            Node<K,V> e; K k;
+            if (p.hash == hash &&
+                ((k = p.key) == key || (key != null && key.equals(k))))
+                e = p;
+            else if (p instanceof TreeNode)
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+            else {
+                for (int binCount = 0; ; ++binCount) {
+                    if ((e = p.next) == null) {
+                        p.next = newNode(hash, key, value, null);
+                        if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                            treeifyBin(tab, hash);
+                        break;
+                    }
+                    if (e.hash == hash &&
+                        ((k = e.key) == key || (key != null && key.equals(k))))
+                        break;
+                    p = e;
+                }
+            }
+            if (e != null) { // existing mapping for key
+                V oldValue = e.value;
+                if (!onlyIfAbsent || oldValue == null)
+                    e.value = value;
+                afterNodeAccess(e);
+                return oldValue;
+            }
+        }
+        ++modCount;
+        if (++size > threshold)
+            resize();
+        afterNodeInsertion(evict);
+        return null;
     }
 ```
 
