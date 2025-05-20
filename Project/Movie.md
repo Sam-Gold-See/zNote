@@ -12,13 +12,65 @@
 </dependency>
 ```
 
-`@Tag` 注解标注在接口类上，用于标注在 swagger 文档中显示的标签。
+- `@Tag` 注解标注在接口类上，用于标注在 swagger 文档中显示的标签。
 
-`@Operation` 注解标注在接口方法上，用于标注在 swagger 文档中显示的接口名称，同时会根据`RequestMapping`系列注解中的接收请求方式生成不同的接口。
+- `@Operation` 注解标注在接口方法上，用于标注在 swagger 文档中显示的接口名称，同时会根据`RequestMapping`系列注解中的接收请求方式生成不同的接口。
 
-`@Parameter` 注解标注在接口方法的参数上，用于标注在 swagger 文档中显示的参数名称、类型、是否必填、默认值等信息。
+  - `summary` 用于显示接口名称。
 
-`@RequestBody` 注解标注在接口方法的参数上，用于标注在 swagger 文档中显示的请求体参数。
+  - `description` 用于显示接口描述。
+
+- `@Parameter` 注解标注在接口方法的参数上，用于标注在 swagger 文档中显示的参数名称、类型、是否必填、默认值等信息。
+
+  - `name` 用于显示参数名称。
+
+  - `description` 用于显示参数描述。
+
+  - `required` 布尔值，用于显示参数是否必填。
+
+  - `example` 用于显示参数示例。
+
+  - `schema` 用于显示参数类型。
+
+  - `defaultValue` 用于显示参数默认值。
+
+  - `in` 用于显示参数位置，可选值有`ParameterIn.QUERY` - `@RequestParam`、`ParameterIn.PATH` - `@PathVariable`、`ParameterIn.HEADER` - `@RequestHeader`、`ParameterIn.COOKIE` - `@CookieValue`。
+
+- `@Schema` 注解标注在接口方法的参数和返回值上，用于标注在 swagger 文档中显示的类型、描述等信息。
+
+  - `description` 用于显示类型描述。
+
+  - `title` 用于显示类型名称。
+
+```java
+@Data
+@Schema(description = "全局统一响应结果", title = "Result")
+public class Result<T> implements Serializable {
+
+    @Schema(description = "状态码")
+    private Integer code;
+
+    @Schema(description = "报错信息")
+    private String msg;
+
+    @Schema(description = "响应数据")
+    private T data;
+}
+```
+
+- `@ApiResponse` 注解标注在接口方法的返回值上，用于标注在 swagger 文档中显示的返回值名称、类型、描述等信息。
+
+  - `responseCode` 用于显示返回值状态码。
+
+  - `description` 用于显示返回值描述。
+
+  - `content` 用于显示返回值类型。
+
+```java
+@ApiResponse(responseCode = "200", description = "成功", content = @Content(
+        schema = @Schema(implementation = Result.class)
+))
+```
 
 ## 日志
 
