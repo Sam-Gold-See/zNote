@@ -36,11 +36,15 @@
 
   - `in` 用于显示参数位置，可选值有`ParameterIn.QUERY` - `@RequestParam`、`ParameterIn.PATH` - `@PathVariable`、`ParameterIn.HEADER` - `@RequestHeader`、`ParameterIn.COOKIE` - `@CookieValue`。
 
-- `@Schema` 注解标注在接口方法的参数和返回值上，用于标注在 swagger 文档中显示的类型、描述等信息。
+- `@Schema` 注解标注在接口方法的参数和返回值上，用于标注在 swagger 文档中显示的类型、描述等信息，主要用于`Post`的请求体JSON数据描述。
 
   - `description` 用于显示类型描述。
 
   - `title` 用于显示类型名称。
+
+  - `requiredMode` 用于显示类型是否必填。
+
+  - `example` 用于显示类型示例。
 
 ```java
 @Data
@@ -69,6 +73,18 @@ public class Result<T> implements Serializable {
 ```java
 @ApiResponse(responseCode = "200", description = "成功", content = @Content(
         schema = @Schema(implementation = Result.class)
+))
+```
+
+- 对于封装数据的`Result<UserVO>`类统一响应对象，需要在`Controller`中新建静态类，然后`content`中的`schema`指向该静态类
+
+```java
+@Schema(name = "UserVOResult", description = "包含UserVO的统一响应对象")
+public static class UserVOResult extends Result<UserVO> {}
+
+@ApiResponse(responseCode = "200", description = "成功", content = @Content(
+        mediaType = Me
+        schema = @Schema(implementation = UserVOResult.class)
 ))
 ```
 
