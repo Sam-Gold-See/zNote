@@ -12,6 +12,28 @@
 </dependency>
 ```
 
+通过`OpenApiConfig`类配置 swagger 文档信息。
+
+```java
+@Configuration
+public class OpenApiConfig {
+
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .info(new Info()
+                        .title("奶龙影视")
+                        .description("奶龙影视网站的接口文档")
+                        .version("1.0.0")
+                        .contact(new Contact()
+                                .name("SamGoldSee")
+                                .url("https://github.com/Sam-Gold-See")
+                                .email("chunxin.huang@m.scnu.edu.cn"))
+                );
+    }
+}
+```
+
 - `@Tag` 注解标注在接口类上，用于标注在 swagger 文档中显示的标签。
 
 - `@Operation` 注解标注在接口方法上，用于标注在 swagger 文档中显示的接口名称，同时会根据`RequestMapping`系列注解中的接收请求方式生成不同的接口。
@@ -36,7 +58,7 @@
 
   - `in` 用于显示参数位置，可选值有`ParameterIn.QUERY` - `@RequestParam`、`ParameterIn.PATH` - `@PathVariable`、`ParameterIn.HEADER` - `@RequestHeader`、`ParameterIn.COOKIE` - `@CookieValue`。
 
-- `@Schema` 注解标注在接口方法的参数和返回值上，用于标注在 swagger 文档中显示的类型、描述等信息，主要用于`Post`的请求体JSON数据描述。
+- `@Schema` 注解标注在接口方法的参数和返回值上，用于标注在 swagger 文档中显示的类型、描述等信息，主要用于`Post`的请求体 JSON 数据描述。
 
   - `description` 用于显示类型描述。
 
@@ -87,6 +109,8 @@ public static class UserVOResult extends Result<UserVO> {}
         schema = @Schema(implementation = UserVOResult.class)
 ))
 ```
+
+- `@Hidden` 注解标注在接口方法上，用于隐藏该接口但是可供接口文档展示。
 
 ## 日志
 
@@ -202,3 +226,129 @@ public class EmailUtils {
     }
 }
 ```
+
+## Spring Security
+
+导入 Spring Security 依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+配置 `SecurityConfig` 类，配置 Spring Security 相关信息，同时注入`BCryptPasswordEncoder` 作为 `PasswordEncoder`
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                // 配置放行路径
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+
+                                // 页面请求
+                                "/", "/toLogin", "/toRegister", "/email/sendCode", "/email/checkCode", "/user/register", "/user/login",
+
+                                // knife4j接口文档路径
+                                "/doc.html", "swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**")
+
+                        .permitAll().anyRequest().authenticated())
+
+                // 配置登录相关属性
+                .formLogin(form -> form
+                        .loginPage("/toLogin")
+                        .loginProcessingUrl("/user/login")
+                        .usernameParameter("email")
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
+
+                // 配置退出相关属性
+                .logout(logout -> logout
+                        .logoutUrl("/toLogout")
+                        .logoutSuccessUrl("/toLogin"))
+
+                .csrf(AbstractHttpConfigurer::disable);
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
+```
+
+在`UserServiceImpl`类中继承接口`UserDetailsService` 并且实现方法 `loadUserByUsername`
+
+```java
+@Service
+public class UserServiceImpl implements UserService, UserDetailsService {
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
+        // 校验验证码
+        checkVerificationCodeStatus(email);
+
+        // 检查用户是否存在
+        User user = userMapper.getByEmail(email);
+        if (user == null)
+            throw new AccountException(MessageConstant.USER_NOT_EXISTS);
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail(),
+                user.getPassword(),
+                AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER")
+        );
+    }
+}
+```
+
+为了存储用户id、是否是VIP等信息，需要拓展`UserDetails`接口，并实现相关方法。
+
+```java
+@Data
+public class UserSession implements UserDetails {
+
+    private final Integer id;
+
+    private final String email;
+
+    private final String password;
+
+    private final Boolean type;
+
+    private final Collection<? extends GrantedAuthority> authorities;
+
+    public UserSession(User user) {
+        this.id = user.getId();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.type = user.getType();
+        this.authorities = AuthorityUtils.createAuthorityList("ROLE_USER");
+    }
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return authorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email;
+    }
+}
+```
+
+在
