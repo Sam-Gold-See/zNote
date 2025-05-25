@@ -309,7 +309,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 }
 ```
 
-为了存储用户id、是否是VIP等信息，需要拓展`UserDetails`接口，并实现相关方法。
+为了存储用户 id、是否是 VIP 等信息，需要拓展`UserDetails`接口，并实现相关方法。
 
 ```java
 @Data
@@ -351,4 +351,43 @@ public class UserSession implements UserDetails {
 }
 ```
 
-在
+可以通过`Spring Security`的上下文容器`SecurityContextHolder`获取当前登录的用户信息。
+
+```java
+        UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+```
+
+## OSS 服务
+
+### 配置依赖、属性
+
+```xml
+<dependency>
+    <groupId>com.aliyun.oss</groupId>
+    <artifactId>aliyun-sdk-oss</artifactId>
+    <version>${aliyun-oss}</version>
+</dependency>
+```
+
+```yml
+aliyun:
+  oss:
+    endpoint:
+    access-key-id:
+    access-key-secret:
+    bucket-name:
+```
+
+```java
+@Data
+@ConfigurationProperties(prefix = "aliyun.oss")
+@Configuration
+public class OSSConfig{
+    private String endpoint;
+    private String accessKeyId;
+    private String accessKeySecret;
+    private String bucketName;
+}
+```
+
+### 实现业务层代码
