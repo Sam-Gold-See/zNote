@@ -357,6 +357,39 @@ public class UserSession implements UserDetails {
         UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 ```
 
+## ElasticSearch
+
+### 安装配置
+
+高版本 `elasticsearch` 都携带捆绑 JDK，环境基本开包即用（常用软件`cpolar`的 WebUI 端口会造成冲突，提前修改`cpolar.yml`并重启服务）
+
+下载`elasticsearch`软件包到指定位置解压
+
+启动服务前配置 JVM 参数，打开`jvm.options`文件，删除对应注释后设置 `-Xms` 和 `-Xmx` 为合适相同的值
+
+```shell
+-Xms1g
+-Xmx1g
+```
+
+进入`bin`目录使用`elastisearch.bat`启动服务，默认端口为`9200`
+
+然后在启动`elasticsearch`服务的同时可以使用命令行新增用户
+
+```bash
+elasticsearch-users useradd <username>
+(Enter new password:)<password>
+(Retype new password:)<password>
+```
+
+并给该用户分配角色，如`superuser`
+
+```bash
+elasticsearch-users roles -a superuser root
+```
+
+### 引入依赖
+
 ## OSS 服务
 
 ### 配置依赖、属性
@@ -391,3 +424,59 @@ public class OSSConfig{
 ```
 
 ### 实现业务层代码
+
+```java
+    /**
+     * 阿里云OSS文件上传
+     *
+     * @param file       目标文件
+     * @param bucketPath Bucket文件路径
+     */
+    @Override
+    public String upload(MultipartFile file, String bucketPath) {
+
+        // 获取相关配置
+        String bucketName = ossConfig.getBucketName();
+        String endpoint = ossConfig.getEndpoint();
+        String accessKeyId = ossConfig.getAccessKeyId();
+        String accessKeySecret = ossConfig.getAccessKeySecret();
+
+        // 创建OSS对象
+        OSS ossClient = new OSSClientBuilder().build(endpoint, accessKeyId, accessKeySecret);
+
+        // 获取原生文件名
+        String originalFilename = file.getOriginalFilename();
+
+        // JDK8的日期格式
+        LocalDateTime time = LocalDateTime.now();
+        DateTimeFormatter dft = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        // 获取用户名
+        UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userSession.getUsername().split("@")[0];
+
+        // 处理非法字符
+        String safeUsername = username.replaceAll("[^a-zA-Z0-9_-]", "_");
+
+        // 提取文件扩展名
+        String extension = originalFilename != null ? originalFilename.substring(originalFilename.lastIndexOf(".")) : null;
+
+        // 拼接OSS文件名
+        String datePart = dft.format(time);
+        String uploadFileName = bucketPath + datePart + "-" + safeUsername + extension;
+
+        try {
+            PutObjectResult result = ossClient.putObject(bucketName, uploadFileName, file.getInputStream());
+            // 拼装返回路径
+            if (result != null)
+                return "https://" + bucketName + "." + endpoint + "/" + uploadFileName;
+        } catch (IOException ioe) {
+            throw new FileException(MessageConstant.FILE_UPLOAD_ERROR + ":" + ioe.getMessage());
+        } finally {
+            // 关闭OSS服务，避免造成OOM
+            ossClient.shutdown();
+        }
+
+        return null;
+    }
+```
