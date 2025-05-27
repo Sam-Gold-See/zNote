@@ -357,39 +357,6 @@ public class UserSession implements UserDetails {
         UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 ```
 
-## ElasticSearch
-
-### 安装配置
-
-高版本 `elasticsearch` 都携带捆绑 JDK，环境基本开包即用（常用软件`cpolar`的 WebUI 端口会造成冲突，提前修改`cpolar.yml`并重启服务）
-
-下载`elasticsearch`软件包到指定位置解压
-
-启动服务前配置 JVM 参数，打开`jvm.options`文件，删除对应注释后设置 `-Xms` 和 `-Xmx` 为合适相同的值
-
-```shell
--Xms1g
--Xmx1g
-```
-
-进入`bin`目录使用`elastisearch.bat`启动服务，默认端口为`9200`
-
-然后在启动`elasticsearch`服务的同时可以使用命令行新增用户
-
-```bash
-elasticsearch-users useradd <username>
-(Enter new password:)<password>
-(Retype new password:)<password>
-```
-
-并给该用户分配角色，如`superuser`
-
-```bash
-elasticsearch-users roles -a superuser root
-```
-
-### 引入依赖
-
 ## OSS 服务
 
 ### 配置依赖、属性
@@ -479,4 +446,273 @@ public class OSSConfig{
 
         return null;
     }
+```
+
+## 支付宝沙箱支付
+
+### 配置依赖、属性
+
+```xml
+<dependency>
+    <groupId>com.alipay.sdk</groupId>
+    <artifactId>alipay-sdk-java</artifactId>
+    <version>${alipay-sdk}</version>
+</dependency>
+
+<dependency>
+    <groupId>com.alipay.sdk</groupId>
+    <artifactId>alipay-easysdk</artifactId>
+    <version>${alipay-easysdk}</version>
+</dependency>
+```
+
+`app_id`，`merchant_private_key`，`alipay_public_key`需要在支付宝沙箱申请，并配置到`application.yml`文件中。
+
+```yml
+alipay:
+  app_id:
+  merchant_private_key:
+  alipay_public_key:
+  notify_url: https://公网地址/alipay/notify
+  return_url: https://公网地址/toProfile
+  sign_type: RSA2
+  charset: utf-8
+  gateway_url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+```
+
+实现 `AliPayConfig.java` 类读取支付宝支付相关配置属性以及初始化支付宝 SDK
+
+```java
+@Slf4j
+@ConfigurationProperties(prefix = "alipay")
+@Configuration
+@Data
+public class AliPayConfig {
+
+    // 应用ID
+    public String appId;
+
+    // 商户私钥
+    public String merchantPrivateKey;
+
+    // 支付宝公钥
+    public String alipayPublicKey;
+
+    // 服务器[异步通知]页面路径
+    public String notifyUrl;
+
+    // 返回路径
+    public String returnUrl;
+
+    // 签名方式
+    private String signType;
+
+    // 字符编码格式
+    private String charset;
+
+    // 支付宝网关
+    public String gatewayUrl;
+
+    @PostConstruct
+    public void init() {
+        // 设置参数
+        Config config = new Config();
+        config.protocol = "https";
+        config.gatewayHost = "openapi.alipay.com";
+        config.signType = this.signType;
+        config.appId = this.appId;
+        config.merchantPrivateKey = this.merchantPrivateKey;
+        config.alipayPublicKey = this.alipayPublicKey;
+        config.notifyUrl = this.notifyUrl;
+        Factory.setOptions(config);
+        System.out.println("=======支付宝SDK初始化成功=======");
+    }
+}
+```
+
+`SecurityConfig.java` 类放行支付宝支付相关接口 `/alipay/**`
+
+```java
+http
+                // 配置放行路径
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+
+                                // 静态资源
+                                "/css/**", "/img/**", "/js/**", "/scss/**", "/vendor/**",
+
+                                // 页面请求
+                                "/toLogin", "/toRegister", "/toForgotPassword", "/email/sendCode", "/email/checkCode", "/user/register", "/user/login", "/user/updatePassword", "/alipay/**",
+
+                                // knife4j接口文档路径
+                                "/doc.html", "/swagger-ui.html", "/swagger-resources/**", "/webjars/**", "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui/**")
+
+                        .permitAll().anyRequest().authenticated())
+```
+
+`AliPay.java`支付订单实体类
+
+```java
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@Schema(description = "支付订单对象", title = "AliPay")
+public class AliPay implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    // 订单编号
+    private String traceNo;
+
+    // 商品金额
+    private Double totalAmount;
+
+    // 商品名称
+    private String subject;
+
+    // 订单追踪号
+    private String alipayTraceNo;
+}
+```
+
+### 发起支付请求
+
+`Controller` 层实现支付接口 `/alipay/pay`
+
+```java
+/**
+ * 发起支付请求
+ *
+ * @param aliPayDTO    支付宝订单对象
+ * @param httpResponse response
+ */
+@Operation(summary = "发起支付请求")
+@GetMapping("/pay")
+public void pay(AliPayDTO aliPayDTO, HttpServletResponse httpResponse) throws Exception {
+    UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    log.info("用户(id:{})正在提交升级账户权限账单:{}", userSession.getId(), aliPayDTO);
+    aliPayService.pay(aliPayDTO, httpResponse);
+}
+```
+
+`Service` 层实现支付相关业务需求
+
+```java
+/**
+ * 发起支付请求
+ *
+ * @param aliPayDTO    支付宝订单对象
+ * @param httpResponse response
+ */
+@Override
+public void pay(AliPayDTO aliPayDTO, HttpServletResponse httpResponse) throws Exception {
+    UserSession userSession = (UserSession) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    AliPayOrder order = AliPayOrder.builder()
+            .tradeNo(aliPayDTO.getTradeNo())
+            .totalAmount(BigDecimal.valueOf(aliPayDTO.getTotalAmount()))
+            .subject(aliPayDTO.getSubject())
+            .userId(userSession.getId())
+            .status(false)
+            .build();
+    aliPayOrderMapper.insert(order);
+    AlipayClient alipayClient = new DefaultAlipayClient(
+            AliPayConstant.GATEWAY_URL,
+            aliPayConfig.getAppId(),
+            aliPayConfig.getMerchantPrivateKey(),
+            AliPayConstant.FORMAT,
+            AliPayConstant.CHARSET,
+            aliPayConfig.getAlipayPublicKey(),
+            aliPayConfig.getSignType());
+    AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
+    request.setNotifyUrl(aliPayConfig.getNotifyUrl());
+    request.setReturnUrl(aliPayConfig.getReturnUrl());
+    JSONObject bizContent = new JSONObject();
+    bizContent.put("out_trade_no", aliPayDTO.getTradeNo());
+    bizContent.put("total_amount", aliPayDTO.getTotalAmount());
+    bizContent.put("subject", aliPayDTO.getSubject());
+    bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+    request.setBizContent(bizContent.toJSONString());
+    String form;
+    try {
+        // 调用SDK生成表单
+        form = alipayClient.pageExecute(request).getBody();
+    } catch (AlipayApiException e) {
+        throw new AliPayException(MessageConstant.ALIPAY_ERROR + ":" + e.getMessage());
+    }
+    httpResponse.setContentType("text/html;charset=" + aliPayConfig.getCharset());
+    httpResponse.getWriter().write(form);
+    httpResponse.getWriter().flush();
+    httpResponse.getWriter().close();
+}
+```
+
+### 支付回调实现业务
+
+支付宝支付回调接口 `/alipay/notify`
+
+```java
+/**
+ * 支付宝支付异步回调
+ *
+ * @param request request
+ */
+@Operation(summary = "支付回调")
+@PostMapping("/notify")
+@ApiResponse(responseCode = "200", description = "成功", content = @Content(
+        mediaType = MediaType.APPLICATION_JSON_VALUE,
+        schema = @Schema(implementation = Result.class)
+))
+public Result<String> payNotify(HttpServletRequest request) throws Exception {
+    User user = aliPayService.payNotify(request);
+    log.info("用户(id:{})完成账号权限升级", user.getId());
+    return Result.success();
+}
+```
+
+实现业务
+
+```java
+/**
+ * 支付宝支付异步回调
+ *
+ * @param request request
+ */
+@Override
+public User payNotify(HttpServletRequest request) throws Exception {
+    Map<String, String> params = new HashMap<>();
+    Map<String, String[]> requestParams = request.getParameterMap();
+    for (String name : requestParams.keySet())
+        params.put(name, request.getParameter(name));
+    log.info("支付宝异步回调参数: {}", params);
+
+    String tradeStatus = params.get("trade_status");
+    if (!"TRADE_SUCCESS".equals(tradeStatus)) {
+        throw new AliPayException(MessageConstant.ALIPAY_ERROR + ":" + tradeStatus);
+    }
+
+    // 验签
+    boolean signVerified = Factory.Payment.Common().verifyNotify(params);
+    if (!signVerified)
+        throw new AliPayException(MessageConstant.ALIPAY_ERROR + ": 回调验签失败");
+
+    String aliPayTradeNo = params.get("out_trade_no");
+
+    AliPayOrder aliPayOrder = aliPayOrderMapper.getByTradeNo(aliPayTradeNo);
+
+    aliPayOrderMapper.update(AliPayOrder.builder()
+            .id(aliPayOrder.getId())
+            .aliPayTradeNo(aliPayTradeNo)
+            .status(true)
+            .build());
+
+    User user = User.builder()
+            .id(aliPayOrder.getUserId())
+            .type(true)
+            .build();
+    userMapper.update(user);
+
+    return user;
+}
 ```
