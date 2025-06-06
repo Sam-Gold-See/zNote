@@ -1274,28 +1274,366 @@ CAS（Compare And Swap）是一种无锁的原子操作，它在并发场景中�
 
 ### AQS 是什么？怎么实现的？
 
-`AQS` 全称是 `AbstractQueuedSynchronizer` 抽象队列同步器，是 Java 并发包（`java.util.concurrent`）中的一个基础框架，用于实现依赖先进先出等待队列的同步器
+`AQS` 全称是 `AbstractQueuedSynchronizer` 抽象队列同步器，是 Java 并发包（`java.util.concurrent`）中的一个基础框架，用于实现依赖先进先出等待队列的同步器，帮助开发者快速构建自定义同步工具
 
-核心作用是帮助实现线程的阻塞与唤醒机制，以及管理同步状态，从而实现**线程间的同步**
+`AQS` 是一个用于构建锁和同步器的抽象类，内部维护一个基于 `CLH` 的 `FIFO` 队列，并通过一个 volatile 状态变量 state 记录同步状态。它支持独占和共享两种锁模式，常见的 `ReentrantLock`、`Semaphore`、`CountDownLatch` 都是基于它实现的。我们只需要重写核心的 `tryAcquire` / `tryRelease` 等方法，就能快速实现自定义同步器。
 
 ### 乐观锁是什么？悲观锁是什么？应用场景分别是什么？
 
+**乐观锁**：假设并发冲突很少发生，不加锁，操作时先读取版本号，提交时检查是否被修改，每次操作都认为不会有其他线程同时操作，只有在更新数据时通过 **版本号或时间戳校验**
+
+**悲观锁**：假设并发冲突一定会发生，所以每次操作都要加锁，避免冲突；在访问资源前，先**加锁**，其它线程就不能访问这个资源，读写之间互斥，保证数据一致性，但性能较低
+
+| 方面      | 悲观锁                           | 乐观锁                         |
+| --------- | -------------------------------- | ------------------------------ |
+| 并发策略  | 保守，假设冲突一定发生           | 乐观，假设冲突极少发生         |
+| 实现方式  | 加锁机制（阻塞其他线程）         | 无锁机制 + 版本控制（`CAS`）   |
+| 性能开销  | 较大（阻塞、上下文切换）         | 较小（高并发下效率更高）       |
+| 适用场景  | 写多读少，冲突概率高             | 读多写少，冲突概率低           |
+| Java 代表 | `synchronized` / `ReentrantLock` | `Atomic` 类、`CAS`、版本字段等 |
+
+- 应用场景：
+
+  - 乐观锁适合场景：
+
+    - **读多写少**，冲突概率很低的业务；不要求强一致性，但希望性能更高的系统；前后端协作更新
+
+  - 悲观锁适合场景：
+
+    - **并发冲突频繁**，数据一致性要求高的系统；数据库层中进行行级加锁时常用
+
+乐观锁和悲观锁主要是应对并发场景下的数据一致性问题。悲观锁假设冲突一定发生，所以通过加锁机制来保证同步，比如 `synchronized` 和数据库的行级锁。而乐观锁假设冲突很少，用版本号或 `CAS` 实现非阻塞控制，性能更好。一般来说，读多写少场景用乐观锁，写多且冲突多的场景用悲观锁。
+
 ### 用数据库如何实现乐观锁？
+
+使用版本号（时间戳）实现乐观锁：
+
+1. 数据表中添加一个 `version` 字段，表示数据版本
+
+2. 查询数据时获取当前 `version` 值
+
+3. 更新数据时，将 `WHERE` 条件带上 `version`
+
+4. 如果 `version` 没有变，说明数据未被其他事务修改，更新成功
+
+5. 如果 `version` 变了，说明被其他事务修改，更新失败
 
 ### JMM 是什么？其中原子性、可见性、有序性问题分别是什么？
 
+JMM（`Java Memory Model`，**Java 内存模型**）是 Java 虚拟机中定义的一种 **多线程并发访问共享变量的行为规范**，它描述了：
+
+- 线程与主内容（共享内存）之间的交互规则；
+
+- 变量在内存中的可见性
+
+- 如何实现有序性与并发的正确性保障
+
+**JMM 的核心：主内存 & 工作内存模型**
+
+Java 中每个线程都有自己的**工作内存**（工作副本），主内存是共享的
+
+- 主内存：存储所有共享变量
+
+- 工作内存：线程私有的，用于存储主内存中变量的副本
+
+线程操作变量时：先从主内存读取到工作内存；在工作内存中进行计算和操作；最后同步回主内存
+
 ### JMM 如何保证的原子性、可见性、有序性？
+
+**JMM 三大特性**：原子性、可见性、有序性
+
+- **原子性**：一个操作要么全部执行，要么全部不执行，中间不会被线程切换打断
+
+  - 使用 `synchronized`；使用 `Lock`；使用原子类 `AtomicInteger`、 `AtomicLong`（底层`CAS`）
+
+- **可见性**：一个线程修改了共享变量的值，其他线程是否能立即看到变化
+
+  - `synchronized`释放锁会将修改同步到主内存；`volatile`对变量的读写直接操作主内存；使用`ReentrantLock` + `volatile` 也可以保证可见性
+
+- **有序性**：编译器和处理器为优化性能，可能会**对代码指令重排序**（前提是单线程语义不变），但在多线程环境中就可能出错
+
+  - `volatile`可以禁止指令重排序（内存屏障）;`synchronized`：内存屏障+互斥同步，天然有序性；使用`happens-before`原则（JMM 定义）
+
+`happens-before` 原则：
+
+- 程序顺序规则：一个线程中，代码的执行顺序按照代码顺序。
+
+- 监视器锁规则：解锁 `unlock` 先于加锁 `lock`。
+
+- `volatile` 变量规则：写 `volatile` 变量先于后续的读操作。
+
+- 线程启动规则：`Thread.start()` 先于线程中代码执行。
+
+- 线程终止规则：线程执行完毕的变量修改对 `join()` 可见。
+
+- 线程中断规则：调用 `interrupt()` 先于检测 `isInterrupted()`。
+
+- 对象构造规则：对象构造完成才可以看到其引用。
+
+- 传递性：`A happens-before B，B happens-before C ⇒ A happens-before C`。
+
+### ThreadLocal 是什么？有什么作用？
+
+`ThreadLocal` 是 Java 提供的一种线程本地存储工具，它让 **每个线程都拥有自己的独立变量副本**，互不干扰，用来解决多线程中 **变量隔离问题** 设计的，每个线程都可以通过 `ThreadLocal.set()` 设置自己的变量副本，其他线程无法访问
+
+工作原理：每个线程内部维护一个 `ThreadLocalMap` ，它的 key 是`ThreadLocal`实例，value 是对应的线程副本变量，每个线程有且仅有一个 `ThreadLocalMap`，每个 `ThreadLocal` 实例在该线程中作为 key 存储值，因此变量是**线程私有**的
+
+核心方法：
+
+```java
+// 设置线程本地变量
+threadLocal.set(value);
+
+// 获取线程本地变量
+T value = threadLocal.get();
+
+// 移除当前线程对应的变量
+threadLocal.remove();
+```
 
 ### 算法：多线程交替打印 0-100
 
+1. 使用 `synchronized + wait + notify` 交替等待唤醒
+
+```java
+public class AtomicPrinter {
+        private static int number = 0;
+    private static final int MAX = 100;
+    private static final Object lock = new Object();
+
+    public static void main(String[] args) {
+        Runnable printer = () -> {
+            while (true) {
+                synchronized (lock) {
+                    lock.notify();
+                    if (number <= MAX)
+                        System.out.println(Thread.currentThread().getName() + "->" + number++);
+                    else break;
+                    try {
+                        lock.wait();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        };
+
+        new Thread(printer, "T1").start();
+        new Thread(printer, "T2").start();
+    }
+}
+```
+
+2. 使用 `Lock + Condition` 控制
+
+```java
+public class AtomicPrinter {
+    private static int number = 0;
+    private static final int MAX = 100;
+    private static final Lock lock = new ReentrantLock();
+    private static final Condition condition = lock.newCondition();
+
+    public static void main(String[] args) {
+        Runnable printer = () -> {
+            while (true) {
+                lock.lock();
+                try {
+                    condition.signal();
+                    if (number <= MAX)
+                        System.out.println(Thread.currentThread().getName() + "->" + number++);
+                    else
+                        break;
+                    condition.await();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    lock.unlock();
+                }
+            }
+        };
+
+        new Thread(printer, "T1").start();
+        new Thread(printer, "T2").start();
+    }
+}
+```
+
 ### 算法：多线程交替打印 ABC
+
+1. 使用 `synchronized + wait + notifyAll` 交替等待唤醒
+
+```java
+public class AtomicPrinter {
+        private static final int LOOP = 10;
+    private static int state = 0;
+    private static final Object lock = new Object();
+
+    public static void main(String[] args) {
+        Runnable printerA = () -> print("A", 0);
+        Runnable printerB = () -> print("B", 1);
+        Runnable printerC = () -> print("C", 2);
+
+        new Thread(printerA).start();
+        new Thread(printerB).start();
+        new Thread(printerC).start();
+    }
+
+    private static void print(String name, int targetStats) {
+        for (int i = 0; i < LOOP; ) {
+            synchronized (lock) {
+                while (state % 3 != targetStats) {
+                    try {
+                        lock.wait();
+                    } catch (Exception e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                System.out.println(name);
+                state++;
+                i++;
+                lock.notifyAll();
+            }
+        }
+    }
+}
+```
+
+2. 使用 `Lock + Condition` 控制
+
+```java
+public class AtomicPrinter {
+        private static final int LOOP = 10;
+    private static final Lock lock = new ReentrantLock();
+    private static final Condition aCondition = lock.newCondition();
+    private static final Condition bCondition = lock.newCondition();
+    private static final Condition cCondition = lock.newCondition();
+    private static int state;
+
+    public static void main(String[] args) {
+        new Thread(() -> print("A", 0, aCondition, bCondition)).start();
+        new Thread(() -> print("B", 1, bCondition, cCondition)).start();
+        new Thread(() -> print("C", 2, cCondition, aCondition)).start();
+    }
+
+    private static void print(String name, int targetStats, Condition self, Condition next) {
+        for (int i = 0; i < LOOP; i++) {
+            lock.lock();
+            try {
+                while (state % 3 != targetStats)
+                    self.await();
+                System.out.println(name);
+                state++;
+                next.signal();
+            } catch (Exception e) {
+                Thread.currentThread().interrupt();
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+}
+```
 
 ### 多线程的上下切换是什么？
 
+**线程上下文切换**就是操作系统**保存当前线程状态**，然后**恢复另一个线程状态**的过程
+
+线程上下文 = 线程运行所需的全部状态信息，包括：
+
+- 程序计数器（PC，下一条指令地址）
+
+- CPU 寄存器
+
+- 栈指针
+
+- 内核堆栈
+
+- 内存映射
+
+- 调度信息（如优先级、状态）
+
 ### 什么时候会发生上下文切换？
+
+| 场景                     | 描述                                                      |
+| ------------------------ | --------------------------------------------------------- |
+| **时间片用完**           | 一个线程运行完分配的时间片，系统调度另一个线程            |
+| **线程阻塞**             | I/O、等待锁、sleep 等操作导致线程挂起，系统切换到别的线程 |
+| **线程优先级更高的就绪** | 比当前线程更高优先级的线程准备好了，触发切换              |
+| **多核负载均衡**         | 操作系统将线程从一个 CPU 核心迁移到另一个                 |
 
 ### 如何减少上下文切换？
 
+上下文切换代价高：
+
+1. 保存和恢复寄存器状态
+
+2. 刷新 CPU 缓存（Cache Miss）
+
+3. TLB 刷新（地址映射表）
+
+4. CPU 管理实践增加（调度时间）
+
+如何减少切换：
+
+| 方法                 | 说明                                                   |
+| -------------------- | ------------------------------------------------------ |
+| 限制线程数量         | 使用线程池，避免创建过多线程                           |
+| 使用协程（虚拟线程） | 轻量线程切换成本极低（如 Java 虚拟线程 / Golang 协程） |
+| 减少共享资源竞争     | 尽量无锁编程，或减少锁粒度、使用 `CAS` 等              |
+| 使用合适的并发模型   | 如 `Disruptor`、消息队列异步处理等                     |
+
 ### 原子类的定义、原理、适用场景？
 
+**原子类**（Atomic Classes）是 Java 提供的一组用于实现原子性操作的工具类，主要依赖底层的 `CAS` 机制实现
+
+| 类型               | 类名                           | 说明                         |
+| ------------------ | ------------------------------ | ---------------------------- |
+| 原子基本类型       | `AtomicInteger`、`AtomicLong`  | 原子地更新 int / long 值     |
+| 原子引用类型       | `AtomicReference<T>`           | 原子地更新对象引用           |
+| 原子数组类型       | `AtomicIntegerArray` 等        | 原子操作数组元素             |
+| 原子对象字段更新器 | `AtomicIntegerFieldUpdater`    | 原子地更新对象中的某个字段   |
+| 高级累加器         | `LongAdder`、`LongAccumulator` | 高并发场景下优化性能的累加器 |
+
+核心实现原理是：`CAS` + `volatile` + `Unsafe`
+
+- `CAS`：CAS 是一种乐观锁思想，通过比较内存中的值是否等于预期值，来决定是否更新
+
+- `volatile`：修饰原子类内部的变量，保证多线程之间变量的内存可见性
+
+- `Unsafe`：底层使用 `sun.misc.Unsafe` 直接操作内存进行原子性操作
+
+优缺点：
+
+- 优点：
+
+  - **无锁并发**：线程安全但不使用 `synchronized`，优化性能
+
+  - **低开销**：避免上下文切换和阻塞
+
+  - **底层硬件级别原子操作**：CPU 提供的原子指令支持
+
+- 缺点：
+
+  - **操作不复合**：仅适用于单变量原子操作
+
+  - **自旋失败会重试**：高并发冲突严重时，CAS 重试消耗较高
+
+  - **不易拓展维护**：业务逻辑复杂时代码可读性差
+
 ### Unsafe 类是什么？
+
+`Unsafe` 类是 Java 提供的一个底层工具类，全名为：`sun.misc.Unsafe`，它提供了操作内存、线程调度、`CAS` 操作等一系列底层方法，可以实现许多高性能组件的核心逻辑，是 Java 并发编程的基石之一。
+
+该类允许我们：
+
+- 直接操作内存
+
+- 实现底层 CAS 操作
+
+- 操作对象字段的偏移
+
+- 控制线程挂起与恢复
+
+- 实现对象实例的无参构造
+
+**官方默认不推荐直接使用**，只能通过反射获取其实例
