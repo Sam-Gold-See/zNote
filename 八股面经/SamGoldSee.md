@@ -3598,22 +3598,144 @@ SYN 攻击（SYN Flood Attack）是一种常见的拒绝服务（DoS）攻击形
 
 ### 讲讲归并排序
 
+归并排序是一种 **分治思想** 实现的排序算法
+
+核心思想：**将数组递归分成两个子数组，分别排序，再合并成一个有序数组**，属于 **稳定排序算法**，即相同元素的相对顺序不会被打乱，时间复杂度是 `O(nlogn)`，空间复杂度是 `O(n)`。
+
+```java
+public class MergeSort {
+    public static void mergeSort(int[] arr, int left, int right) {
+        if (left >= right) return;
+        int mid = (left + right) / 2;
+
+        mergeSort(arr, left, mid);       // 排左边
+        mergeSort(arr, mid + 1, right);  // 排右边
+
+        merge(arr, left, mid, right);    // 合并
+    }
+
+    private static void merge(int[] arr, int left, int mid, int right) {
+        int[] temp = new int[right - left + 1]; // 临时数组
+        int i = left, j = mid + 1, k = 0;
+
+        while (i <= mid && j <= right) {
+            temp[k++] = arr[i] <= arr[j] ? arr[i++] : arr[j++];
+        }
+
+        while (i <= mid) temp[k++] = arr[i++];
+        while (j <= right) temp[k++] = arr[j++];
+
+        // 拷贝回原数组
+        for (int l = 0; l < temp.length; l++) {
+            arr[left + l] = temp[l];
+        }
+    }
+}
+```
+
 ### 讲讲快速排序
 
-### 快速排序的时间复杂度由什么影响
+核心思路：选一个基准数，把比它小的放左边，比它大的放右边，然后**递归排序左右两部分**，属于**不稳定排序算法**，最好和平均时间复杂度为`O(nlogn)`，最坏时间复杂度为`O(n^2)`（当数据基本有序或重复元素很多时）。
+
+```java
+public class QuickSort {
+    public static void quickSort(int[] arr, int left, int right) {
+        if (left >= right) return;
+
+        int pivotIndex = partition(arr, left, right); // 基准位置
+        quickSort(arr, left, pivotIndex - 1);         // 排左边
+        quickSort(arr, pivotIndex + 1, right);        // 排右边
+    }
+
+    private static int partition(int[] arr, int left, int right) {
+        int pivot = arr[left];  // 选左边第一个数作为基准
+        int i = left, j = right;
+
+        while (i < j) {
+            while (i < j && arr[j] >= pivot) j--;
+            while (i < j && arr[i] <= pivot) i++;
+
+            if (i < j) swap(arr, i, j);
+        }
+
+        swap(arr, left, i); // 把基准换到中间
+        return i;
+    }
+
+    private static void swap(int[] arr, int i, int j) {
+        int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
+    }
+}
+```
 
 ### 如何用两个栈模拟一个队列
+
+一个 `inStack` 一个 `outStack`，每次 `push` 进队列的时候，放入 `inStack`；`pop` 的时候，先看看 `outStack` 是否为空，若不为空，则直接 `pop` outStack；否则，将 `inStack` 所有数据 `pop` 出来放入 `outStack`，再从 `outStack` 中 `pop` 出来。
 
 ## 场景题
 
 ### 如何预估接口上线后的 QPS
 
+1. 业务逻辑预估法（新接口-无历史调用数据）：使用业务指标进行估算
+
+2. 日志/压测数据分析法：通过 **历史日志或监控** 计算
+
+3. 压力测试预估法：使用压测工具 `JMeter` `wrk` `Locust` `ab`进行模拟请求
+
+4. 结合系统架构估算系统承载 QPS
+
 ### 如何预估/回答接口本身能抗住多少 QPS
+
+预估
+
+```
+理论最大 QPS ≈ 并发数 / 接口耗时
+
+并发数 ≈ 线程数 * 实例数 * 利用率（70%）
+```
 
 ### 订单<未支付&到期>关闭如何实现
 
+1. **延迟队列**：使用 RabbitMQ/Redis 等 MQ
+
+   - 创建订单时发送一个延迟消息 TTL 到 MQ
+
+   - 订单支付成功则消费掉这条消息
+
+   - 若消息未被消费，过期后由私信队列接收并出发关闭订单逻辑
+
+2. **数据库轮询**：使用定时任务
+
+   - 每隔一段时间定时执行 SQL 查询
+
 ### 1 亿个数据取出最大前 100 个
+
+优先队列/小根堆，维护该优先队列的大小为 100
+
+分布式环境则各个机器维护自己的优先队列，然后合并排序
 
 ### 大文件排序
 
+核心思路：归并排序
+
+1. 分块排序：将大文件分成多个小文件块，每块读入内存，使用快排/归并排序 排序好
+
+2. 多路归并：将多个已排序的小文件，**使用堆进行多路归并**，合并成一个最终有序大文件
+
 ### Redis 缓存与 MySQL 数据一致性
+
+- 常见的缓存与数据库不一致的场景：
+
+  - 缓存未更新/脏数据：数据库更新了，缓存没更新，读取的依旧是旧数据
+
+  - 缓存提前失效：缓存被淘汰、过期，数据库没变下次读取触发缓存穿透
+
+  - 并发下写-读穿插：一个线程更新数据库并删除缓存，另一个线程刚好读取缓存为空，查询数据库并写入旧值，覆盖了最新值（**缓存击穿与写回问题**）
+
+- 常见策略：
+
+  - 先删缓存，再更新数据库（不推荐）：并发下会出现缓存被删、旧数据重新写入问题
+
+  - 先更新数据库，再删缓存：能避免写后被旧数据覆盖的情况；**删除缓存必须是强一致的操作**
+
+  - 延迟双删：避免极小概率下并发读写导致旧数据被重新写入缓存
