@@ -2632,33 +2632,414 @@ Redis 的主从同步分为两个阶段：
 
 ## Spring
 
-### 解释一下 IoC 和 AOP？IoC 的好处？
+### 解释一下 IoC？IoC 的好处？
+
+- **IoC**控制反转：
+
+IoC 是一种 **设计思想**，核心是将对象的创建和依赖管理交由容器（如 Spring）来完成，而不是在代码中主动去创建或查找依赖对象
+
+实现方式（依赖注入 DI）：构造器注入；Setter 方法注入；字段注入
+
+优点：**解耦合**，类之间通过接口与注入解耦；**提高可维护性、可测试性**；**提高灵活性**；**统一管理对象生命周期**
 
 ### AOP 的应用场景？实现原理？
 
+- **AOP**面向切面编程：AOP 是一种编程思想，它将与核心业务无关的功能（横切关注点）抽取出来，如：日志、权限、事务、监控等，将这些功能集中定义，再在需要时织入到目标方法中
+
+| 名称      | 解释                                     |
+| --------- | ---------------------------------------- |
+| JoinPoint | 可插入切面的点（方法调用、异常抛出等）   |
+| Pointcut  | 选择哪些 JoinPoint 应被织入              |
+| Advice    | 实际的增强逻辑（如前置、后置、异常等）   |
+| Aspect    | 切面类，封装 pointcut 和 advice          |
+| Weaving   | 把切面逻辑织入目标对象的过程（动态代理） |
+
+本质上是通过**动态代理技术**来实现的，拦截方法调用，插入增强逻辑
+
+两种实现方式：
+
+| 实现方式           | 依赖条件             | 底层原理                                        |
+| ------------------ | -------------------- | ----------------------------------------------- |
+| **JDK 动态代理**   | 目标对象实现了接口   | `java.lang.reflect.Proxy`                       |
+| **CGLIB 动态代理** | 目标对象没有实现接口 | 继承目标类并重写方法（底层使用 ASM 字节码生成） |
+
 ### Spring 事务的实现原理？
+
+Spring 事务的实现原理是基于 **AOP + 数据库事务管理器**的机制，通过在方法执行前后自动开启、提交、回滚事务来实现
+
+使用 `@Transactional` 注解时，Spring 会自动在运行时为目标方法创建 **代理对象**，实现事务的管理
+
+核心流程：
+
+1. 解析 `@Transactional` 注解
+
+2. 创建事务代理对象
+
+3. 事务拦截器界入
+
+4. 执行事务逻辑
+
+Spring 事务的实现是基于 AOP 动态代理机制，通过拦截方法调用，在其前后自动执行事务的开启、提交和回滚逻辑，由 `TransactionInterceptor` 调用事务管理器（如 DataSourceTransactionManager）来完成事务控制。
 
 ### SpringBoot 自动装配原理？
 
+Spring Boot 自动装配 是其最核心、最具代表性的特性之一。它的设计理念是：**约定优于配置**，让开发者专注于业务开发，而不是繁琐的配置。
+
+**根据类路径下的 jar 包、类、配置文件等自动判断并注入相应的 Bean 和 配置**，大大减少了开发者的配置工作量
+
+Spring Boot 的自动装配本质上是通过 `@EnableAutoConfiguration` 注解加载 `spring.factories` 中声明的自动配置类，并根据条件注解判断是否装配对应的 Bean，从而实现“按需自动配置”。
+
 ### SpringBoot 的启动流程？
+
+Spring Boot 启动流程是：**构建应用** → **初始化环境** → **创建容器** → **自动装配** → **加载 Bean** → **启动容器** → **发布事件**，其核心在于 `@EnableAutoConfiguration` 所驱动的**自动配置机制**。
 
 ### SpringBoot 如何优雅停机
 
+Spring Boot **的优雅停机**（Graceful Shutdown）指的是在应用关闭时，**等待当前处理中的请求执行完毕后再释放资源、关闭容器**，避免服务中断或数据丢失。
+
+优点：防止接口调用终端、异常失败；避免数据库操作未完成导致脏数据；在容器下服务下线时避免瞬间连接拒绝；等待线程池、任务队列、消息队列等处理完任务
+
+内置支持优雅停机
+
+`application.yml`
+
+```yaml
+server:
+  shutdown: graceful
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+```
+
+Spring Boot 2.3+ 支持原生优雅停机，只需设置 `server.shutdown=graceful`。也可以配合 `@PreDestroy` / `DisposableBean` 等钩子方法自定义实现，可确保线程池、连接池、消息消费等资源干净退出，避免业务数据或请求中断。
+
 ### Spring 常见注解有哪些？
+
+- 组件注册相关注解
+
+| 注解              | 作用说明                                             |
+| ----------------- | ---------------------------------------------------- |
+| `@Component`      | 将类标记为 Spring 容器中的组件                       |
+| `@Service`        | 标记业务逻辑层组件（本质还是 @Component）            |
+| `@Repository`     | 标记数据访问层组件，具备自动异常转换功能             |
+| `@Controller`     | 标记控制层组件，用于 Spring MVC                      |
+| `@RestController` | 等价于 `@Controller + @ResponseBody`，用于 REST 接口 |
+| `@Configuration`  | 声明这是一个配置类，相当于传统 XML 配置              |
+| `@Bean`           | 声明一个 Bean 实例由当前方法创建并交给 Spring 管理   |
+| `@ComponentScan`  | 指定包路径，自动扫描并注册组件                       |
+
+- 依赖注入相关注解
+
+| 注解         | 说明                                                 |
+| ------------ | ---------------------------------------------------- |
+| `@Autowired` | 按类型自动注入 Bean（可加 `@Qualifier` 指定名称）    |
+| `@Qualifier` | 与 `@Autowired` 配合，指定注入具体的 Bean 名称       |
+| `@Resource`  | 按名称注入（来自 JSR-250）                           |
+| `@Inject`    | 来自 JSR-330，功能类似于 `@Autowired`                |
+| `@Value`     | 注入配置项或常量值，例如：`@Value("${server.port}")` |
+
+- 作用域与生命周期
+
+| 注解             | 功能                                               |
+| ---------------- | -------------------------------------------------- |
+| `@Scope`         | 指定 Bean 的作用域（`singleton`, `prototype`, 等） |
+| `@PostConstruct` | 方法在 Bean 初始化后执行（初始化钩子）             |
+| `@PreDestroy`    | 方法在 Bean 销毁前执行（销毁钩子）                 |
+
+- AOP 相关注解
+
+| 注解                      | 说明                           |
+| ------------------------- | ------------------------------ |
+| `@Aspect`                 | 声明一个切面类                 |
+| `@Before`                 | 方法执行前增强                 |
+| `@After`                  | 方法执行后增强（无论是否异常） |
+| `@AfterReturning`         | 方法正常返回后增强             |
+| `@AfterThrowing`          | 方法抛异常时增强               |
+| `@Around`                 | 环绕增强，方法执行前后都可增强 |
+| `@EnableAspectJAutoProxy` | 开启基于注解的 AOP 功能        |
+
+- 事务管理
+
+| 注解                           | 功能                                 |
+| ------------------------------ | ------------------------------------ |
+| `@Transactional`               | 声明事务边界，支持方法级事务管理     |
+| `@EnableTransactionManagement` | 开启注解式事务支持（通常用于配置类） |
+
+- 配置注解
+
+| 注解                       | 说明                                                                |
+| -------------------------- | ------------------------------------------------------------------- |
+| `@SpringBootApplication`   | 相当于 `@Configuration + @EnableAutoConfiguration + @ComponentScan` |
+| `@EnableAutoConfiguration` | 启动自动配置功能                                                    |
+| `@ConfigurationProperties` | 将配置文件的属性注入到类中                                          |
+| `@PropertySource`          | 加载外部 properties/yml 文件                                        |
+| `@Import`                  | 导入其他配置类或组件                                                |
+
+- Web 开发相关
+
+| 注解                                    | 功能说明                             |
+| --------------------------------------- | ------------------------------------ |
+| `@RequestMapping`                       | 映射 HTTP 请求路径，可用在类和方法上 |
+| `@GetMapping` (`Post`、`Put`、`Delete`) | 请求方式映射                         |
+| `@RequestParam`                         | 绑定请求参数                         |
+| `@PathVariable`                         | 绑定路径参数                         |
+| `@RequestBody`                          | 接收请求体 JSON 并转换为对象         |
+| `@ResponseBody`                         | 返回对象转为 JSON 响应体             |
+| `@ModelAttribute`                       | 绑定表单数据到对象，并添加到模型中   |
+| `@SessionAttributes`                    | 将模型中的属性保存到 Session 中      |
+
+- 其他注解
+
+| 注解                | 用途                                 |
+| ------------------- | ------------------------------------ |
+| `@Lazy`             | 延迟加载 Bean                        |
+| `@Primary`          | 在多 Bean 冲突时，优先注入该 Bean    |
+| `@Conditional`      | 条件注入（与 `@Configuration` 配合） |
+| `@EnableScheduling` | 开启定时任务功能                     |
+| `@Scheduled`        | 声明定时任务方法                     |
+| `@Async`            | 声明异步执行的方法                   |
+| `@EnableAsync`      | 开启异步支持                         |
 
 ### Spring Bean 的作用域有哪些？
 
+一共支持 **6 种作用域**：
+
+常用作用域（核心模块种支持）
+
+| 作用域名            | 描述                                                                           |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `singleton`（默认） | 整个 Spring 容器中只创建一个该 Bean 实例。**应用场景**：大部分服务、工具类组件 |
+| `prototype`         | 每次获取都创建一个新的 Bean 实例。**应用场景**：状态不共享的对象               |
+
+Web 项目作用域（仅在 WebApplicationContext 中支持）
+
+| 作用域名      | 描述                                                                           |
+| ------------- | ------------------------------------------------------------------------------ |
+| `request`     | 每次 HTTP 请求都会创建一个新的 Bean，**请求结束即销毁**。                      |
+| `session`     | 每个 HTTP Session 创建一个 Bean，**Session 结束即销毁**。                      |
+| `application` | 每个 ServletContext（Web 应用）范围内一个 Bean，类似于单例，但局限于当前应用。 |
+| `websocket`   | 每个 WebSocket 会话中创建一个 Bean，**仅在使用 Spring WebSocket 时有效**。     |
+
 ### Spring MVC 的执行流程？
+
+```
+1. 用户发送请求
+        ↓
+2. DispatcherServlet（前端控制器）接收请求
+        ↓
+3. HandlerMapping 查找匹配的 Handler（Controller 方法）
+        ↓
+4. HandlerAdapter 调用对应的 Controller 方法
+        ↓
+5. Controller 处理业务逻辑，返回 ModelAndView 或数据
+        ↓
+6. ViewResolver 解析视图（如果是页面）
+        ↓
+7. DispatcherServlet 渲染视图或返回数据（JSON/XML）
+        ↓
+8. 响应返回给客户端
+```
 
 ### Spring 中用到了哪些设计模式？
 
+- 创建型设计模式
+
+  1. 工厂模式：创建对象的逻辑由工厂统一管理，屏蔽具体类的创建过程
+
+     - `BeanFactory`、`ApplicationContext`：创建和管理 Bean 实例
+
+     - `FactoryBean` 接口：允许自定义 Bean 的创建逻辑
+
+- 结构性设计模式
+
+  2. 代理模式：为其他对象提供一种代理以控制对这个对象的访问
+
+     - **AOP（面向切面编程）**实现原理：基于 JDK 动态代理 / CGLIB 字节码增强
+
+     - `@Transactional` `@Async` `@Cacheable` 等底层以来代理机制
+
+  3. 适配器模式：将不兼容的接口转化为兼容的接口
+
+     - `HandlerAdapter`：将不同类型的处理器统一适配为可执行的形式
+
+     - `WebMvcConfigurer`：适配用户定义的拓展逻辑
+
+  4. 装饰器模式：在不改变对象结构的情况下，动态地为其增加功能
+
+     - `HttpServletRequestWrapper` `HttpServletReponseWrapper`：对请求/响应进行增强
+
+     - Bean 的包装（如 AOP 增强逻辑）也可以理解为装饰器
+
+- 行为型设计模式
+
+  5. 观察者模式：对象之间建立一种依赖关系，一个对象状态变化时通知所有依赖对象
+
+     - `ApplicationEvent` + `ApplicationListener`：Spring 的事件发布机制
+
+     - `@EventListener` 注解简化监听器定义
+
+  6. 模板方式模式：定义算法的骨架，将部分逻辑延迟到子类中实现
+
+     - `JdbcTemplate` `RestTemplate` `RedisTemplate`：定义固定执行流程、暴露钩子方法给用户
+
+     - `AbstractApplicationContext`：启动流程
+
+  7. 策略模式：定义一系列算法，并使它们可以互换使用
+
+     - `Resource` 接口和 `FileSystemResource` `ClassPathResource` 等实现
+
+     - `ApplicationContext` 自动根据类型选择合适的策略实现类
+
+  8. 责任链模式：请求在链中传递，每个节点决定是否处理
+
+     - Spring MVC 的 `HandlerInterceptor` `Filter`
+
+     - Spring Security 的过滤器链
+
+  9. 单例模式：保证一个类只有一个实例，并提供全局访问点
+
+     - Spring Bean 默认单例模式（`singleton` 作用域）
+
+  10. 原型模式：创建重复的对象，且每个对象都是新的
+
+      - 设置 Bean 的作用域为`prototype`时，Spring 每次注入时都会创建新实例
+
+| 模式     | Spring 中的典型应用        |
+| -------- | -------------------------- |
+| 工厂     | BeanFactory、FactoryBean   |
+| 单例     | 默认 Bean Scope            |
+| 原型     | prototype Scope            |
+| 代理     | AOP、事务                  |
+| 模板方法 | JdbcTemplate、RestTemplate |
+| 策略     | 消息转换器、资源加载器     |
+| 观察者   | 事件监听                   |
+| 责任链   | 拦截器、过滤器链           |
+| 适配器   | HandlerAdapter             |
+| 装饰器   | RequestWrapper、增强对象   |
+
 ### 循环依赖问题是什么？三级缓存是什么？
+
+循环依赖是指：在 Spring 创建 Bean 的过程中，多个 Bean 相互依赖，导致出现**循环引用**的问题
+
+三级缓存结构：
+
+| 缓存级别 | 字段名称                | 描述                                        |
+| -------- | ----------------------- | ------------------------------------------- |
+| 一级缓存 | `singletonObjects`      | 完成初始化的 Bean（真正可用的）             |
+| 二级缓存 | `earlySingletonObjects` | 提前暴露的 Bean（未完成依赖注入）           |
+| 三级缓存 | `singletonFactories`    | Bean 工厂，用于创建早期引用的 ObjectFactory |
 
 ### 三级缓存怎么解决循环依赖问题？
 
+1. A 创建过程开始：实例化 A（执行构造函数），此时还没有注入属性
+
+2. 将 A 的 ObjectFactory 提前暴露到 **三级缓存**
+
+3. A 注入 B，触发创建 B
+
+4. B 构造完成后也尝试注入 A：发现 A 已经有一个 ObjectFactory，就从中提前拿出**早期引用**（加入到二级缓存）
+
+5. B 注入 A 成功， B 创建完成
+
+6. 回过头 A 注入 B，A 创建完成
+
+7. 最后移除三级缓存，只留下一级缓存中真正完成生命周期的 Bean
+
 ### @Autowired 和 @Resource 的区别？
 
+都用于 **自动注入依赖对象**，但他们的实现机制、默认行为和注入优先级不同
+
+1. 注解来源
+
+| 注解         | 来源                                                             |
+| ------------ | ---------------------------------------------------------------- |
+| `@Autowired` | Spring 提供，来自 `org.springframework.beans.factory.annotation` |
+| `@Resource`  | JDK 提供，来自 `javax.annotation`（JSR-250 标准）                |
+
+2. 默认注入方式
+
+| 注解         | 默认注入方式                                |
+| ------------ | ------------------------------------------- |
+| `@Autowired` | **按类型（ByType）** 优先                   |
+| `@Resource`  | **按名称（ByName）** 优先（找不到再按类型） |
+
+3. 是否支持 required 属性
+
+| 注解         | 是否支持 `required=false`    |
+| ------------ | ---------------------------- |
+| `@Autowired` | ✅ 支持：默认 `true`，可配置 |
+| `@Resource`  | ❌ 不支持，会直接报错        |
+
+4. 作用范围
+
+| 注解         | 可用位置                   |
+| ------------ | -------------------------- |
+| `@Autowired` | 构造器、方法、字段         |
+| `@Resource`  | 方法、字段（不推荐构造器） |
+
+5. 依赖对象的名称指定方式
+
+- `@Autowired` 搭配 `@Qualifier("beanName")` 实现按名称注入
+
+- `@Resource(name = "beanName")` 直接指定 bean 名称
+
+6. 多个 Bean 类型冲突时的处理方式
+
+- `@Autowired` 会优先使用 `@Primary` 或结合 `@Qualifier` 注入
+
+- `@Resource` 会优先通过字段名匹配 Bean 名称
+
 ### 事务失效的原因有哪些？
+
+事务在 Spring 中是通过 **声明式事务**（基于 AOP） 实现的，因此事务失效一般不是数据库本身的问题，而是由于 **Spring 事务管理机制配置或使用不当** 导致的。
+
+1. 调用者与被调用者在同一个类中，方法内部自调用
+
+Spring AOP 是基于 **代理对象** 实现的，**对象内部方法调用不会经过代理对象**，不会触发事务拦截器。
+
+2. 方法不是 `public` 修饰的
+
+Spring AOP 默认只会对 `public` 方法进行事务增强，`private/protected/default` 方法不生效。
+
+3. 没有被 Spring 管理的类或对象调用了实物方法
+
+Spring 的事务注解依赖于 Spring 的容器和代理机制，如果该类未被容器管理，则事务不会生效。
+
+4. `@Transactional` 注解放在了接口或抽象类上
+
+只有接口代理（JDK）或类代理（CGLIB）上真正执行的方法才会生效。
+
+5. 抛出了异常但没有被识别为回滚条件
+
+Spring 事务 **只对运行时异常**（`RuntimeException`）和 `Error` 进行回滚。
+
+6. 数据库引擎不支持事务
+
+MySQL 使用了 `MyISAM` 存储引擎，它不支持事务。
+
+7. 数据库连接被自动提交
+
+某些情况（手动 JDBC 操作或配置不当）会开启自动提交，导致事务失效
+
+8. 异步方法内的事务不生效
+
+`@Async` 方法会在 **独立线程中执行**，事务上下文无法传递
+
+9. 嵌套调用事务传播属性设置不当
+
+外层方法未加事务，内层方法添加事务，但抛异常也不会回滚外层逻辑
+
+## RabbitMQ
+
+### RabbitMQ 的基本组件有哪些？Exchange、Queue、Binding 分别是什么？
+
+### RabbitMQ 支持哪些 Exchange 类型？各自适用场景是什么？
+
+### 如何保证消息消费的幂等性
+
+### 何谓消息确认（ACK/NACK）与持久化？如何避免消息丢史？
+
+### 如何利用死信队列（DLX）处理消息积压或消费失败？
 
 ## 计算机网络
 
