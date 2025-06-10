@@ -3947,6 +3947,8 @@ Maven 的作用：
 
 ### Maven 构建项目
 
+#### Maven 项目结构
+
 Maven 工程目录结构：
 
 ![Maven工程目录结构](img/Java_21.png)
@@ -3958,7 +3960,7 @@ Maven 工程目录结构：
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns="http://maven.apache.org/POM/4.0.0
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
@@ -3979,6 +3981,14 @@ Maven 工程目录结构：
 
 </project>
 ```
+
+#### Maven 项目的 Archetype
+
+**Archetype**：Maven 项目的模板，可以快速创建 Maven 项目
+
+Archetype 是 Maven 工程的模板工具包，一个 Archetype 定义了要做的相同类型的事情的初始样式或模型。用于快速创建 Maven
+
+常用的是 Spring 携带的引导式`Archetype`（IDEA），除此之外就是 `maven-archetype-quickstart`，定义了一个基本的 Maven 项目结构，包括：`junit`依声明的`pom.xml`、`src/main/java`主代码目录及一个名为`App.java`的类、`src/test/java`测试代码目录及一个名为`AppTest.java`的测试用例。
 
 #### Maven 项目构建命令
 
