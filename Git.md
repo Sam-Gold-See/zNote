@@ -132,6 +132,16 @@ Git 工作目录对于文件的**修改** （增加、删除、更新）会存�
 
 7. 使用`git commit --amend --date="YYYY-MM-DDTHH:MM:SS+08:00"`
 
+### gitignore 文件语法
+
+| 语法        | 作用                                 | 实例                  |
+| ----------- | ------------------------------------ | --------------------- |
+| `*.log`     | 忽略所有 `.log` 文件                 | `error.log`           |
+| `/temp/`    | 忽略根目录下的 `temp` 目录及其子目录 | `/temp/test.txt`      |
+| `temp/`     | 忽略所有层级的`temp`目录             | `temp/test.txt`       |
+| `!temp.txt` | 不忽略 `temp.txt` 文件（例外规则）   | `temp.txt`            |
+| `# 注释`    | 添加注释                             | `# 忽略所有.txt 文件` |
+
 ### Git 分支管理
 
 1. `git branch`：查看本地分支
