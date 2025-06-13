@@ -7530,3 +7530,81 @@ Spring 允许我们自定义重试次数耗尽后的消息处理策略，这个�
 - 唯一消息 ID
 
 - 业务状态判断
+
+## Spring Cloud
+
+### 分布式基础
+
+![分布式基础](img/Java_36.png)
+
+#### 单体架构模式
+
+![单体架构模式](img/Java_37.png)
+
+- 域名
+
+- IP
+
+- 节点：服务器
+
+- 应用：服务
+
+- 数据库
+
+#### 集群架构模式
+
+![集群架构模式](img/Java_38.png)
+
+- 副本：对节点做的复制
+
+- 集群
+
+- 路由：网关完成请求的路由功能
+
+- 负载均衡：根据负载情况，将请求分发到不同的节点
+
+- 扩缩容：增减集群中的副本数量
+
+#### 分布式架构
+
+![分布式架构](img/Java_39.png)
+
+- 单点故障：某个节点出现故障，整个系统不可用
+
+- 远程调用`Remote Procedure Call`
+
+- 注册中心：
+
+  - 服务发现：远程调用之前，需要发现服务的位置，可使用负载均衡思想
+
+  - 服务注册：感知服务的上下线消息
+
+- 配置中心：统一管理所有配置、推送配置的变更
+
+- 服务熔断：为了避免服务雪崩，在远程调用期间，若卡顿，则快速失败
+
+  - 服务雪崩：一个微服务的故障传播到了整个调用链，进而影响了整个服务器，进而影响了服务器的其他微服务，最终导致整个应用不可用
+
+- 分布式事务：多个服务之间要保证数据一致性，需要使用分布式事务
+
+#### 分布式架构技术
+
+- 微服务：SpringBoot
+
+- 注册中心/配置中心：Spring Cloud Alibaba Nacos
+
+- 网关：Nginx + Spring Cloud Gateway
+
+- 远程调用：Spring Cloud OpenFeign
+
+- 服务熔断：Spring Cloud Alibaba Sentinel
+
+- 分布式事务：Spring Cloud Alibaba Seata
+
+### 项目工程
+
+![项目工程结构图](img/Java_40.png)
+
+使用`pom(Spring-Demo)`来管理`SpringBoot`、`SpringCloud`、`SpringCloudAlibaba`的版本，`pom(Services)`继承于`pom(Spring-Demo)`来管理各个子服务的版本，如`Nacos`等
+
+### Nacos - 注册中心、配置中心
