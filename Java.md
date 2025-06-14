@@ -7608,3 +7608,66 @@ Spring 允许我们自定义重试次数耗尽后的消息处理策略，这个�
 使用`pom(Spring-Demo)`来管理`SpringBoot`、`SpringCloud`、`SpringCloudAlibaba`的版本，`pom(Services)`继承于`pom(Spring-Demo)`来管理各个子服务的版本，如`Nacos`等
 
 ### Nacos - 注册中心、配置中心
+
+使用 `startup.cmd -m standalone` 启动单机模式的 Nacos 服务器，默认端口为 8848
+
+#### 服务注册
+
+1. 启动微服务：SpringBoot 微服务 web 项目启动
+
+2. 引入服务发现依赖：`spring-cloud-starter-alibaba-nacos-discovery`、
+
+3. 配置`Nacos`地址：`spring.cloud.nacos.server-addr=127.0.0.1:8848`
+
+4. 查看服务是否注册成功：`http://127.0.0.1:8848/nacos`
+
+5. 在微服务配置中新增多个实例（运行配置程序参数设置新端口）模拟微服务集群
+
+#### 服务发现
+
+1. 开启服务发现功能：`@EnableDiscoveryClient`标注在启动类上
+
+2. 测试服务发现 API：`DiscoveryClient`
+
+```java
+@SpringBootTest
+public class DiscoveryTest {
+
+    @Resource
+    DiscoveryClient discoveryClient;
+
+    @Test
+    void discoveryClientTest() {
+        for (String service : discoveryClient.getServices()) {
+            System.out.println("service = " + service);
+            // 获取 ip + port
+            List<ServiceInstance> instances = discoveryClient.getInstances(service);
+            for (ServiceInstance instance : instances) {
+                System.out.println("ip:" + instance.getHost() + ";port:" + instance.getPort());
+            }
+        }
+    }
+}
+```
+
+3. 测试服务发现 API：`NacosServiceDiscovery`
+
+```java
+@SpringBootTest
+public class DiscoveryTest {
+
+    @Resource
+    NacosServiceDiscovery nacosServiceDiscovery;
+
+    @Test
+    void nacosServiceDiscoveryTest() throws NacosException {
+        for (String service : nacosServiceDiscovery.getServices()) {
+            System.out.println("service = " + service);
+            List<ServiceInstance> instances = nacosServiceDiscovery.getInstances(service);
+            for (ServiceInstance instance : instances) {
+                System.out.println("ip:" + instance.getHost() + ";port:" + instance.getPort());
+            }
+        }
+    }
+}
+```
