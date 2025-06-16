@@ -7671,3 +7671,54 @@ public class DiscoveryTest {
     }
 }
 ```
+
+#### 远程调用
+
+**基本流程**：
+
+![远程调用流程图](img/Java_41.png)
+
+**下单场景**：
+
+![下单场景流程图](img/Java_42.png)
+
+在项目中`Services`层，新建同级模块`Model`层，专门用于存储`Bean`等多个微服务之间可能共享的模型类，然后在`pom(Services)`中对于`Model`进行依赖引入
+
+**远程调用基本实现**：
+
+```java
+    private Product getProductFromRemote(Long productId) {
+        // 1. 获取到商品服务所在所有机器ip + port
+        List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
+
+        ServiceInstance instance = instances.get(0);
+        // 远程URL
+        String url = "https://" + instance.getHost() + ":" + instance.getPort() + "/product/" + productId;
+        log.info("远程请求路径{}", url);
+        // 2. 给远程发送请求
+        return restTemplate.getForObject(url, Product.class);
+    }
+```
+
+**远程调用负载均衡**：
+
+1. 引入负载均衡依赖：`spring-cloud-starter-loadbalancer`
+
+2. 调用负载均衡 API：`LoadBalancerClient`
+
+3. 远程调用核心：`RestTemplate`
+
+4. 负载均衡调用：`@LoadBalanced`
+
+```java
+    // 完成负载均衡请求
+    private Product getProductFromRemoteWithBalance(Long productId) {
+        // 1. 获取到商品服务所在所有机器ip + port
+        ServiceInstance choose = loadBalancerClient.choose("service-product");
+        // 远程URL
+        String url = "http://" + choose.getHost() + ":" + choose.getPort() + "/product/" + productId;
+        log.info("负载均衡远程请求路径{}", url);
+        // 2. 给远程发送请求
+        return restTemplate.getForObject(url, Product.class);
+    }
+```
