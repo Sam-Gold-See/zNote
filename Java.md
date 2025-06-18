@@ -7687,6 +7687,17 @@ public class DiscoveryTest {
 **远程调用基本实现**：
 
 ```java
+@Configuration
+public class ProductServiceConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+```
+
+```java
     private Product getProductFromRemote(Long productId) {
         // 1. 获取到商品服务所在所有机器ip + port
         List<ServiceInstance> instances = discoveryClient.getInstances("service-product");
@@ -7706,10 +7717,6 @@ public class DiscoveryTest {
 
 2. 调用负载均衡 API：`LoadBalancerClient`
 
-3. 远程调用核心：`RestTemplate`
-
-4. 负载均衡调用：`@LoadBalanced`
-
 ```java
     // 完成负载均衡请求
     private Product getProductFromRemoteWithBalance(Long productId) {
@@ -7722,3 +7729,34 @@ public class DiscoveryTest {
         return restTemplate.getForObject(url, Product.class);
     }
 ```
+
+3. 远程调用核心：`RestTemplate`
+
+4. 负载均衡调用：`@LoadBalanced`
+
+```java
+@Configuration
+public class ProductServiceConfig {
+
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+```
+
+```java
+    // 基于注解实现负载均衡
+    private Product getProductFromRemoteWithBalanceAnnotation(Long productId) {
+        // service-product 是微服务注册名，会被动态替换
+        String url = "http://service-product/product/" + productId;
+        log.info("注解负载均衡远程请求路径{}", url);
+        // 2. 给远程发送请求
+        return restTemplate.getForObject(url, Product.class);
+    }
+```
+
+**若注册中心宕机，远程调用还能成功吗？**
+
+![负载均衡远程调用流程图](img/Java_43.png)
