@@ -7760,3 +7760,79 @@ public class ProductServiceConfig {
 **若注册中心宕机，远程调用还能成功吗？**
 
 ![负载均衡远程调用流程图](img/Java_43.png)
+
+#### 配置中心
+
+启动 Nacos -> 引入依赖 -> `application.properties`配置 -> 创建 `data-id`（数据集） -> 发布配置 -> 微服务获取配置
+
+- 引入依赖
+
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+</dependency>
+```
+
+- 配置
+
+```properties
+spring.config.import=nacos:service-order.properties
+```
+
+- 微服务获取配置
+
+```java
+@Value("${}")
+String value;
+```
+
+- 在类上标注使用 `@RefreshScope` 来保证配置自动更新
+
+对于其他微服务不需要使用配置中心管理，会导致无法启动，可以在`application.properties`文件中配置`spring.cloud.nacos.config.import-check.enabled=false`来关闭自动导入检查，以此来实现启动功能
+
+- 对于配置中心的大量配置属性，可以采用如下方法,新建`properties.OrderProperties.java`类文件，使用`@Data` + `@ConfigurationProperties(prefix="order")`进行配置绑定
+
+```java
+@Component
+@Data
+@ConfigurationProperties(prefix="order") // 配置批量绑定和刷新，无需使用@Value和@RefreshScope注解
+public class OrderProperties {
+
+    private String timeout;
+
+    private String autoConfirm;
+}
+```
+
+- 同时可以使用`NacosConfigManager`进行配置监听，在主启动类启动监听
+
+```java
+    @Bean
+    ApplicationRunner applicationRunner(NacosConfigManager nacosConfigManager) {
+        return args -> {
+            ConfigService configService = nacosConfigManager.getConfigService();
+            configService.addListener("service-order.properties", "DEFAULT_GROUP", new Listener() {
+                @Override
+                public Executor getExecutor() {
+                    return Executors.newFixedThreadPool(4);
+                }
+
+                @Override
+                public void receiveConfigInfo(String configInfo) {
+                    System.out.println("变化的配置是:" + configInfo);
+                }
+            });
+        };
+    }
+```
+
+- `nacos`的配置优先级和`application.properties`的优先级如何：以配置中心为准，若配置中心没有配置，则使用`application.properties`中的配置
+
+![配置流程](img/Java_44.png)
+
+#### 配置中心-数据隔离
+
+- 项目有多套环境、每个微服务在每套环境的值都不一样，可以通过切换环境加载本环境的配置
+
+  - 需要做到区分多套环境、区分多种微服务、区分多种配置、按需加载配置
