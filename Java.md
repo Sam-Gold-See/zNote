@@ -7836,3 +7836,70 @@ public class OrderProperties {
 - 项目有多套环境、每个微服务在每套环境的值都不一样，可以通过切换环境加载本环境的配置
 
   - 需要做到区分多套环境、区分多种微服务、区分多种配置、按需加载配置
+
+- 使用`namespace`区分不同环境，使用`group`来区分不同微服务，`data-id`区分不同配置，每个`namespace`和`SpringBoot`中的`application-xxx`进行对应
+
+- 在`application.yml`中，配置`spring.cloud.nacos.config.namespace`，在`spring.cloud.nacos.config.import`中在文件后标注组`xxx.properties?group=xxx`
+
+### OpenFeign - 远程调用
+
+**声明式**REST 客户端 - **编程式**REST 客户端（`RestTemplate`）
+
+- **注解驱动**
+
+  - 指定**远程地址**：`@FeignClient`
+
+  - 指定**请求方式**：`@GetMapping`、`@PostMapping`、`@PutMapping`、`@DeleteMapping`
+
+  - 指定**携带数据**：`@RequestHeader`、`@RequestParam`、`@PathVariable`、`@RequestBody`
+
+  - 指定**结果返回**：响应模型
+
+- 引入依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+
+- 启动类标注注解`@EnableFeignClients`
+
+- 新建 java 接口`feign.ProductFeignClient`
+
+```java
+@FeignClient(value = "service-product") // 说明是个feign客户端
+public interface ProductFeignClient {
+
+    // MVC注解的两套使用逻辑
+    // 1 标注在Controller上，是接受这样的请求
+    // 2 标注在FeignClient上，是发送这样的请求
+    @GetMapping("/product/{id}")
+    Product getProductById(@PathVariable("id") Long id);
+}
+```
+
+- `OpenFeign` 也可以调用第三方服务的 API
+
+```java
+@FeignClient(value = "weather-client", url = "http://aliv18.data.moji.com")
+public interface WeatherFeignClient {
+    @PostMapping("/whapi/json/alicityweather/condition")
+    String getWeather(@RequestHeader("Authorization")String auth,
+                    @RequestParam("token") String token,
+                    @RequestParam("cityId") String cityId);
+}
+```
+
+- 客户端和服务端负载均衡
+
+  - 调用 API 接口流程
+
+    ![调用API接口流程](img/Java_45.png)
+
+  - 客户端负载均衡和服务端负载均衡
+
+    ![客户端负载均衡和服务端负载均衡](img/Java_46.png)
+
+- 日志实现
