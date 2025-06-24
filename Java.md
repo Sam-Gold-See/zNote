@@ -7903,3 +7903,122 @@ public interface WeatherFeignClient {
     ![客户端负载均衡和服务端负载均衡](img/Java_46.png)
 
 - 日志实现
+
+  - 在`application.yml`中配置`logging.level.com.xxx.xxx.feign=debug`
+
+  - 实现日志配置类
+
+  ```java
+  @Configuration
+  public class xxxConfig{
+      @Bean
+      Logger.Level feignLoggerLevel(){
+        return Logger.Level.FULL;
+      }
+  }
+  ```
+
+- 超时控制
+
+  - `connectTimeout`连接超时，默认 10 秒
+
+  - `readTimeout`读取超时，默认 60 秒
+
+  - 超时配置，在`application.yml`中配置
+
+  ```yml
+  spring:
+    cloud:
+      openfeign:
+        client:
+          config:
+            default:
+              logger-level: full
+              connect-timeout: 3000
+              read-timeout: 5000
+            service-product:
+              connect-timeout: 1000
+              read-timeout: 2000
+  ```
+
+- 重试机制
+
+  - 远程调用超时失败后，还可以进行多次尝试，如果某次成功返回 ok，如果多次依然失败则结束调用返回错误
+
+  - `openfeign`在底层默认使用`Retryer.NEVER_RETRY`策略，需要手动打开
+
+  - 在上面配置中设置默认重试机制并且添加组件
+
+  ```yml
+  spring:
+    cloud:
+      openfeign:
+        client:
+          config:
+            service-product:
+              retryer: feign.retryer.DEFAULT
+  ```
+
+  ```java
+  @Bean
+  Retryer retryer() {
+      return new Retryer.Default();
+  }
+  ```
+
+- 拦截器机制
+
+  - 以请求拦截器的使用为主，新建 java 类文件`interceptor.XTokenRequestInterceptor`，然后在 yml 配置文件中对应模块（如`default`或`service-product`）新增属性`request-interceptors: com.xxx.interceptor.XTokenRequestInterceptor`
+
+  - 也可以使用`@Component`注册到 Spring 中每次请求都会自动调用
+
+  ```java
+  @Component
+  public class XTokenRequestInterceptor implements RequestInterceptor {
+      @Override
+      public void apply(RequestTemplate template){
+          template.header("X-Token", UUID.randomUUID().toString());
+      }
+  }
+  ```
+
+- `Fallback` 机制 - 兜底返回（需要结合`Sentital`）
+
+  - 新建 java 类`feign.fallback.ProductFeignClientFallback`文件
+
+  ```java
+  @Component
+  public class ProductFeignClientFallback implements ProductFeignClient {
+
+      @Override
+      public Product getProductById(Long id) {
+          // 兜底失败业务逻辑
+          return new Product();
+      }
+  }
+  ```
+
+  - feign 接口中使用`fallback`属性
+
+  ```java
+  @FeignClient(value = "service-product", fallback = ProductFeignClientFallback.class)
+  public interface ProductFeignClient {
+      @GetMapping("/product/{id}")
+      Product getProductById(@PathVariable("id") Long id);
+  }
+  ```
+
+  - 配置使用 `Sentinel`
+
+  ```xml
+  <dependency>
+      <groupId>com.alibaba.cloud</groupId>
+      <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+  </dependency>
+  ```
+
+  ```yml
+  feign:
+    sentinel:
+      enabled: true
+  ```
