@@ -8022,3 +8022,91 @@ public interface WeatherFeignClient {
     sentinel:
       enabled: true
   ```
+
+### Sentinel - 熔断机制
+
+随着微服务的流行，服务和服务之间的**稳定性**变得越来越重要，`Spring Cloud Alibaba Sentinel`以流量为切入点，从**流量控制**、**流量路由**、**熔断降级**、**系统自适应过载保护**、**热点流量防护**等多个维度保护服务的稳定性
+
+![Sentinel](img/Java_47.png)
+
+- **架构原理**：
+
+![Sentinel架构原理](img/Java_48.png)
+
+- 资源 & 规则：
+
+  - 定义资源：
+
+    - 主流框架**自动适配**(Web Servlet、Dubbo、Spring Cloud、gRPC、Spring WebFlux、Reactor);
+
+    - **编程式**：SphU API
+
+    - **声明式**：`@SentinelResource`
+
+  - 定义规则：
+
+    - 流量控制(FlowRule)
+
+    - 熔断降级(DegradeRule)
+
+    - 系统保护(SystemRule)
+
+    - 来源访问控制(AuthorityRule)
+
+    - 热点参数(ParamFlowRule)
+
+- 工作原理
+
+![Sentinel工作原理](img/Java_49.png)
+
+- 整合使用
+
+![Sentinel整合使用](img/Java_50.png)
+
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+</dependency>
+```
+
+```yml
+spring:
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8080
+      eager: true
+```
+
+#### 异常处理
+
+![Sentinel异常处理](img/Java_51.png)
+
+- Web 接口
+
+自定义异常处理类`handler.CustomBlockExceptionHandler`，继承`BlockExceptionHandler`
+
+```java
+@Component
+public class CustomBlockExceptionHandler extends BlockExceptionHandler {
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response, String resourceName, BlockException ex) throws Exception {
+
+    }
+}
+```
+
+- `@SentinelResource`
+
+标注在非 Web 接口方法上
+
+```java
+@SentinelResource(value = "test", blockHandler = "customBlockHandler", fallback = "fallback")
+```
+
+- `OpenFeign`
+
+兜底回调/全局异常处理
+
+- `SphU` 硬编码
