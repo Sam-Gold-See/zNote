@@ -8129,6 +8129,70 @@ public class CustomBlockExceptionHandler extends BlockExceptionHandler {
 
 ![流控效果](img/Java_54.png)
 
-#### 熔断规则
+#### 熔断降级
 
-#### 环境搭建
+![熔断降级](img/Java_55.png)
+
+**切断不稳定调用** -> **快速返回不积压** -> **避免雪崩效应**
+
+熔断降级作为保护自身的手段，通常在**客户端（调用端）进行配置**
+
+- 熔断策略：
+
+  - 慢调用比例
+
+  - 异常比例
+
+  - 异常数
+
+![断路器工作原理](img/Java_56.png)
+
+![兜底返回区别](img/Java_57.png)
+
+配置熔断规则后，在熔断后一段时间内，会自动调用兜底返回方法，提高服务速度
+
+### Gateway - API 网关
+
+![API网关](img/Java_58.png)
+
+- 新建`services`同级模块`gateway`
+
+- 引入依赖
+
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-gateway</artifactId>
+</dependency>
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+</dependency>
+```
+
+- 使用配置文件配置
+
+```yml application.yml
+spring:
+  profiles:
+    include: route
+  application:
+    name: gateway
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+
+server:
+  port: 80
+```
+
+```yml application-route.yml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: order-route
+          uri: lb://service-order
+          predicates:
+            - Path=/api/order/**
+```
