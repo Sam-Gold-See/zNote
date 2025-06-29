@@ -8168,7 +8168,17 @@ public class CustomBlockExceptionHandler extends BlockExceptionHandler {
     <groupId>com.alibaba.cloud</groupId>
     <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 </dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-cloud-starter-loadbalancer</artifactId>
+</dependency>
 ```
+
+- 基础原理
+
+![API网关原理](img/Java_59.png)
+
+#### 路由
 
 - 使用配置文件配置
 
@@ -8196,3 +8206,64 @@ spring:
           predicates:
             - Path=/api/order/**
 ```
+
+`id`：路由 ID
+
+`predicates`：路由条件、断言
+
+`uri`：路由目标地址，可以是微服务的服务名，也可以是其他 URL
+
+`filters`：路由过滤器，可以对请求和响应进行修改
+
+`order`：路由的执行顺序，数字越小优先级越高
+
+#### 断言 - predicates
+
+短写：
+
+`- Path=/api/order/**` 断言路由工厂 + 参数
+
+长写：
+
+```yml
+- name: Path // 断言路由工厂
+  args:
+    pattern: /api/order/**
+    matchTrailingSlash: true
+```
+
+- 断言工厂和参数个数、类型及作用
+
+![断言工厂和参数类型及作用](img/Java_60.png)
+
+#### 过滤器 - filters
+
+短写：
+
+`- AddRequestHeader=X-Request-Id,123456` 过滤器工厂 + 参数
+
+长写：
+
+```yml
+- name: AddRequestHeader // 过滤器工厂
+  args:
+    name: X-Request-Id
+    values: 123456
+```
+
+![过滤器原理](img/Java_61.png)
+
+跨域问题：
+
+```yml
+spring:
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          "[/**]":
+            allowedOrigins: "*"
+            allowedMethods: "*"
+```
+
+### Seata - 分布式事务
