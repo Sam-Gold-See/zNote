@@ -8267,3 +8267,35 @@ spring:
 ```
 
 ### Seata - 分布式事务
+
+在微服务项目中，一个操作往往会涉及多个不同的服务，每个服务又会连接不同的数据库：
+
+`Seata`是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务，用于保障多个事务的统一提交和统一回滚
+
+- 使用`seata-server.bat`命令启动 Seata
+
+- 引入依赖
+
+```xml
+<dependency>
+    <groupId>com.alibaba.cloud</groupId>
+    <artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+</dependency>
+```
+
+- 添加 `Seata` 的配置文件
+
+```conf
+service {
+  #transaction service group mapping
+  vgroupMapping.default_tx_group = "default"
+  #only support when registry.type=file, please don't set multiple addresses
+  default.grouplist = "127.0.0.1:8091"
+  #degrade, current not support
+  enableDegrade = false
+  #disable seata
+  disableGlobalTransaction = false
+}
+```
+
+- 使用`@GlobalTransactional`注解开启全局事务
