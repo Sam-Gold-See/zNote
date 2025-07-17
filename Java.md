@@ -8299,3 +8299,6 @@ service {
 ```
 
 - 使用`@GlobalTransactional`注解开启全局事务
+
+## Java 开发规范
+
