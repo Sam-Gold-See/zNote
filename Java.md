@@ -8344,7 +8344,7 @@ service {
 
 #### 消息传输模型介绍
 
-![点对点消息传输模型介绍](/img/Java_63.png)
+![点对点消息传输模型介绍](./img/Java_63.png)
 
 - 点对点模型也叫队列模型，具有如下特点：
 
@@ -8352,10 +8352,76 @@ service {
 
   - 一对一通信：基于消费匿名特点，下游消费者即使有多个，但都没有自己独立的身份，因此共享队列中的消息，每一条消息都只会被唯一一个消费者处理。因此点对点模型只能实现一对一通信。
 
-![发布订阅模型介绍](/img/Java_64.png)
+![发布订阅模型介绍](./img/Java_64.png)
 
 - 发布订阅模型具有如下特点：
 
   - 消费独立：相比队列模型的匿名消费方式，发布订阅模型中消费方都会具备的身份，一般叫做订阅组（订阅关系），不同订阅组之间相互独立不会相互影响。
 
   - 一对多通信：基于独立身份的设计，同一个主题内的消息可以被多个订阅组处理，每个订阅组都可以拿到全量消息。因此发布订阅模型可以实现一对多通信。
+
+## Java 21 虚拟线程
+
+### 虚拟线程
+
+对于需要处理大量 IO 请求的任务来说，使用线程是低效的，一旦读写 IO，线程就会进入等待状态，直到 IO 数据返回
+
+为了能高效执行 IO 密集型任务，Java 从 19 开始引入了虚拟线程。虚拟线程的接口和普通线程是一样的，但是执行方式不一样。虚拟线程不是由操作系统调度，而是由普通线程调度，即成百上千个虚拟线程可以由一个普通线程调度。任何时刻，只能执行一个虚拟线程，但是，一旦该虚拟线程执行一个 IO 操作进入等待时，它会被立刻“挂起”，然后执行下一个虚拟线程。什么时候 IO 数据返回了，这个挂起的虚拟线程才会被再次调度。因此，若干个虚拟线程可以在一个普通线程中交替运行
+
+```java
+void register() {
+    config = readConfigFile("./config.json"); // #1
+    if (config.useFullName) {
+        name = req.firstName + " " + req.lastName;
+    }
+    insertInto(db, name); // #2
+    if (config.cache) {
+        redis.set(key, name); // #3
+    }
+}
+```
+
+涉及到 IO 读写的#1、#2、#3 处，执行到这些地方的时候（进入相关的 JNI 方法内部时）会自动挂起，并切换到其他虚拟线程执行。等到数据返回后，当前虚拟线程会再次调度并执行，因此，代码看起来是同步执行，但实际上是异步执行的。
+
+### 使用虚拟线程
+
+- 方法一：直接创建虚拟线程并运行
+
+```java
+// 传入Runnable实例并立刻运行:
+Thread vt = Thread.startVirtualThread(() -> {
+    System.out.println("Start virtual thread...");
+    Thread.sleep(10);
+    System.out.println("End virtual thread.");
+});
+```
+
+- 方法二：创建虚拟线程但不自动运行，而是手动调用`start()`开始运行
+
+```java
+// 创建VirtualThread:
+Thread vt = Thread.ofVirtual().unstarted(() -> {
+    System.out.println("Start virtual thread...");
+    Thread.sleep(1000);
+    System.out.println("End virtual thread.");
+});
+// 运行:
+vt.start();
+```
+
+- 方法三：通过虚拟线程的 ThreadFactory 创建虚拟线程，然后手动调用`start()`开始运行
+
+```java
+// 创建ThreadFactory:
+ThreadFactory tf = Thread.ofVirtual().factory();
+// 创建VirtualThread:
+Thread vt = tf.newThread(() -> {
+    System.out.println("Start virtual thread...");
+    Thread.sleep(1000);
+    System.out.println("End virtual thread.");
+});
+// 运行:
+vt.start();
+```
+
+由于虚拟线程属于非常轻量级的资源，因此，用时创建，用完就扔，不要池化虚拟线程。
