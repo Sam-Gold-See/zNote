@@ -8425,3 +8425,69 @@ vt.start();
 ```
 
 由于虚拟线程属于非常轻量级的资源，因此，用时创建，用完就扔，不要池化虚拟线程。
+
+## Java 14 记录类
+
+`String`、`Integer`等类型的时候，这些类型都是不变类，具有以下特点：
+
+- 定义 class 时使用`final`，无法派生子类
+
+- 每个字段使用`final`，保证创建实例后无法修改任何字段
+
+对于以下这个`Point`类，有 `x`，`y`两个变量，同时它是个不变类
+
+```java
+public final class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int x() {
+        return this.x;
+    }
+
+    public int y() {
+        return this.y;
+    }
+
+    @Override
+    public String toString() {}
+
+    @Override
+    public boolean equals(Object o) {}
+
+    @Override
+    public int hashCode() {}
+}
+```
+
+从 Java14 开始，引入了新的`Record`类，定义`Record`类，使用关键字`record`
+
+```java
+// Record
+public class Main {
+    public static void main(String[] args) {
+        Point p = new Point(123, 456);
+        System.out.println(p.x());
+        System.out.println(p.y());
+        System.out.println(p);
+    }
+}
+
+record Point(int x, int y) {}
+```
+
+对于该 `record` 类需要进行特殊调整的话，可以在`record`类中添加逻辑
+
+```java
+public record Point(int x, int y){
+  public Point{
+    if (x < 0 || y < 0)
+      throw new IllegalArgumentException();
+  }
+}
+```
