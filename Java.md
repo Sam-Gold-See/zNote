@@ -8491,3 +8491,19 @@ public record Point(int x, int y){
   }
 }
 ```
+
+## DuckDB
+
+在 `DataGrip` 中进行驱动配置（默认下载源速度慢，可以换源/直接下载 jar 包导入`C:\Users\<User-Name>\AppData\Roaming\JetBrains\DataGrip2025.1\jdbc-drivers\`）
+
+然后默认使用内存存储，可以直接用 SQL 读取`csv`文件或者`json`文件
+
+```sql
+select *
+from 'C:\Users\Sam_Gold_See\Downloads\test.json';
+```
+
+```sql
+select *
+from 'C:\Users\Sam_Gold_See\Downloads\test.csv';
+```
