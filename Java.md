@@ -8507,7 +8507,3 @@ from 'C:\Users\Sam_Gold_See\Downloads\test.json';
 select *
 from 'C:\Users\Sam_Gold_See\Downloads\test.csv';
 ```
-
-## 工作小记
-
-### 注意开发闭环、功能独立
