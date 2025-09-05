@@ -8507,3 +8507,7 @@ from 'C:\Users\Sam_Gold_See\Downloads\test.json';
 select *
 from 'C:\Users\Sam_Gold_See\Downloads\test.csv';
 ```
+
+## 开发流程
+
+用户/产品提需求 -> 产品设计需求文档 -> 开需求评审会议对齐需求 -> 开发设计技术文档 -> 开技术评审会议对齐前端、后端、测试 -> 需求开发 (-> 前后端联调) -> 测试 -> 开用例评审会议对齐功能测试 -> 预发环境 -> 发版上线
