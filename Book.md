@@ -27,3 +27,5 @@
 ### [实战 Java 高并发程序设计](https://book.douban.com/subject/26663605/)
 
 深入介绍了 Java 高并发开发的一些定义、概念、技术、工具
+
+### [Redis 核心原理与实践](https://book.douban.com/subject/35560278/)
