@@ -8426,6 +8426,61 @@ vt.start();
 
 由于虚拟线程属于非常轻量级的资源，因此，用时创建，用完就扔，不要池化虚拟线程。
 
+### 几个 E.g.
+
+```java
+Semaphore semaphore = new Semaphore(8);
+AtomicBoolean atomicBoolean = new AtomicBoolean(true);
+try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    for (Object obj : list) {
+        executor.submit(() -> {
+            try {
+                semaphore.acquire();
+                mapper.update(obj);
+            } catch (Exception e) {
+                atomicBoolean.set(false);
+                log.error("update error, agrs:{}", JSON.toJSONString(obj), e);
+                throw new RuntimeException("errorMsg");
+            } finally {
+                semaphore.release();
+            }
+        });
+    }
+}
+if (!atomicBoolean.get()) {
+    throw new BusinessException("errorMsg");
+} else {
+    return CommonResult.success();
+}
+```
+
+```java
+int threadSize = 3;
+CopyOnWriteArrayList<String> orderIds = new CopyOnWriteArrayList<>();
+try (LimitedVirtualThreadExecutor limitedVirtualThreadExecutor = new LimitedVirtualThreadExecutor(threadSize)) {
+  for (Object source : list) {
+    limitedVirtualThreadExecutor.execute(() -> {
+      try {
+        LogUtils.setTraceId(traceId);
+        source.setCreator(vo.getCreatorId());
+        source.setCreatorName(vo.getCreatorName());
+        List<ProductProhibitedInteriorOrderDetail> orderDetailDo = ProductProhibitedInteriorOrderConverter
+                .toOrderDetailDo(source.getDetails(), date, time, source.getCreator());
+        Lists.partition(orderDetailDo, pushSize)
+                .forEach(e -> productProhibitedInteriorOrderDetailMapper.insertList(e));
+        productProhibitedInteriorOrderMapper.insertSelective(ProductProhibitedInteriorOrderConverter
+                .toOrderDo(source, date, time));
+        orderIds.add(source.getRecordNumber());
+      } catch (Exception e) {
+        log.error("推单失败:{}", source.getRecordNumber(), e);
+        throw new RuntimeException(e);
+      }
+    });
+  }
+}
+result.setOrderIds(orderIds);
+```
+
 ## Java 14 记录类
 
 `String`、`Integer`等类型的时候，这些类型都是不变类，具有以下特点：
