@@ -31,3 +31,7 @@
 ### [Redis 核心原理与实践](https://book.douban.com/subject/35560278/)
 
 ### [Spring 微服务实战](https://book.douban.com/subject/35873832/)
+
+较为清晰的介绍了整个微服务的架构
+
+但是部分技术栈和常用技术有出入，建议理解架构、流程为主，而非学习工具、技术
